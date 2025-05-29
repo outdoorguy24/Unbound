@@ -15,4 +15,4 @@
 
 ##Advanced Features
 - Notifications
-- Able to block the uninstallation of this app when a block is active
+- Able to block the uninstallation of this app when a block is active# Unbound
