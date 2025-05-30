@@ -1,12 +1,14 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { logScreenView } from '../_firebase';
 
 const heading = "IT'S TIME TO REMEMBER WHO YOU ARE.";
 const body = "PICK UP THE PAINTBRUSH AND GRAB THE HAMMER. LACE UP YOUR SHOES OR BOXING GLOVES. GET A SPLINTER. WALK BAREFOOT IN THE GRASS. BECOME THE MAN YOU WERE MEANT TO BE. MAKE YOUR GRANDFATHER PROUD.";
 
 export default function Screen5() {
   const router = useRouter();
+  useEffect(() => { logScreenView('Onboarding5'); }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>

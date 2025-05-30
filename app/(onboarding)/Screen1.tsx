@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { logScreenView } from '../_firebase';
 import OnboardingIllustration from '../components/OnboardingIllustration';
 
 const heading = "YOU COME FROM WHO HUNTED ON OPEN PLAINS. WHO STARTED FIRES WITH STONE. WHO TOLD STORIES UNDER STARS.";
@@ -9,6 +10,7 @@ const body = "THE WORLD HAS CHANGED BUT THE FIRE INSIDE YOU HASN'T.";
 
 export default function Screen1() {
   const router = useRouter();
+  useEffect(() => { logScreenView('Onboarding1'); }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>

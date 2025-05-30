@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { logScreenView } from '../_firebase';
 
 const heading = "WHAT'S STEALING YOUR TIME?";
 const options = [
@@ -15,6 +16,7 @@ const options = [
 export default function Screen6() {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
+  useEffect(() => { logScreenView('Onboarding6'); }, []);
 
   const toggleOption = (option: string) => {
     setSelected((prev) =>
