@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { logScreenView } from '../_firebase';
 
 const heading = "WHEN ARE YOU MOST VULNERABLE?";
 const subheading = "KNOWLEDGE IS POWER. WHEN DOES WEAKNESS STRIKE?";
@@ -15,7 +14,7 @@ const options = [
 export default function Screen7() {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
-  useEffect(() => { logScreenView('Onboarding7'); }, []);
+  useEffect(() => { /* logScreenView('Onboarding7'); */ }, []);
 
   const toggleOption = (option: string) => {
     setSelected((prev) =>

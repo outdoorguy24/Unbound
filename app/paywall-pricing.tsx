@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // import analytics from '@react-native-firebase/analytics'; // Uncomment when Firebase is set up
 import { useRouter } from 'expo-router';
-import { logScreenView } from './_firebase';
 
 const heading = "Unlock Unbound";
 const badge = "7-DAY FREE TRIAL";
@@ -13,10 +12,7 @@ const privacyUrl = 'https://yourdomain.com/privacy';
 
 export default function PaywallPricing() {
   const router = useRouter();
-  useEffect(() => {
-    logScreenView('PaywallPricing');
-    // analytics().logScreenView({ screen_name: 'PaywallPricing' });
-  }, []);
+  useEffect(() => { /* logScreenView('PaywallPricing'); */ }, []);
   return (
     <View style={styles.container}>
       <View style={styles.placeholder} />

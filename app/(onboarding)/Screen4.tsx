@@ -1,14 +1,13 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { logScreenView } from '../_firebase';
 
 const heading = "THIS APP IS AN ACT OF REBELLION.";
 const body = "YOU'RE NOT HERE ON EARTH TO BE A MINDLESS CONSUMER. YOU'RE HERE TO WAKE UP. TO MAKE THE MOST OF THESE FLEETING MOMENTS. TO CREATE MORE THAN YOU CONSUME.";
 
 export default function Screen4() {
   const router = useRouter();
-  useEffect(() => { logScreenView('Onboarding4'); }, []);
+  useEffect(() => { /* logScreenView('Onboarding4'); */ }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>

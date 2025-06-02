@@ -2,17 +2,13 @@ import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // import analytics from '@react-native-firebase/analytics'; // Uncomment when Firebase is set up
 import { useRouter } from 'expo-router';
-import { logScreenView } from './_firebase';
 
 const heading = "Why Join Unbound?";
 const description = "Break free from distraction. Reclaim your time, your focus, and your life. Join a movement of people who want to do more, be more, and live more—without the noise.";
 
 export default function PaywallDescription() {
   const router = useRouter();
-  useEffect(() => {
-    logScreenView('PaywallDescription');
-    // analytics().logScreenView({ screen_name: 'PaywallDescription' });
-  }, []);
+  useEffect(() => { /* logScreenView('PaywallDescription'); */ }, []);
   return (
     <View style={styles.container}>
       <View style={styles.placeholder} />

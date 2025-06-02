@@ -1,14 +1,13 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { logScreenView } from '../_firebase';
 
 const heading = "TECHNOLOGY HAS BENEFITS. BUT IT'S STEALING YOUR LIFE.";
 const body = "CHEAP DOPAMINE. CONSTANT DISTRACTION. YOU'RE NOT BROKEN—YOU'RE OVERSTIMULATED. YOU KNOW WHAT YOU SHOULD BE DOING... BUT YOU SCROLL INSTEAD. THEN COMES THE GUILT. AND MORE SCROLLING TO ESCAPE THE GUILT.";
 
 export default function Screen2() {
   const router = useRouter();
-  useEffect(() => { logScreenView('Onboarding2'); }, []);
+  useEffect(() => { /* logScreenView('Onboarding2'); */ }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>

@@ -1,14 +1,13 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { logScreenView } from '../_firebase';
 
 const heading = "HERE'S HOW WE'LL HELP YOU RECLAIM YOUR TIME";
 const body = `SET YOUR SCHEDULE\nCHOOSE WHEN TO DEFEND YOUR ATTENTION.\n\nWE BLOCK THE DISTRACTIONS\nZERO ACCESS. ZERO EXCUSES. ZERO WAY OUT.\n\nYOU LIVE YOUR LIFE`;
 
 export default function Screen8() {
   const router = useRouter();
-  useEffect(() => { logScreenView('Onboarding8'); }, []);
+  useEffect(() => { /* logScreenView('Onboarding8'); */ }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>

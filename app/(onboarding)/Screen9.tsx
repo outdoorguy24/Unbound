@@ -1,22 +1,18 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import OnboardingIllustration from '../components/OnboardingIllustration';
 
-const heading = "YOU COME FROM WHO HUNTED ON OPEN PLAINS. WHO STARTED FIRES WITH STONE. WHO TOLD STORIES UNDER STARS.";
-const subheading = "NOW WE SCROLL. WE SWIPE. WE SIT.";
-const body = "THE WORLD HAS CHANGED BUT THE FIRE INSIDE YOU HASN'T.";
+const heading = "HERE'S HOW WE'LL HELP YOU RECLAIM YOUR TIME";
+const body = `SET YOUR SCHEDULE\nCHOOSE WHEN TO DEFEND YOUR ATTENTION.\n\nWE BLOCK THE DISTRACTIONS\nZERO ACCESS. ZERO EXCUSES. ZERO WAY OUT.\n\nYOU LIVE YOUR LIFE`;
 
-export default function Screen1() {
+export default function Screen9() {
   const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding1'); */ }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>
-      <OnboardingIllustration />
-      <Text style={styles.subheading}>{subheading}</Text>
+      <View style={styles.placeholder} />
       <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen2')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/paywall-description')}>
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
     </View>
@@ -44,22 +40,17 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     lineHeight: 32,
   },
-  subheading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 18,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+  placeholder: {
+    width: width * 0.7,
+    height: width * 0.35,
+    backgroundColor: '#4B3415',
+    borderRadius: 24,
+    marginVertical: 18,
   },
   body: {
     color: '#2C1A05',
     fontFamily: 'Vollkorn-Bold',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 8,

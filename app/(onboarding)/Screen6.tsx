@@ -1,22 +1,20 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { logScreenView } from '../_firebase';
 
-const heading = "WHAT'S STEALING YOUR TIME?";
+const heading = "WHAT'S YOUR BIGGEST FEAR ABOUT THIS ADDICTION?";
+const subheading = "Understanding your 'why' makes all the difference.";
 const options = [
-  'SOCIAL MEDIA',
-  'PORN',
-  'YOUTUBE',
-  'NEWS/REDDIT',
-  'GAMING',
-  'ALL OF THE ABOVE',
+  'MISSING MY PRIME YEARS',
+  'DESTROYING MY RELATIONSHIPS',
+  'LOSING MY MENTAL EDGE',
+  'BECOMING WEAK & SOFT',
+  'DYING WITH REGRETS',
 ];
 
 export default function Screen6() {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
-  useEffect(() => { logScreenView('Onboarding6'); }, []);
 
   const toggleOption = (option: string) => {
     setSelected((prev) =>
@@ -27,7 +25,12 @@ export default function Screen6() {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
+      <Text style={styles.subheading}>{subheading}</Text>
+      {/* Placeholder for illustration - replace with SVG/PNG when available */}
+      <View style={styles.illustrationPlaceholder}>
+        {/* <Image source={require('path/to/your/image.png')} style={styles.illustration} /> */}
+        <Text style={styles.illustrationText}>[Illustration Here]</Text>
+      </View>
       <View style={styles.optionsContainer}>
         {options.map((option) => (
           <TouchableOpacity
@@ -61,18 +64,35 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 18,
+    marginBottom: 8,
     marginTop: 24,
     textTransform: 'uppercase',
     letterSpacing: 1.2,
     lineHeight: 32,
   },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.2,
-    backgroundColor: '#4B3415',
+  subheading: {
+    color: '#2C1A05',
+    fontFamily: 'Vollkorn-Bold',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 8,
+    marginTop: 4,
+    letterSpacing: 1.1,
+    lineHeight: 22,
+  },
+  illustrationPlaceholder: {
+    width: width * 0.5,
+    height: width * 0.3,
+    backgroundColor: '#E5C98B',
     borderRadius: 24,
-    marginVertical: 12,
+    marginVertical: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  illustrationText: {
+    color: '#4B3415',
+    fontSize: 14,
+    fontStyle: 'italic',
   },
   optionsContainer: {
     width: '100%',
@@ -84,9 +104,9 @@ const styles = StyleSheet.create({
     borderColor: '#4B3415',
     borderWidth: 2,
     borderRadius: 8,
-    paddingVertical: 10,
+    paddingVertical: 16,
     paddingHorizontal: 16,
-    marginVertical: 6,
+    marginVertical: 8,
     alignItems: 'center',
   },
   optionSelected: {
@@ -95,7 +115,7 @@ const styles = StyleSheet.create({
   optionText: {
     color: '#4B3415',
     fontFamily: 'Vollkorn-Bold',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },

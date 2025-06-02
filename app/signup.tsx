@@ -1,8 +1,9 @@
 import * as Google from 'expo-auth-session/providers/google';
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect } from 'react';
 import { Alert, Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { logScreenView } from './_firebase';
+import { useAuth } from './_layout';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -14,7 +15,10 @@ const privacyUrl = 'https://yourdomain.com/privacy';
 const GOOGLE_CLIENT_ID = '792843045396-ilj7jq2u02p0tue456a0bdt96fs9and2.apps.googleusercontent.com';
 
 export default function Signup() {
-  useEffect(() => { logScreenView('Signup'); }, []);
+  const router = useRouter();
+  const auth = useAuth() as { login?: () => void } | null || {};
+  const { login } = auth;
+  useEffect(() => { /* logScreenView('Signup'); */ }, []);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: GOOGLE_CLIENT_ID,
@@ -42,6 +46,15 @@ export default function Signup() {
       </TouchableOpacity>
       <TouchableOpacity style={styles.appleButton} onPress={() => {/* TODO: Apple sign-in logic */}}>
         <Text style={styles.buttonText}>Continue with Apple</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.appleButton, { marginTop: 8, backgroundColor: '#4B3415' }]}
+        onPress={() => {
+          login && login();
+          router.replace('/(tabs)/camp');
+        }}
+      >
+        <Text style={[styles.buttonText, { color: '#fff' }]}>Sign Up (Dev Shortcut)</Text>
       </TouchableOpacity>
       <View style={styles.linksRow}>
         <Text style={styles.link} onPress={() => Linking.openURL(termsUrl)}>Terms of Service</Text>
