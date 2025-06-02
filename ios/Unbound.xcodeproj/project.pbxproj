@@ -375,8 +375,8 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.starrman.unbound;
-				PRODUCT_NAME = Unbound;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anonymous.Unbound;
+				PRODUCT_NAME = "Unbound";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Unbound/Unbound-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -412,8 +412,8 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.starrman.unbound;
-				PRODUCT_NAME = Unbound;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anonymous.Unbound;
+				PRODUCT_NAME = "Unbound";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Unbound/Unbound-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
