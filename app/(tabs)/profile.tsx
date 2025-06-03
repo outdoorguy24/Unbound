@@ -1,5 +1,6 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { registerForPushNotificationsAsync, sendTestNotification } from '@/utils/notifications';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -41,7 +42,23 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.logoutButton} onPress={() => {/* TODO: Add logout logic */}}>
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
-        {/* TODO: Replace with real logic and assets */}
+        {/* DEV-ONLY: Push notification test button */}
+        {__DEV__ && (
+          <>
+            <TouchableOpacity
+              style={[styles.logoutButton, { backgroundColor: '#F7E0A3', marginTop: 16 }]}
+              onPress={registerForPushNotificationsAsync}
+            >
+              <Text style={[styles.logoutText, { color: '#4B3415' }]}>Register for Push Notifications</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.logoutButton, { backgroundColor: '#F7E0A3', marginTop: 8 }]}
+              onPress={sendTestNotification}
+            >
+              <Text style={[styles.logoutText, { color: '#4B3415' }]}>Send Test Notification</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </ScrollView>
     </ScreenContainer>
   );
