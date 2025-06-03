@@ -1,3 +1,4 @@
+import { getStoredPushToken } from '@/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useSegments } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -7,6 +8,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  pushToken?: string;
 }
 
 interface AuthContextType {
@@ -73,21 +75,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoadingAuth(true);
     try {
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Create placeholder user
+      const pushToken = await getStoredPushToken();
       const user: User = {
         id: '1',
         email,
         name: email.split('@')[0],
+        pushToken: pushToken || undefined,
       };
-      
-      // Store user
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
       setUser(user);
-      
-      // Navigate to home
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Error logging in:', error);
@@ -101,21 +98,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (email: string, password: string, name: string) => {
     setIsLoadingAuth(true);
     try {
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Create placeholder user
+      const pushToken = await getStoredPushToken();
       const user: User = {
         id: '1',
         email,
         name,
+        pushToken: pushToken || undefined,
       };
-      
-      // Store user
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
       setUser(user);
-      
-      // Navigate to home
       router.replace('/(tabs)');
     } catch (error) {
       console.error('Error signing up:', error);

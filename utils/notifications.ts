@@ -76,4 +76,20 @@ export function addNotificationListeners(onReceive, onResponse) {
   };
 }
 
+export async function sendLocalNotification({ title, body, data = {} }) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title,
+      body,
+      data,
+    },
+    trigger: null,
+  });
+}
+
+export function addNotificationTapListener(onTap) {
+  // onTap: (response) => void
+  return Notifications.addNotificationResponseReceivedListener(onTap);
+}
+
 // TODO: Integrate with backend (Supabase) to store/send tokens for real push 
