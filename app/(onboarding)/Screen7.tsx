@@ -1,127 +1,128 @@
+import { Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const heading = "WHEN ARE YOU MOST VULNERABLE?";
-const subheading = "KNOWLEDGE IS POWER. WHEN DOES WEAKNESS STRIKE?";
-const options = [
-  'MORNING',
-  'WORK BREAKS',
-  'EVENING',
-  'LATE NIGHT',
+const OPTIONS = [
+  { key: 'social', label: 'Social Media', icon: <Feather name="smartphone" size={36} color="#4B3415" /> },
+  { key: 'porn', label: 'Porn', icon: <MaterialCommunityIcons name="block-helper" size={36} color="#4B3415" /> },
+  { key: 'youtube', label: 'YouTube', icon: <Feather name="tv" size={36} color="#4B3415" /> },
+  { key: 'news', label: 'News/Reddit', icon: <MaterialCommunityIcons name="newspaper" size={36} color="#4B3415" /> },
+  { key: 'gaming', label: 'Gaming', icon: <FontAwesome5 name="gamepad" size={36} color="#4B3415" /> },
+  { key: 'all', label: 'All of the Above', icon: <Feather name="layers" size={36} color="#4B3415" /> },
 ];
 
 export default function Screen7() {
-  const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding7'); */ }, []);
+  const [selected, setSelected] = useState<string[]>([]);
 
-  const toggleOption = (option: string) => {
-    setSelected((prev) =>
-      prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]
+  const toggleOption = (key: string) => {
+    setSelected(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
     );
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>{heading}</Text>
-      <Text style={styles.subheading}>{subheading}</Text>
-      <View style={styles.placeholder} />
-      <View style={styles.optionsContainer}>
-        {options.map((option) => (
+      <Text style={styles.heading}>What's stealing your time?</Text>
+      <View style={styles.progressRow}>
+        <Text style={styles.progressDot}>● ● ● ● ● ● ○ ○ ○</Text>
+        <Text style={styles.progressNum}>6 7</Text>
+      </View>
+      <View style={styles.grid}>
+        {OPTIONS.map(option => (
           <TouchableOpacity
-            key={option}
-            style={[styles.option, selected.includes(option) && styles.optionSelected]}
-            onPress={() => toggleOption(option)}
+            key={option.key}
+            style={[styles.option, selected.includes(option.key) && styles.optionSelected]}
+            onPress={() => toggleOption(option.key)}
+            activeOpacity={0.8}
           >
-            <Text style={[styles.optionText, selected.includes(option) && styles.optionTextSelected]}>{option}</Text>
+            {option.icon}
+            <Text style={styles.optionLabel}>{option.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen8')}>
-        <Text style={styles.buttonText}>Next</Text>
+      <TouchableOpacity
+        style={styles.nextBtn}
+        onPress={() => router.push('/(onboarding)/Screen8')}
+        disabled={selected.length === 0}
+      >
+        <Text style={styles.nextBtnText}>Next</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F3E2C7',
     alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingTop: 48,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#2C1A05',
     textAlign: 'center',
-    marginBottom: 8,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
-  },
-  subheading: {
-    color: '#4B3415',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 22,
-  },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.18,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 12,
-  },
-  optionsContainer: {
-    width: '100%',
-    marginTop: 12,
     marginBottom: 16,
   },
-  option: {
-    backgroundColor: '#F3E2C7',
-    borderColor: '#4B3415',
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginVertical: 6,
+  progressRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
+  },
+  progressDot: {
+    color: '#4B3415',
+    fontSize: 18,
+    marginRight: 8,
+  },
+  progressNum: {
+    color: '#4B3415',
+    fontSize: 14,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 32,
+  },
+  option: {
+    width: 120,
+    height: 120,
+    backgroundColor: '#F7F2E0',
+    borderRadius: 16,
+    margin: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   optionSelected: {
-    backgroundColor: '#4B3415',
+    borderColor: '#A05A1A',
+    backgroundColor: '#E2C89A',
   },
-  optionText: {
+  optionLabel: {
+    marginTop: 12,
     color: '#4B3415',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 16,
     fontWeight: 'bold',
-    textTransform: 'uppercase',
+    fontSize: 15,
+    textAlign: 'center',
   },
-  optionTextSelected: {
-    color: '#F3E2C7',
-  },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+  nextBtn: {
+    backgroundColor: '#4B3415',
     borderRadius: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    alignItems: 'center',
     marginTop: 16,
+    width: '100%',
   },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
+  nextBtnText: {
+    color: '#fff',
     fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
+    fontSize: 18,
+    textAlign: 'center',
   },
 }); 

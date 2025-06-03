@@ -1,6 +1,6 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -39,7 +39,10 @@ export default function DefendScreen() {
     start: '08:00',
     end: '22:00',
   });
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  // New schedule section states
+  const [allDayEveryDay, setAllDayEveryDay] = useState(false);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
   // Handle toggling block state
   const toggleBlock = (key: string) => {
@@ -73,7 +76,7 @@ export default function DefendScreen() {
     setBlockPorn(val => !val);
   };
 
-  // Handle schedule modal
+  // Handle schedule
   const handleDayToggle = (day: string) => {
     setSchedule(prev => ({
       ...prev,
@@ -89,10 +92,76 @@ export default function DefendScreen() {
   // Schedule summary
   const scheduleSummary = `${schedule.days.join(', ')} | ${schedule.start}–${schedule.end}`;
 
+  // New schedule section helpers
+  function toggleAllDayEveryDay(val: boolean) {
+    setAllDayEveryDay(val);
+    if (val) {
+      setSchedule({ days: [...DAYS], start: '12:00 AM', end: '11:59 PM' });
+    }
+  }
+  function formatTime(t: string) {
+    return t;
+  }
+  function parseTime(t: string) {
+    // t: '08:00 AM' => Date
+    const [h, m, ampm] = t.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, '08', '00', 'AM'];
+    let hour = parseInt(h, 10);
+    if (ampm === 'PM' && hour < 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    return new Date(2000, 0, 1, hour, parseInt(m, 10));
+  }
+  function toTimeString(date: Date) {
+    let h = date.getHours();
+    const m = date.getMinutes();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
+  }
+  function getScheduleSummary() {
+    if (allDayEveryDay) return 'Blocking all day, every day';
+    const start = schedule.start;
+    const end = schedule.end;
+    const days = schedule.days.length === 7 ? 'Every day' : schedule.days.join(', ');
+    // Calculate duration
+    const [sh, sm, sampm] = start.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, '08', '00', 'AM'];
+    const [eh, em, eampm] = end.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, '08', '00', 'AM'];
+    let sHour = parseInt(sh, 10);
+    let eHour = parseInt(eh, 10);
+    if (sampm === 'PM' && sHour < 12) sHour += 12;
+    if (sampm === 'AM' && sHour === 12) sHour = 0;
+    if (eampm === 'PM' && eHour < 12) eHour += 12;
+    if (eampm === 'AM' && eHour === 12) eHour = 0;
+    let duration = (eHour * 60 + parseInt(em, 10)) - (sHour * 60 + parseInt(sm, 10));
+    if (duration < 0) duration += 24 * 60;
+    const hours = Math.floor(duration / 60);
+    const mins = duration % 60;
+    return `Blocking ${days} from ${start} to ${end} (${hours}h ${mins}m)`;
+  }
+  function getSliderStyle() {
+    if (allDayEveryDay) return { left: 0, width: '100%' };
+    // Map start/end to 0-100% (0=midnight, 100=end of day)
+    const toMinutes = (t: string) => {
+      const [h, m, ampm] = t.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, '08', '00', 'AM'];
+      let hour = parseInt(h, 10);
+      if (ampm === 'PM' && hour < 12) hour += 12;
+      if (ampm === 'AM' && hour === 12) hour = 0;
+      return hour * 60 + parseInt(m, 10);
+    };
+    const startM = toMinutes(schedule.start);
+    const endM = toMinutes(schedule.end);
+    let left = (startM / 1440) * 100;
+    let width = ((endM - startM + 1440) % 1440) / 1440 * 100;
+    if (width === 0) width = 100;
+    return { left: `${left}%`, width: `${width}%` };
+  }
+  function handleSaveSchedule() {
+    // Placeholder: could persist or show a toast
+  }
+
   return (
     <ScreenContainer>
-      <ScreenHeader title="Defend" />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <Text style={styles.brand}>unbound</Text>
         <Text style={styles.motivation}>
@@ -197,15 +266,53 @@ export default function DefendScreen() {
             </Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.scheduleBox} onPress={() => setShowScheduleModal(true)}>
-          <Text style={styles.scheduleSummary}>{scheduleSummary}</Text>
-          <Text style={styles.setScheduleBtn}>Set Schedule</Text>
-        </TouchableOpacity>
-        {/* Schedule Modal */}
-        <Modal visible={showScheduleModal} transparent animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={styles.scheduleModal}>
-              <Text style={styles.scheduleModalTitle}>Set Your Schedule</Text>
+        {/* Schedule Card */}
+        <View style={styles.scheduleCard}>
+          <View style={styles.allDayRow}>
+            <Text style={styles.allDayLabel}>All day, every day</Text>
+            <Switch
+              value={allDayEveryDay}
+              onValueChange={toggleAllDayEveryDay}
+            />
+          </View>
+          {!allDayEveryDay && (
+            <>
+              {/* Time Pickers */}
+              <View style={styles.timePickerRow}>
+                <Text style={styles.timeLabel}>Start:</Text>
+                <TouchableOpacity onPress={() => setShowStartPicker(true)} style={styles.timePickerBtn}>
+                  <Text style={styles.timePickerText}>{formatTime(schedule.start)}</Text>
+                </TouchableOpacity>
+                <Text style={styles.timeLabel}>End:</Text>
+                <TouchableOpacity onPress={() => setShowEndPicker(true)} style={styles.timePickerBtn}>
+                  <Text style={styles.timePickerText}>{formatTime(schedule.end)}</Text>
+                </TouchableOpacity>
+              </View>
+              {showStartPicker && (
+                <DateTimePicker
+                  value={parseTime(schedule.start)}
+                  mode="time"
+                  is24Hour={false}
+                  display="spinner"
+                  onChange={(_, date) => {
+                    setShowStartPicker(false);
+                    if (date) setSchedule(s => ({ ...s, start: toTimeString(date) }));
+                  }}
+                />
+              )}
+              {showEndPicker && (
+                <DateTimePicker
+                  value={parseTime(schedule.end)}
+                  mode="time"
+                  is24Hour={false}
+                  display="spinner"
+                  onChange={(_, date) => {
+                    setShowEndPicker(false);
+                    if (date) setSchedule(s => ({ ...s, end: toTimeString(date) }));
+                  }}
+                />
+              )}
+              {/* Day Picker */}
               <View style={styles.daysRow}>
                 {DAYS.map(day => (
                   <TouchableOpacity
@@ -223,30 +330,18 @@ export default function DefendScreen() {
                   </TouchableOpacity>
                 ))}
               </View>
-              <View style={styles.timeRow}>
-                <Text style={styles.timeLabel}>Start:</Text>
-                <TextInput
-                  style={styles.timeInput}
-                  value={schedule.start}
-                  onChangeText={val => handleTimeChange('start', val)}
-                  placeholder="08:00"
-                  keyboardType="numeric"
-                />
-                <Text style={styles.timeLabel}>End:</Text>
-                <TextInput
-                  style={styles.timeInput}
-                  value={schedule.end}
-                  onChangeText={val => handleTimeChange('end', val)}
-                  placeholder="22:00"
-                  keyboardType="numeric"
-                />
-              </View>
-              <TouchableOpacity style={styles.saveScheduleBtn} onPress={() => setShowScheduleModal(false)}>
-                <Text style={styles.saveScheduleText}>Save</Text>
-              </TouchableOpacity>
+            </>
+          )}
+          {/* Summary and Slider */}
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryText}>{getScheduleSummary()}</Text>
+          </View>
+          <View style={styles.sliderRow}>
+            <View style={styles.sliderTrack}>
+              <View style={[styles.sliderActive, getSliderStyle()]} />
             </View>
           </View>
-        </Modal>
+        </View>
 
         {/* Step 3: Start Blocking */}
         <View style={styles.stepRow}>
@@ -288,21 +383,17 @@ const styles = StyleSheet.create({
   customInput: { flex: 1, backgroundColor: '#fff', borderRadius: 8, padding: 12, fontSize: 16, color: '#2C1A05', borderWidth: 1, borderColor: '#E2C89A' },
   addButton: { backgroundColor: '#A05A1A', borderRadius: 8, paddingVertical: 12, paddingHorizontal: 18, marginLeft: 8, alignItems: 'center', justifyContent: 'center' },
   addButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-  scheduleBox: { backgroundColor: '#F7F2E0', borderRadius: 12, padding: 14, marginBottom: 16, marginTop: 8, alignItems: 'center' },
-  scheduleSummary: { fontSize: 15, color: '#2C1A05', marginBottom: 4 },
-  setScheduleBtn: { color: '#A05A1A', fontWeight: 'bold', fontSize: 16 },
-  scheduleModal: { backgroundColor: '#fff', borderRadius: 16, padding: 24, margin: 32, alignItems: 'center' },
-  scheduleModalTitle: { fontWeight: 'bold', fontSize: 18, color: '#2C1A05', marginBottom: 12 },
-  daysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, width: '100%' },
-  dayButton: { padding: 8, borderRadius: 8, backgroundColor: '#F7E0A3', marginHorizontal: 2 },
-  dayButtonActive: { backgroundColor: '#A05A1A' },
-  dayButtonText: { color: '#2C1A05', fontWeight: 'bold' },
-  dayButtonTextActive: { color: '#fff' },
-  timeRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  timeLabel: { fontWeight: 'bold', color: '#2C1A05', marginHorizontal: 8 },
-  timeInput: { backgroundColor: '#F7F2E0', borderRadius: 8, padding: 8, width: 60, textAlign: 'center', color: '#2C1A05', fontSize: 16 },
-  saveScheduleBtn: { backgroundColor: '#A05A1A', borderRadius: 8, paddingVertical: 12, paddingHorizontal: 32, marginTop: 8 },
-  saveScheduleText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  scheduleCard: { backgroundColor: '#F7F2E0', borderRadius: 16, padding: 18, marginBottom: 24, marginTop: 8 },
+  allDayRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  allDayLabel: { fontSize: 16, color: '#2C1A05' },
+  timePickerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
+  timePickerBtn: { backgroundColor: '#fff', borderRadius: 8, paddingVertical: 8, paddingHorizontal: 18, marginHorizontal: 8 },
+  timePickerText: { fontSize: 16, color: '#2C1A05', fontWeight: 'bold' },
+  summaryRow: { marginTop: 8, marginBottom: 4 },
+  summaryText: { color: '#4B3415', fontSize: 15, textAlign: 'center' },
+  sliderRow: { marginTop: 8, marginBottom: 4, height: 16, justifyContent: 'center' },
+  sliderTrack: { height: 6, backgroundColor: '#E2C89A', borderRadius: 3, width: '100%', position: 'relative' },
+  sliderActive: { position: 'absolute', height: 6, backgroundColor: '#A05A1A', borderRadius: 3 },
   startBlockBtn: { backgroundColor: '#A05A1A', borderRadius: 12, paddingVertical: 18, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
   startBlockText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'center', alignItems: 'center' },
@@ -311,4 +402,9 @@ const styles = StyleSheet.create({
   infoText: { color: '#4B3415', fontSize: 15, marginBottom: 16, textAlign: 'center' },
   infoClose: { backgroundColor: '#A05A1A', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 24 },
   infoCloseText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  daysRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16, width: '100%' },
+  dayButton: { padding: 8, borderRadius: 8, backgroundColor: '#F7E0A3', marginHorizontal: 2 },
+  dayButtonActive: { backgroundColor: '#A05A1A' },
+  dayButtonText: { color: '#2C1A05', fontWeight: 'bold' },
+  dayButtonTextActive: { color: '#fff' },
 }); 
