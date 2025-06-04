@@ -13,7 +13,7 @@ export default function Screen5() {
       <Text style={styles.heading}>{heading}</Text>
       <View style={styles.placeholder} />
       <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen6')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen10')}>
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
     </View>

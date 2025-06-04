@@ -1,75 +1,169 @@
+import { ScreenContainer } from '@/components/ui/ScreenContainer';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const heading = "HERE'S HOW WE'LL HELP YOU RECLAIM YOUR TIME";
-const body = `SET YOUR SCHEDULE\nCHOOSE WHEN TO DEFEND YOUR ATTENTION.\n\nWE BLOCK THE DISTRACTIONS\nZERO ACCESS. ZERO EXCUSES. ZERO WAY OUT.\n\nYOU LIVE YOUR LIFE`;
+const FAKE_NAMES = ['Jake', 'Marcus', 'Alex'];
+
+// Stub for future backend integration
+async function pairWithAccountabilityPartner(userId: string): Promise<{ matched: boolean; partnerName?: string }> {
+  // TODO: Connect to Supabase accountability_pairs table
+  // Simulate 50/50 match
+  const matched = Math.random() < 0.5;
+  if (matched) {
+    const partnerName = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
+    return { matched: true, partnerName };
+  }
+  return { matched: false };
+}
 
 export default function Screen9() {
   const router = useRouter();
+  const [searching, setSearching] = useState(true);
+  const [result, setResult] = useState<{ matched: boolean; partnerName?: string } | null>(null);
+  const [dotIndex, setDotIndex] = useState(0);
+
+  // Simulate searching animation and matching logic
+  useEffect(() => {
+    let dotTimer: NodeJS.Timeout;
+    let searchTimer: NodeJS.Timeout;
+    // Animate dots
+    dotTimer = setInterval(() => setDotIndex((i) => (i + 1) % 3), 400);
+    // Simulate 2-3 second search
+    searchTimer = setTimeout(async () => {
+      const res = await pairWithAccountabilityPartner('user123');
+      setResult(res);
+      setSearching(false);
+      clearInterval(dotTimer);
+    }, 2000 + Math.random() * 1000);
+    return () => {
+      clearTimeout(searchTimer);
+      clearInterval(dotTimer);
+    };
+  }, []);
+
+  // Progress dots
+  const dots = [0, 1, 2].map((i) => (
+    <View
+      key={i}
+      style={{
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        margin: 4,
+        backgroundColor: dotIndex === i ? '#4B3415' : '#D6C08A',
+      }}
+    />
+  ));
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/paywall-description')}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    <ScreenContainer>
+      <ScreenHeader title="" />
+      <View style={styles.centered}>
+        <Text style={styles.bigTitle}>FINDING YOUR BATTLE PARTNER</Text>
+        <Text style={styles.subtitle}>Every warrior needs someone watching their back.</Text>
+        {/* Placeholder illustration */}
+        <View style={styles.illustration}><Text>[icon]</Text></View>
+        {searching ? (
+          <>
+            <Text style={styles.searching}>Searching for your accountability partner{'.'.repeat((dotIndex % 3) + 1)}</Text>
+          </>
+        ) : result?.matched ? (
+          <>
+            <Text style={styles.success}>You've been paired with <Text style={styles.partnerName}>{result.partnerName}</Text>!</Text>
+            <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace('/defend')}>
+              <Text style={styles.continueText}>Continue</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <Text style={styles.noMatch}>You're first in line - your partner will join soon!</Text>
+            <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace('/defend')}>
+              <Text style={styles.continueText}>Continue</Text>
+            </TouchableOpacity>
+          </>
+        )}
+        <View style={styles.dotsRow}>{dots}</View>
+      </View>
+    </ScreenContainer>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
-  container: {
+  centered: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingTop: 24,
   },
-  heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
+  bigTitle: {
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#2C1A05',
     textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
+    marginBottom: 8,
     letterSpacing: 1.2,
-    lineHeight: 32,
   },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 18,
-  },
-  body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
+  subtitle: {
     fontSize: 18,
+    color: '#2C1A05',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  illustration: {
+    width: 180,
+    height: 120,
+    backgroundColor: '#F7F2E0',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+  },
+  searching: {
+    fontSize: 20,
+    color: '#4B3415',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+    marginBottom: 16,
   },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
+  success: {
+    fontSize: 20,
+    color: '#2C1A05',
     fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  partnerName: {
+    color: '#A05A1A',
+    fontWeight: 'bold',
+  },
+  noMatch: {
+    fontSize: 20,
+    color: '#2C1A05',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  continueBtn: {
+    backgroundColor: '#4B3415',
+    borderRadius: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 16,
+    width: '100%',
+  },
+  continueText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 32,
   },
 }); 

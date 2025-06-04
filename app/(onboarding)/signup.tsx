@@ -9,8 +9,8 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Your Account</Text>
-      <Button title="Sign Up with Email" onPress={() => { login(); router.replace('/(tabs)/camp'); }} />
-      <Button title="Sign Up with Google" variant="outline" onPress={() => { login(); router.replace('/(tabs)/camp'); }} style={styles.googleButton} />
+      <Button title="Sign Up with Email" onPress={() => { router.replace('/(onboarding)/Screen9'); }} />
+      <Button title="Sign Up with Google" variant="outline" onPress={() => { router.replace('/(onboarding)/Screen9'); }} style={styles.googleButton} />
       <Pressable onPress={() => router.push('/(onboarding)/login')} style={styles.loginLink}>
         <Text style={styles.loginText}>Already have an account? Log in</Text>
       </Pressable>

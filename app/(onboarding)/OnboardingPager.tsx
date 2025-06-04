@@ -8,6 +8,7 @@ import Screen6 from './Screen6';
 import Screen7 from './Screen7';
 import Screen8 from './Screen8';
 import Screen9 from './Screen9';
+import Screen10 from './Screen10'; // 
 
 const screens = [
   Screen1,
@@ -19,10 +20,11 @@ const screens = [
   Screen7,
   Screen8,
   Screen9,
+  Screen10,
 ];
 
 export default function OnboardingPager() {
   // This component is now just a placeholder, as navigation is handled by each screen's Next button.
   // Optionally, you could redirect to Screen1 here if needed.
   return <Screen1 />;
-} 
+}

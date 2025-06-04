@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
       setUser(user);
-      router.replace('/(tabs)');
+      router.replace('/(onboarding)/signup');
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
       setUser(user);
-      router.replace('/(tabs)');
+      router.replace('/(onboarding)/signup');
     } catch (error) {
       console.error('Error signing up:', error);
       throw error;
