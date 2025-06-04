@@ -45,7 +45,8 @@
     "react-native-webview": "13.13.5",
     "expo-notifications": "~0.31.2",
     "@react-native-picker/picker": "2.11.0",
-    "@react-native-community/datetimepicker": "8.3.0"
+    "@react-native-community/datetimepicker": "8.3.0",
+    "expo-store-review": "~8.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
