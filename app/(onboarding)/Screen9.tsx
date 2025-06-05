@@ -1,39 +1,33 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { useAuth } from '@/contexts/AuthContext';
+import { findOrCreatePartner } from '@/lib/partnerMatching';
+import { getUserProfile } from '@/lib/supabaseUserProfile';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-const FAKE_NAMES = ['Jake', 'Marcus', 'Alex'];
-
-// Stub for future backend integration
-async function pairWithAccountabilityPartner(userId: string): Promise<{ matched: boolean; partnerName?: string }> {
-  // TODO: Connect to Supabase accountability_pairs table
-  // Simulate 50/50 match
-  const matched = Math.random() < 0.5;
-  if (matched) {
-    const partnerName = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
-    return { matched: true, partnerName };
-  }
-  return { matched: false };
-}
-
 export default function Screen9() {
   const router = useRouter();
+  const { user } = useAuth();
   const [searching, setSearching] = useState(true);
-  const [result, setResult] = useState<{ matched: boolean; partnerName?: string } | null>(null);
+  const [partnerProfile, setPartnerProfile] = useState<any>(null);
   const [dotIndex, setDotIndex] = useState(0);
+  const [matched, setMatched] = useState(false);
 
-  // Simulate searching animation and matching logic
   useEffect(() => {
-    let dotTimer: NodeJS.Timeout;
-    let searchTimer: NodeJS.Timeout;
-    // Animate dots
+    let dotTimer: ReturnType<typeof setInterval>;
+    let searchTimer: ReturnType<typeof setTimeout>;
     dotTimer = setInterval(() => setDotIndex((i) => (i + 1) % 3), 400);
     // Simulate 2-3 second search
     searchTimer = setTimeout(async () => {
-      const res = await pairWithAccountabilityPartner('user123');
-      setResult(res);
+      if (!user?.id) return;
+      const res = await findOrCreatePartner(user.id);
+      setMatched(res.matched);
+      if (res.matched && res.partnerId) {
+        const profile = await getUserProfile(res.partnerId);
+        setPartnerProfile(profile);
+      }
       setSearching(false);
       clearInterval(dotTimer);
     }, 2000 + Math.random() * 1000);
@@ -41,7 +35,7 @@ export default function Screen9() {
       clearTimeout(searchTimer);
       clearInterval(dotTimer);
     };
-  }, []);
+  }, [user]);
 
   // Progress dots
   const dots = [0, 1, 2].map((i) => (
@@ -69,9 +63,9 @@ export default function Screen9() {
           <>
             <Text style={styles.searching}>Searching for your accountability partner{'.'.repeat((dotIndex % 3) + 1)}</Text>
           </>
-        ) : result?.matched ? (
+        ) : matched && partnerProfile ? (
           <>
-            <Text style={styles.success}>You've been paired with <Text style={styles.partnerName}>{result.partnerName}</Text>!</Text>
+            <Text style={styles.success}>You've been paired with <Text style={styles.partnerName}>{partnerProfile.first_name} from {partnerProfile.city}</Text>!</Text>
             <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace('/defend')}>
               <Text style={styles.continueText}>Continue</Text>
             </TouchableOpacity>

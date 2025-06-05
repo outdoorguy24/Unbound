@@ -1,143 +1,191 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
+import { getTrailLog } from '@/lib/trailLog';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+
+const MILESTONES = [10, 50, 100, 500, 1000]; // in days
+
+function calcTimeSavedDays(logs: { action: string; created_at: string }[]) {
+  // Find all enable/disable pairs and sum durations
+  let totalMs = 0;
+  let lastEnabled: Date | null = null;
+  logs.forEach((log) => {
+    if (log.action === 'blocking_enabled') {
+      lastEnabled = new Date(log.created_at);
+    } else if (log.action === 'blocking_disabled' && lastEnabled !== null) {
+      const disabledAt = new Date(log.created_at);
+      totalMs += disabledAt.getTime() - (lastEnabled as Date).getTime();
+      lastEnabled = null;
+    }
+  });
+  // If still enabled at end, count up to now
+  if (lastEnabled !== null) {
+    totalMs += Date.now() - (lastEnabled as Date).getTime();
+  }
+  return totalMs / (1000 * 60 * 60 * 24); // convert ms to days
+}
+
+function calcTotalBlocks(logs: any[]) {
+  return logs.filter((log) => log.action === 'blocked_attempt').length;
+}
+
+function calcStreakDays(logs: any[]) {
+  // Get all days with at least one block/streak action
+  const days = new Set(
+    logs
+      .filter((log) =>
+        log.action === 'blocked_attempt' || log.action === 'streak_day')
+      .map((log) => new Date(log.created_at).toISOString().slice(0, 10))
+  );
+  // Sort days descending
+  const sorted = Array.from(days).sort((a, b) => b.localeCompare(a));
+  if (sorted.length === 0) return 0;
+  // Count consecutive days from today backwards
+  let streak = 0;
+  let d = new Date();
+  for (let i = 0; i < sorted.length; i++) {
+    const dayStr = d.toISOString().slice(0, 10);
+    if (sorted.includes(dayStr)) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+function getNextMilestone(currentDays: number) {
+  for (let m of MILESTONES) {
+    if (currentDays < m) return m;
+  }
+  return null;
+}
 
 export default function TrailLogScreen() {
-  // Placeholder state for stats
-  const [stats, setStats] = useState({
-    timeSaved: 0,
-    productivity: 0,
-    totalBlocks: 0,
-    streakDays: 0,
-    progress: 0,
-  });
-  const router = useRouter();
+  const { user } = useAuth();
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Simulate progress bar updates
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStats((prev) => ({
-        ...prev,
-        progress: prev.progress < 100 ? prev.progress + 1 : 100,
-      }));
-    }, 100);
-    return () => clearInterval(interval);
-  }, []);
+    async function fetchLogs() {
+      if (!user?.id) return;
+      setLoading(true);
+      const data = await getTrailLog(user.id, { limit: 500 }); // get enough for streaks
+      setLogs(data || []);
+      setLoading(false);
+    }
+    fetchLogs();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <ScreenContainer>
+        <ScreenHeader title="Trail Log" />
+        <ActivityIndicator size="large" color="#4B3415" style={{ marginTop: 40 }} />
+      </ScreenContainer>
+    );
+  }
+
+  const timeSavedDays = calcTimeSavedDays(logs);
+  const totalBlocks = calcTotalBlocks(logs);
+  const streakDays = calcStreakDays(logs);
+  const nextMilestone = getNextMilestone(timeSavedDays);
 
   return (
     <ScreenContainer>
       <ScreenHeader title="Trail Log" />
-      <Text style={styles.heading}>Total time reclaimed since installation</Text>
-      <View style={styles.statsGrid}>
+      <Text style={styles.subtitle}>Total time reclaimed since installation</Text>
+      <View style={styles.gridRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.timeSaved}m</Text>
+          <Text style={styles.statValue}>{timeSavedDays.toFixed(1)}d</Text>
           <Text style={styles.statLabel}>TIME SAVED</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.productivity}%</Text>
+          <Text style={styles.statValue}>0%</Text>
           <Text style={styles.statLabel}>PRODUCTIVITY GAIN</Text>
         </View>
+      </View>
+      <View style={styles.gridRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.totalBlocks}</Text>
+          <Text style={styles.statValue}>{totalBlocks}</Text>
           <Text style={styles.statLabel}>TOTAL BLOCKS</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statValue}>{stats.streakDays}</Text>
+          <Text style={styles.statValue}>{streakDays}</Text>
           <Text style={styles.statLabel}>STREAK DAYS</Text>
         </View>
       </View>
       <View style={styles.milestoneBox}>
-        <FontAwesome5 name="flag-checkered" size={24} color="#fff" style={{ marginBottom: 8 }} />
         <Text style={styles.milestoneLabel}>Next Milestone</Text>
-        <Text style={styles.milestoneValue}>100 HOURS</Text>
-        <View style={styles.progressBarBg}>
-          <View style={[styles.progressBar, { width: `${stats.progress}%` }]} />
-        </View>
-        <TouchableOpacity style={styles.milestoneButton} onPress={() => router.push('/modals/milestone')}>
-          <Text style={styles.milestoneButtonText}>View Milestone</Text>
-        </TouchableOpacity>
+        <Text style={styles.milestoneValue}>{nextMilestone ? `${nextMilestone * 24} HOURS` : '🎉'}</Text>
+        <Text style={styles.milestoneSub}>TIME SAVED GOAL</Text>
       </View>
-      {/* TODO: Replace stats, progress, and icons with real data/assets */}
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  heading: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  subtitle: {
+    color: '#4B3415',
+    fontSize: 16,
     textAlign: 'center',
-    marginTop: 16,
     marginBottom: 16,
-    color: '#2C1A05',
+    marginTop: 4,
   },
-  statsGrid: {
+  gridRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 12,
+    width: '100%',
+    paddingHorizontal: 8,
   },
   statBox: {
-    width: '48%',
-    backgroundColor: '#F7E0A3',
+    flex: 1,
+    backgroundColor: '#E2C89A',
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    marginHorizontal: 6,
     alignItems: 'center',
+    paddingVertical: 18,
+    elevation: 2,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#2C1A05',
+    marginBottom: 2,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: '#4B3415',
-    marginTop: 4,
+    fontWeight: 'bold',
+    letterSpacing: 1.1,
   },
   milestoneBox: {
     backgroundColor: '#4B3415',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 16,
+    paddingVertical: 24,
+    marginTop: 18,
+    marginHorizontal: 8,
   },
   milestoneLabel: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 4,
   },
   milestoneValue: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 2,
   },
-  progressBarBg: {
-    width: '100%',
-    height: 10,
-    backgroundColor: '#E5C98B',
-    borderRadius: 5,
-    marginVertical: 8,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
-  },
-  milestoneButton: {
-    backgroundColor: '#E5C98B',
-    borderRadius: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    marginTop: 10,
-  },
-  milestoneButtonText: {
-    color: '#4B3415',
-    fontWeight: 'bold',
+  milestoneSub: {
+    color: '#fff',
+    fontSize: 14,
+    letterSpacing: 1.1,
   },
 }); 
