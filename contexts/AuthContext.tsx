@@ -1,3 +1,4 @@
+import { loginWithGoogle, supabase } from '@/lib/supabaseClient';
 import { getStoredPushToken } from '@/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useSegments } from 'expo-router';
@@ -15,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   isLoadingAuth: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -36,9 +37,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if user is logged in
   const isLoggedIn = !!user;
 
-  // Simulate checking auth state on mount
+  // Listen for auth state changes
   useEffect(() => {
-    checkAuth();
+    const getSession = async () => {
+      setIsLoadingAuth(true);
+      const { data, error } = await supabase.auth.getSession();
+      if (data?.session?.user) {
+        setUser(data.session.user);
+      } else {
+        setUser(null);
+      }
+      setIsLoadingAuth(false);
+    };
+    getSession();
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
   // Handle protected routes
@@ -57,37 +74,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoggedIn, segments, isLoadingAuth]);
 
-  // Simulate checking auth state
-  const checkAuth = async () => {
-    try {
-      const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (error) {
-      console.error('Error checking auth:', error);
-    } finally {
-      setIsLoadingAuth(false);
-    }
-  };
-
-  // Simulate login
-  const login = async (email: string, password: string) => {
+  // Login with Google
+  const login = async () => {
     setIsLoadingAuth(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const pushToken = await getStoredPushToken();
-      const user: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-        pushToken: pushToken || undefined,
-      };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-      setUser(user);
-      router.replace('/(onboarding)/signup');
+      await loginWithGoogle();
     } catch (error) {
-      console.error('Error logging in:', error);
+      console.error('Google login error:', error);
       throw error;
     } finally {
       setIsLoadingAuth(false);
@@ -117,21 +110,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Simulate logout
+  // Logout
   const logout = async () => {
     setIsLoadingAuth(true);
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Clear stored user
-      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      await supabase.auth.signOut();
       setUser(null);
-      
-      // Navigate to login
       router.replace('/(auth)/login');
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('Logout error:', error);
       throw error;
     } finally {
       setIsLoadingAuth(false);

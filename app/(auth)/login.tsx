@@ -3,25 +3,19 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isLoadingAuth } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    if (!email || !password) return;
-    
-    setIsLoading(true);
+    setError(null);
     try {
-      await login(email, password);
-    } catch (error) {
-      console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
+      await login();
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
     }
   };
 
@@ -31,35 +25,14 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Text style={styles.heading}>Welcome Back</Text>
         <Text style={styles.subheading}>Sign in to continue your journey</Text>
-        
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-          
-          <TouchableOpacity 
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
+        {error && <Text style={styles.error}>{error}</Text>}
+        <TouchableOpacity 
+          style={[styles.button, isLoadingAuth && styles.buttonDisabled]}
+          onPress={handleLogin}
+          disabled={isLoadingAuth}
+        >
+          {isLoadingAuth ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
+        </TouchableOpacity>
         <TouchableOpacity 
           style={styles.linkButton}
           onPress={() => router.push('/(auth)/signup')}
@@ -91,22 +64,12 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: 'center',
   },
-  form: {
-    marginBottom: 24,
-  },
-  input: {
-    backgroundColor: '#F7E0A3',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    color: '#2C1A05',
-  },
   button: {
     backgroundColor: '#4B3415',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
+    marginBottom: 16,
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -125,5 +88,10 @@ const styles = StyleSheet.create({
   },
   linkTextBold: {
     fontWeight: 'bold',
+  },
+  error: {
+    color: 'red',
+    marginBottom: 12,
+    textAlign: 'center',
   },
 }); 
