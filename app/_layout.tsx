@@ -1,5 +1,6 @@
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useProfileCheck } from '@/hooks/useProfileCheck';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -24,15 +25,16 @@ export default function RootLayout() {
 }
 
 function AppNavigator({ loaded }) {
-  const { isLoggedIn, isLoadingAuth } = useAuth();
-  if (!loaded || isLoadingAuth) {
+  const { user, profile, loading } = useProfileCheck();
+  if (!loaded || loading) {
     return null;
   }
-  const showOnboarding = !isLoggedIn;
   return (
     <Stack>
-      {showOnboarding ? (
+      {!user ? (
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+      ) : !profile ? (
+        <Stack.Screen name="(onboarding)/ScreenProfileSetup" options={{ headerShown: false }} />
       ) : (
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       )}

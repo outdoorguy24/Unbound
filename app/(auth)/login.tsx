@@ -33,6 +33,23 @@ export default function LoginScreen() {
         >
           {isLoadingAuth ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
         </TouchableOpacity>
+        {/* DEV SHORTCUT BUTTON */}
+        <TouchableOpacity 
+          style={[styles.button, { backgroundColor: '#888' }]}
+          onPress={() => {
+            // Set a fake user in AuthContext for dev
+            // @ts-ignore
+            if (typeof window !== 'undefined') {
+              window.__DEV_USER__ = true;
+            }
+            // Simulate login by setting a fake user
+            // This assumes AuthContext exposes setUser, or you can trigger a navigation to the main app
+            // For now, navigate to main app
+            router.replace('/(tabs)');
+          }}
+        >
+          <Text style={styles.buttonText}>Dev Shortcut: Skip Login</Text>
+        </TouchableOpacity>
         <TouchableOpacity 
           style={styles.linkButton}
           onPress={() => router.push('/(auth)/signup')}

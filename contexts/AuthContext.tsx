@@ -1,4 +1,5 @@
 import { loginWithGoogle, supabase } from '@/lib/supabaseClient';
+import { getUserProfile } from '@/lib/supabaseUserProfile';
 import { getStoredPushToken } from '@/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useSegments } from 'expo-router';
@@ -58,21 +59,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Handle protected routes
+  // Profile check and protected routes
   useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingGroup = segments[0] === '(onboarding)';
-
-    if (!isLoadingAuth) {
+    const checkProfileAndRoute = async () => {
+      if (isLoadingAuth) return;
+      const inAuthGroup = segments[0] === '(auth)';
+      const inOnboardingGroup = segments[0] === '(onboarding)';
       if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup) {
-        // Redirect to login if not logged in and trying to access protected route
         router.replace('/(auth)/login');
-      } else if (isLoggedIn && (inAuthGroup || inOnboardingGroup)) {
-        // Redirect to home if logged in and trying to access auth/onboarding
-        router.replace('/(tabs)');
+        return;
       }
-    }
-  }, [isLoggedIn, segments, isLoadingAuth]);
+      if (isLoggedIn) {
+        // Check for user profile
+        try {
+          const profile = await getUserProfile(user!.id);
+          if (!profile) {
+            // No profile, go to profile setup
+            if (segments[1] !== 'ScreenProfileSetup') {
+              router.replace('/(onboarding)/ScreenProfileSetup');
+            }
+            return;
+          }
+          // Profile exists, go to main app
+          if (inAuthGroup || inOnboardingGroup) {
+            router.replace('/(tabs)/home');
+          }
+        } catch (e) {
+          // If error is not 'no rows found', log it
+          console.error('Profile check error:', e);
+        }
+      }
+    };
+    checkProfileAndRoute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, segments, isLoadingAuth, user]);
 
   // Login with Google
   const login = async () => {

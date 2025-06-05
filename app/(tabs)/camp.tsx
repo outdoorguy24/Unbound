@@ -1,5 +1,7 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { supabase } from '@/lib/supabaseClient';
+import { getUserProfile } from '@/lib/supabaseUserProfile';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -42,34 +44,62 @@ export default function CampScreen() {
   const [user, setUser] = useState<any>(null);
   const [partner, setPartner] = useState<any>(null);
   const [community, setCommunity] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Randomize placeholder data on mount
-    const streakDays = calculateStreakDays();
-    const partnerStreak = calculateStreakDays();
-    const timeSaved = Math.floor(Math.random() * 741) + 60; // 60-800
-    const totalUsers = Math.floor(Math.random() * 1201) + 800; // 800-2000
-    const totalTimeSaved = Math.floor(Math.random() * 100001) + 50000; // 50,000-150,000
+    async function fetchData() {
+      setLoading(true);
+      // Get current user
+      const { data: authData } = await supabase.auth.getUser();
+      const supaUser = authData?.user;
+      if (!supaUser) {
+        setLoading(false);
+        return;
+      }
+      // Get user profile
+      const userProfile = await getUserProfile(supaUser.id);
+      // TODO: Replace with real streak/time logic
+      const streakDays = calculateStreakDays();
+      const partnerStreak = calculateStreakDays();
+      const timeSaved = Math.floor(Math.random() * 741) + 60; // 60-800
+      const totalUsers = Math.floor(Math.random() * 1201) + 800; // 800-2000
+      const totalTimeSaved = Math.floor(Math.random() * 100001) + 50000; // 50,000-150,000
 
-    setUser({
-      userId: 'user123',
-      firstName: 'John',
-      streakDays,
-      timeSavedThisWeek: timeSaved,
-    });
-    setPartner({
-      name: 'Marcus',
-      city: 'Denver',
-      streakDays: partnerStreak,
-      status: getPartnerStatus(partnerStreak),
-    });
-    setCommunity({
-      totalUsers,
-      totalTimeSaved,
-    });
+      setUser({
+        userId: supaUser.id,
+        firstName: userProfile?.first_name || 'Warrior',
+        streakDays,
+        timeSavedThisWeek: timeSaved,
+      });
+
+      // Fetch partnerId (stub: replace with real logic)
+      // For now, simulate a partnerId (could be null for no partner)
+      const partnerId = supaUser.id === '1' ? '2' : '1'; // Replace with real matching logic
+      let partnerProfile = null;
+      if (partnerId) {
+        partnerProfile = await getUserProfile(partnerId);
+      }
+      setPartner(
+        partnerProfile
+          ? {
+              name: partnerProfile.first_name,
+              city: partnerProfile.city,
+              streakDays: partnerStreak,
+              status: getPartnerStatus(partnerStreak),
+            }
+          : null
+      );
+
+      setCommunity({
+        totalUsers,
+        totalTimeSaved,
+      });
+      setLoading(false);
+    }
+    fetchData();
   }, []);
 
-  if (!user || !partner || !community) {
+  if (loading || !user || !community) {
     return (
       <ScreenContainer>
         <ScreenHeader title="Camp" />
@@ -94,8 +124,14 @@ export default function CampScreen() {
 
         <View style={styles.sectionBoxNoBorder}>
           <Text style={styles.sectionTitle}>YOUR ACCOUNTABILITY PARTNER</Text>
-          <Text style={styles.partnerName}>{partner.name} from {partner.city} – Day {partner.streakDays}</Text>
-          <Text style={styles.partnerStatus}>{partner.status}</Text>
+          {partner ? (
+            <>
+              <Text style={styles.partnerName}>{partner.name} from {partner.city} – Day {partner.streakDays}</Text>
+              <Text style={styles.partnerStatus}>{partner.status}</Text>
+            </>
+          ) : (
+            <Text style={styles.partnerName}>Your partner is setting up their profile</Text>
+          )}
         </View>
 
         <View style={styles.sectionBoxNoBorder}>
