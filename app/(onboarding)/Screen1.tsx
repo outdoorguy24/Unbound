@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import OnboardingIllustration from '../components/OnboardingIllustration';
 
 const heading = "YOU COME FROM WHO HUNTED ON OPEN PLAINS. WHO STARTED FIRES WITH STONE. WHO TOLD STORIES UNDER STARS.";
@@ -11,14 +11,11 @@ export default function Screen1() {
   const router = useRouter();
   useEffect(() => { /* logScreenView('Onboarding1'); */ }, []);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { flex: 1 }]}>
       <Text style={styles.heading}>{heading}</Text>
       <OnboardingIllustration />
       <Text style={styles.subheading}>{subheading}</Text>
       <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen2')}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
     </View>
   );
 }

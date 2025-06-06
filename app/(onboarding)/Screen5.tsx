@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 
 const heading = "IT'S TIME TO REMEMBER WHO YOU ARE.";
 const body = "PICK UP THE PAINTBRUSH AND GRAB THE HAMMER. LACE UP YOUR SHOES OR BOXING GLOVES. GET A SPLINTER. WALK BAREFOOT IN THE GRASS. BECOME THE MAN YOU WERE MEANT TO BE. MAKE YOUR GRANDFATHER PROUD.";
@@ -9,13 +9,10 @@ export default function Screen5() {
   const router = useRouter();
   useEffect(() => { /* logScreenView('Onboarding5'); */ }, []);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { flex: 1 }]}>
       <Text style={styles.heading}>{heading}</Text>
       <View style={styles.placeholder} />
       <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen10')}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
     </View>
   );
 }

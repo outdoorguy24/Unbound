@@ -1,6 +1,5 @@
 import { Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const OPTIONS = [
@@ -12,9 +11,13 @@ const OPTIONS = [
   { key: 'all', label: 'All of the Above', icon: <Feather name="layers" size={36} color="#4B3415" /> },
 ];
 
-export default function Screen7() {
-  const router = useRouter();
+export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
   const [selected, setSelected] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
+    if (selected.length > 0 && enableSwipe) enableSwipe();
+  }, [selected]);
 
   const toggleOption = (key: string) => {
     setSelected(prev =>
@@ -43,11 +46,11 @@ export default function Screen7() {
         ))}
       </View>
       <TouchableOpacity
-        style={styles.nextBtn}
-        onPress={() => router.push('/(onboarding)/Screen8')}
+        style={[styles.nextBtn, selected.length === 0 && { opacity: 0.5 }]}
+        onPress={() => { if (onSubmit) onSubmit(); }}
         disabled={selected.length === 0}
       >
-        <Text style={styles.nextBtnText}>Next</Text>
+        <Text style={styles.nextBtnText}>Submit</Text>
       </TouchableOpacity>
     </View>
   );

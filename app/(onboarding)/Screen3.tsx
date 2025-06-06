@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect } from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 
 const heading = "EVERY MINUTE ON PORN OR SOCIAL MEDIA... IS A MINUTE YOU'LL NEVER GET BACK.";
 const body = "YOU'RE GIVING AWAY YOUR LIFE — ONE SWIPE AT A TIME — TO BILLIONAIRE TECH OVERLORDS WHO DON'T CARE ABOUT YOU. THIS IS A WAR FOR YOUR ATTENTION.";
@@ -9,13 +9,10 @@ export default function Screen3() {
   const router = useRouter();
   useEffect(() => { /* logScreenView('Onboarding3'); */ }, []);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { flex: 1 }]}>
       <Text style={styles.heading}>{heading}</Text>
       <View style={styles.placeholder} />
       <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen4')}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
     </View>
   );
 }

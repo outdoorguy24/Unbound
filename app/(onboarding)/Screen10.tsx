@@ -1,6 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const OPTIONS = [
@@ -10,9 +9,13 @@ const OPTIONS = [
   { key: 'latenight', label: 'Late Night', desc: "Can't sleep, can't stop", icon: <Feather name="moon" size={36} color="#4B3415" /> },
 ];
 
-export default function ScreenVulnerable() {
-  const router = useRouter();
+export default function Screen10({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
   const [selected, setSelected] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
+    if (selected.length > 0 && enableSwipe) enableSwipe();
+  }, [selected]);
 
   const toggleOption = (key: string) => {
     setSelected(prev =>
@@ -44,10 +47,10 @@ export default function ScreenVulnerable() {
       </View>
       <TouchableOpacity
         style={[styles.nextBtn, selected.length === 0 && styles.nextBtnDisabled]}
-        onPress={() => router.push('/(onboarding)/Screen6')}
+        onPress={() => { if (onSubmit) onSubmit(); }}
         disabled={selected.length === 0}
       >
-        <Text style={styles.nextBtnText}>Next</Text>
+        <Text style={styles.nextBtnText}>Submit</Text>
       </TouchableOpacity>
     </View>
   );

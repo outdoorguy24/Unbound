@@ -1,5 +1,4 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const heading = "WHAT'S YOUR BIGGEST FEAR ABOUT THIS ADDICTION?";
@@ -12,9 +11,13 @@ const options = [
   'DYING WITH REGRETS',
 ];
 
-export default function Screen6() {
+export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
   const [selected, setSelected] = useState<string[]>([]);
-  const router = useRouter();
+
+  useEffect(() => {
+    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
+    if (selected.length > 0 && enableSwipe) enableSwipe();
+  }, [selected]);
 
   const toggleOption = (option: string) => {
     setSelected((prev) =>
@@ -42,8 +45,12 @@ export default function Screen6() {
           </TouchableOpacity>
         ))}
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/Screen7')}>
-        <Text style={styles.buttonText}>Next</Text>
+      <TouchableOpacity
+        style={[styles.button, selected.length === 0 && { opacity: 0.5 }]}
+        onPress={() => { if (onSubmit) onSubmit(); }}
+        disabled={selected.length === 0}
+      >
+        <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
     </View>
   );

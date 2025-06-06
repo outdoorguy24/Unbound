@@ -42,6 +42,7 @@
     "react-dom": "19.0.0",
     "react-native": "^0.79.3",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-pager-view": "^6.8.1",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
@@ -59,17 +60,41 @@
     "typescript": "~5.8.3"
   },
   "private": true,
-  "jest": {
-  },
-  "expo": {
-  },
+  "jest": {},
+  "expo": {},
   "metro": {
     "transformer": {
       "babelTransformerPath": "react-native-svg-transformer"
     },
     "resolver": {
-      "assetExts": ["db", "mp3", "ttf", "png", "jpg", "jpeg", "bmp", "gif", "webp", "mp4", "m4v", "mov", "aac", "wav", "oga", "ogg", "heic", "heif"],
-      "sourceExts": ["js", "jsx", "ts", "tsx", "json", "svg"]
+      "assetExts": [
+        "db",
+        "mp3",
+        "ttf",
+        "png",
+        "jpg",
+        "jpeg",
+        "bmp",
+        "gif",
+        "webp",
+        "mp4",
+        "m4v",
+        "mov",
+        "aac",
+        "wav",
+        "oga",
+        "ogg",
+        "heic",
+        "heif"
+      ],
+      "sourceExts": [
+        "js",
+        "jsx",
+        "ts",
+        "tsx",
+        "json",
+        "svg"
+      ]
     }
   }
 }
