@@ -1,5 +1,4 @@
 import { loginWithGoogle, supabase } from '@/lib/supabaseClient';
-import { getUserProfile } from '@/lib/supabaseUserProfile';
 import { getStoredPushToken } from '@/utils/notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, useSegments } from 'expo-router';
@@ -20,6 +19,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 // Create context
@@ -154,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         logout,
+        setUser,
       }}
     >
       {children}

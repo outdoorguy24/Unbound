@@ -2,12 +2,12 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { login, isLoadingAuth } = useAuth();
+  const { login, isLoadingAuth, setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async () => {
@@ -28,7 +28,7 @@ export default function LoginScreen() {
         {error && <Text style={styles.error}>{error}</Text>}
         <TouchableOpacity 
           style={[styles.button, isLoadingAuth && styles.buttonDisabled]}
-          onPress={handleLogin}
+          onPress={login}
           disabled={isLoadingAuth}
         >
           {isLoadingAuth ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
@@ -37,14 +37,11 @@ export default function LoginScreen() {
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: '#888' }]}
           onPress={() => {
-            // Set a fake user in AuthContext for dev
-            // @ts-ignore
-            if (typeof window !== 'undefined') {
-              window.__DEV_USER__ = true;
-            }
-            // Simulate login by setting a fake user
-            // This assumes AuthContext exposes setUser, or you can trigger a navigation to the main app
-            // For now, navigate to main app
+            setUser({
+              id: '11111111-1111-1111-1111-111111111111',
+              email: 'dev@unbound.test',
+              name: 'Dev User',
+            });
             router.replace('/(tabs)');
           }}
         >

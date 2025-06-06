@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useAuth } from '../_layout';
 
 export default function LoginScreen() {
   const router = useRouter();

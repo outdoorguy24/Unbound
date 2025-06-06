@@ -1,8 +1,9 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 import { getUserProfile } from '@/lib/supabaseUserProfile';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 // --- Helper Functions ---
@@ -41,6 +42,7 @@ function calculateStreakDays(): number {
 // --- Main Component ---
 
 export default function CampScreen() {
+  const { user: contextUser } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [partner, setPartner] = useState<any>(null);
   const [community, setCommunity] = useState<any>(null);
@@ -52,6 +54,27 @@ export default function CampScreen() {
       // Get current user
       const { data: authData } = await supabase.auth.getUser();
       const supaUser = authData?.user;
+      // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
+      if (__DEV__ && !supaUser && contextUser) {
+        setUser({
+          userId: contextUser.id,
+          firstName: contextUser.name || 'Dev',
+          streakDays: 7,
+          timeSavedThisWeek: 123,
+        });
+        setPartner({
+          name: 'Partner',
+          city: 'Pairtown',
+          streakDays: 5,
+          status: 'Getting started',
+        });
+        setCommunity({
+          totalUsers: 1234,
+          totalTimeSaved: 56789,
+        });
+        setLoading(false);
+        return;
+      }
       if (!supaUser) {
         setLoading(false);
         return;

@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { findOrCreatePartner } from '@/lib/partnerMatching';
 import { getUserProfile } from '@/lib/supabaseUserProfile';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Screen9() {
@@ -14,10 +14,12 @@ export default function Screen9() {
   const [partnerProfile, setPartnerProfile] = useState<any>(null);
   const [dotIndex, setDotIndex] = useState(0);
   const [matched, setMatched] = useState(false);
+  const [timeoutReached, setTimeoutReached] = useState(false);
 
   useEffect(() => {
     let dotTimer: ReturnType<typeof setInterval>;
     let searchTimer: ReturnType<typeof setTimeout>;
+    let redirectTimer: ReturnType<typeof setTimeout>;
     dotTimer = setInterval(() => setDotIndex((i) => (i + 1) % 3), 400);
     // Simulate 2-3 second search
     searchTimer = setTimeout(async () => {
@@ -31,9 +33,17 @@ export default function Screen9() {
       setSearching(false);
       clearInterval(dotTimer);
     }, 2000 + Math.random() * 1000);
+    // Start a 10 second timer to auto-redirect if no partner is found
+    redirectTimer = setTimeout(() => {
+      setTimeoutReached(true);
+      setTimeout(() => {
+        router.replace('/(tabs)/camp');
+      }, 2000); // Show message for 2 seconds before redirect
+    }, 10000);
     return () => {
       clearTimeout(searchTimer);
       clearInterval(dotTimer);
+      clearTimeout(redirectTimer);
     };
   }, [user]);
 
@@ -59,7 +69,11 @@ export default function Screen9() {
         <Text style={styles.subtitle}>Every warrior needs someone watching their back.</Text>
         {/* Placeholder illustration */}
         <View style={styles.illustration}><Text>[icon]</Text></View>
-        {searching ? (
+        {timeoutReached ? (
+          <>
+            <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
+          </>
+        ) : searching ? (
           <>
             <Text style={styles.searching}>Searching for your accountability partner{'.'.repeat((dotIndex % 3) + 1)}</Text>
           </>

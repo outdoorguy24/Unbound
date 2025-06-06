@@ -2,7 +2,7 @@ import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SignupScreen() {
@@ -28,7 +28,7 @@ export default function SignupScreen() {
         {error && <Text style={styles.error}>{error}</Text>}
         <TouchableOpacity 
           style={[styles.button, isLoadingAuth && styles.buttonDisabled]}
-          onPress={handleSignup}
+          onPress={login}
           disabled={isLoadingAuth}
         >
           {isLoadingAuth ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign up with Google</Text>}

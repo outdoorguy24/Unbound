@@ -1,3 +1,4 @@
+import SplashScreen from '@/components/SplashScreen';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useProfileCheck } from '@/hooks/useProfileCheck';
@@ -5,19 +6,29 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import { useState } from 'react';
 import 'react-native-reanimated';
+
+// Module-level variable to persist splash state across remounts
+let splashShown = false;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const [showSplash, setShowSplash] = useState(!splashShown);
+
+  const handleSplashFinish = () => {
+    splashShown = true;
+    setShowSplash(false);
+  };
 
   return (
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AppNavigator loaded={loaded} />
+        {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+        {!showSplash && <AppNavigator loaded={loaded} />}
         <StatusBar style="auto" />
       </ThemeProvider>
     </AuthProvider>

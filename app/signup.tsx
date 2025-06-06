@@ -1,11 +1,7 @@
-import * as Google from 'expo-auth-session/providers/google';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import * as WebBrowser from 'expo-web-browser';
-import React, { useEffect } from 'react';
-import { Alert, Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useAuth } from './_layout';
-
-WebBrowser.maybeCompleteAuthSession();
+import { useEffect } from 'react';
+import { Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const heading = 'Create Your Account';
 const description = 'Sign up to start your 7-day free trial and unlock Unbound.';
@@ -20,27 +16,13 @@ export default function Signup() {
   const { login } = auth;
   useEffect(() => { /* logScreenView('Signup'); */ }, []);
 
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: GOOGLE_CLIENT_ID,
-    selectAccount: true,
-  });
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      Alert.alert('Google Sign-In Success', JSON.stringify(authentication));
-      // TODO: Send authentication info to Supabase or your backend
-    }
-  }, [response]);
-
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>{heading}</Text>
       <Text style={styles.body}>{description}</Text>
       <TouchableOpacity
         style={styles.googleButton}
-        onPress={() => promptAsync()}
-        disabled={!request}
+        onPress={login}
       >
         <Text style={styles.buttonText}>Continue with Google</Text>
       </TouchableOpacity>
