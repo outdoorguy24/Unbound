@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, Image, StyleSheet } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -10,14 +10,14 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
     // Fade in
     Animated.timing(opacity, {
       toValue: 1,
-      duration: 600,
+      duration: 1800,
       useNativeDriver: true,
     }).start(() => {
       // Stay for 3 seconds, then fade out
       setTimeout(() => {
         Animated.timing(opacity, {
           toValue: 0,
-          duration: 600,
+          duration: 1200,
           useNativeDriver: true,
         }).start(() => {
           onFinish();
@@ -28,14 +28,11 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View style={[styles.container, { opacity }]}> 
-      {/* Placeholder visual - replace with your SVG/image later */}
-      <View style={styles.centered}>
-        <Image
-          source={require('../assets/images/icon.png')} // Placeholder, replace with your splash image
-          style={styles.image}
-          resizeMode="contain"
-        />
-      </View>
+      <Image
+        source={require('../assets/images/splash-screen.png')}
+        style={styles.image}
+        resizeMode="contain"
+      />
     </Animated.View>
   );
 }
@@ -52,13 +49,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   image: {
-    width: width * 0.7,
-    height: width * 0.7,
+    width: width,
+    height: height,
   },
 }); 
