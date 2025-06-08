@@ -34,6 +34,7 @@ export default function LoginScreen() {
           {isLoadingAuth ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign in with Google</Text>}
         </TouchableOpacity>
         {/* DEV SHORTCUT BUTTON */}
+        {/*
         <TouchableOpacity 
           style={[styles.button, { backgroundColor: '#888' }]}
           onPress={() => {
@@ -47,6 +48,7 @@ export default function LoginScreen() {
         >
           <Text style={styles.buttonText}>Dev Shortcut: Skip Login</Text>
         </TouchableOpacity>
+        */}
         <TouchableOpacity 
           style={styles.linkButton}
           onPress={() => router.push('/(auth)/signup')}

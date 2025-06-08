@@ -29,15 +29,6 @@ export default function Signup() {
       <TouchableOpacity style={styles.appleButton} onPress={() => {/* TODO: Apple sign-in logic */}}>
         <Text style={styles.buttonText}>Continue with Apple</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.appleButton, { marginTop: 8, backgroundColor: '#4B3415' }]}
-        onPress={() => {
-          login && login();
-          router.replace('/(tabs)/camp');
-        }}
-      >
-        <Text style={[styles.buttonText, { color: '#fff' }]}>Sign Up (Dev Shortcut)</Text>
-      </TouchableOpacity>
       <View style={styles.linksRow}>
         <Text style={styles.link} onPress={() => Linking.openURL(termsUrl)}>Terms of Service</Text>
         <Text style={styles.link} onPress={() => Linking.openURL(privacyUrl)}>Privacy Policy</Text>
