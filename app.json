@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Unbound",
-    "slug": "Unbound",
+    "slug": "unbound-fresh",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Unbound"
+      "bundleIdentifier": "com.starrman.unbound"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.Unbound"
+      "package": "com.starrman.unbound"
     },
     "web": {
       "bundler": "metro",
@@ -44,8 +44,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "085697ed-cf5f-4951-aa39-a157b5b79a63"
+        "projectId": "ff157a4b-184e-4a7c-b993-838b8242af3e"
       }
-    }
+    },
+    "owner": "outdoorguy24"
   }
 }
