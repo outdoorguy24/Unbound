@@ -14,7 +14,7 @@ export default function PaywallDescription() {
       <View style={styles.placeholder} />
       <Text style={styles.heading}>{heading}</Text>
       <Text style={styles.body}>{description}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/paywall-pricing')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/paywall-pricing')}>
         <Text style={styles.buttonText}>Continue</Text>
       </TouchableOpacity>
     </View>
