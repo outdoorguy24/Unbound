@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
+import { createClient } from "@supabase/supabase-js";
+import * as WebBrowser from "expo-web-browser";
 
-const SUPABASE_URL = 'https://mvwrnvcyyxmabjhfpshk.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12d3JudmN5eXhtYWJqaGZwc2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNDI5NDUsImV4cCI6MjA2MjgxODk0NX0.VV-lgwQa43tfLYndPZeacQqoPkPmKtM7_qlgP0ceSb8';
+const SUPABASE_URL = "https://mvwrnvcyyxmabjhfpshk.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12d3JudmN5eXhtYWJqaGZwc2hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNDI5NDUsImV4cCI6MjA2MjgxODk0NX0.VV-lgwQa43tfLYndPZeacQqoPkPmKtM7_qlgP0ceSb8";
 
 // Configure WebBrowser for OAuth
 WebBrowser.maybeCompleteAuthSession();
@@ -12,7 +12,7 @@ WebBrowser.maybeCompleteAuthSession();
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     // Use custom scheme for mobile app
-    scheme: 'unbound',
+    scheme: "unbound",
     // Detect URL automatically
     detectSessionInUrl: false,
     // Auto refresh tokens
@@ -24,39 +24,46 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 // Fixed Google OAuth login
 export async function loginWithGoogle() {
-  console.log('Starting Google OAuth...');
-  
+  console.log("Starting Google OAuth...");
+
   try {
-    // Create proper redirect URI using your app scheme
-    const redirectTo = AuthSession.makeRedirectUri({
-      scheme: 'unbound',
-      path: 'auth/callback'
-    });
-    
-    console.log('Redirect URI:', redirectTo);
+    const redirectTo = "https://mvwrnvcyyxmabjhfpshk.supabase.co/auth/v1/callback";
+    console.log("Using redirect URI:", redirectTo);
 
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo,
-        // Query params for mobile
+        skipBrowserRedirect: false,
         queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     });
 
     if (error) {
-      console.error('OAuth error:', error);
+      console.error("OAuth error:", error);
       throw error;
     }
 
-    console.log('OAuth initiated successfully');
-    return data;
-    
+    if (!data?.url) {
+      throw new Error("No OAuth URL returned");
+    }
+
+    console.log("OAuth URL:", data.url);
+    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+
+    if (result.type === "success") {
+      const { url } = result;
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      return sessionData;
+    }
+
+    throw new Error("OAuth session was cancelled or failed");
   } catch (err) {
-    console.error('OAuth exception:', err);
+    console.error("OAuth exception:", err);
     throw err;
   }
-} 
+}
