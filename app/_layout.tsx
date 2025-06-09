@@ -1,14 +1,14 @@
-import SplashScreen from '@/components/SplashScreen';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useProfileCheck } from '@/hooks/useProfileCheck';
-import { StripeProvider } from '@/lib/stripeProvider';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import 'react-native-reanimated';
+import SplashScreen from "@/components/SplashScreen";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { useProfileCheck } from "@/hooks/useProfileCheck";
+import { StripeProvider } from "@/lib/stripeProvider";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import "react-native-reanimated";
 
 // Module-level variable to persist splash state across remounts
 let splashShown = false;
@@ -16,7 +16,7 @@ let splashShown = false;
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const [showSplash, setShowSplash] = useState(!splashShown);
 
@@ -28,7 +28,7 @@ export default function RootLayout() {
   return (
     <StripeProvider>
       <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
           {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
           {!showSplash && <AppNavigator loaded={loaded} colorScheme={colorScheme} />}
           <StatusBar style="auto" />
@@ -38,7 +38,7 @@ export default function RootLayout() {
   );
 }
 
-function AppNavigator({ loaded, colorScheme }) {
+function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: any }) {
   const { user, profile, loading } = useProfileCheck();
   if (!loaded || loading) {
     return null;
@@ -47,9 +47,9 @@ function AppNavigator({ loaded, colorScheme }) {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: colorScheme === 'dark' ? '#000' : '#fff',
+          backgroundColor: colorScheme === "dark" ? "#000" : "#fff",
         },
-        headerTintColor: colorScheme === 'dark' ? '#fff' : '#000',
+        headerTintColor: colorScheme === "dark" ? "#fff" : "#000",
       }}
     >
       {!user ? (
@@ -59,8 +59,8 @@ function AppNavigator({ loaded, colorScheme }) {
       ) : (
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       )}
-      <Stack.Screen name="defend-modal" options={{ presentation: 'modal', headerShown: false }} />
-      <Stack.Screen name="founder" options={{ title: 'Talk with the Founder' }} />
+      <Stack.Screen name="defend-modal" options={{ presentation: "modal", headerShown: false }} />
+      <Stack.Screen name="founder" options={{ title: "Talk with the Founder" }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

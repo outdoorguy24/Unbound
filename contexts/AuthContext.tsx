@@ -1,8 +1,9 @@
-import { loginWithGoogle, supabase } from '@/lib/supabaseClient';
-import { getStoredPushToken } from '@/utils/notifications';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter, useSegments } from 'expo-router';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { loginWithGoogle, supabase } from "@/lib/supabaseClient";
+import { getUserProfile } from "@/lib/supabaseUserProfile";
+import { getStoredPushToken } from "@/utils/notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter, useSegments } from "expo-router";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 // Types
 interface User {
@@ -26,7 +27,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Storage keys
-const AUTH_STORAGE_KEY = '@auth_user';
+const AUTH_STORAGE_KEY = "@auth_user";
 
 // Provider component
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -63,10 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkProfileAndRoute = async () => {
       if (isLoadingAuth) return;
-      const inAuthGroup = segments[0] === '(auth)';
-      const inOnboardingGroup = segments[0] === '(onboarding)';
+      const inAuthGroup = segments[0] === "(auth)";
+      const inOnboardingGroup = segments[0] === "(onboarding)";
       if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup) {
-        router.replace('/(auth)/login');
+        router.replace("/(auth)/login");
         return;
       }
       if (isLoggedIn) {
@@ -75,18 +76,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const profile = await getUserProfile(user!.id);
           if (!profile) {
             // No profile, go to profile setup
-            if (segments[1] !== 'ScreenProfileSetup') {
-              router.replace('/(onboarding)/ScreenProfileSetup');
+            if (segments[1] !== "ScreenProfileSetup") {
+              router.replace("/(onboarding)/ScreenProfileSetup");
             }
             return;
           }
           // Profile exists, go to main app
           if (inAuthGroup || inOnboardingGroup) {
-            router.replace('/(tabs)/home');
+            router.replace("/(tabs)/home");
           }
         } catch (e) {
           // If error is not 'no rows found', log it
-          console.error('Profile check error:', e);
+          console.error("Profile check error:", e);
         }
       }
     };
@@ -100,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await loginWithGoogle();
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error("Google login error:", error);
       throw error;
     } finally {
       setIsLoadingAuth(false);
@@ -111,19 +112,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (email: string, password: string, name: string) => {
     setIsLoadingAuth(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       const pushToken = await getStoredPushToken();
       const user: User = {
-        id: '1',
+        id: "1",
         email,
         name,
         pushToken: pushToken || undefined,
       };
       await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
       setUser(user);
-      router.replace('/(onboarding)/signup');
+      router.replace("/(onboarding)/signup");
     } catch (error) {
-      console.error('Error signing up:', error);
+      console.error("Error signing up:", error);
       throw error;
     } finally {
       setIsLoadingAuth(false);
@@ -136,9 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabase.auth.signOut();
       setUser(null);
-      router.replace('/(auth)/login');
+      router.replace("/(auth)/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
       throw error;
     } finally {
       setIsLoadingAuth(false);
@@ -166,7 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-} 
+}
