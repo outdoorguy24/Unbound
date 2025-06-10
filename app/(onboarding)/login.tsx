@@ -9,7 +9,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Log In</Text>
-      <Button title="Log In" onPress={() => { login(); router.replace('/(onboarding)/Screen9'); }} />
+      <Button title="Log In" onPress={() => { login(); router.replace('/(onboarding)/ScreenProfileSetup'); }} />
       <Pressable onPress={() => router.push('/(onboarding)/signup')} style={styles.signupLink}>
         <Text style={styles.signupText}>Don't have an account? Sign up</Text>
       </Pressable>

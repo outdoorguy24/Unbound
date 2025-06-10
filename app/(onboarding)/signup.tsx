@@ -9,7 +9,7 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Your Account</Text>
-      <Button title="Sign Up with Email" onPress={() => { router.replace('/(onboarding)/Screen9'); }} />
+      <Button title="Sign Up with Email" onPress={() => { router.replace('/(onboarding)/ScreenProfileSetup'); }} />
       <Button title="Sign Up with Google" variant="outline" onPress={login} style={styles.googleButton} />
       <Pressable onPress={() => router.push('/(onboarding)/login')} style={styles.loginLink}>
         <Text style={styles.loginText}>Already have an account? Log in</Text>

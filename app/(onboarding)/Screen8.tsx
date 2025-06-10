@@ -13,7 +13,7 @@ export default function Screen8() {
       <Text style={styles.heading}>{heading}</Text>
       <View style={styles.placeholder} />
       <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/paywall-description')}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/paywall-description')}>
         <Text style={styles.buttonText}>Next</Text>
       </TouchableOpacity>
     </View>

@@ -14,7 +14,7 @@ export default function ScreenProfileSetup() {
 
   const isValidName = (name: string) => /^[A-Za-z]{3,}$/.test(name);
   const isValidCity = (city: string) => /^[A-Za-z ]{3,}$/.test(city);
-  const canSubmit = isValidName(firstName) && isValidCity(city);
+  const canSubmit = isValidName(firstName) && (city.length === 0 || isValidCity(city));
 
   const handleSubmit = async () => {
     if (!user?.id) return;
