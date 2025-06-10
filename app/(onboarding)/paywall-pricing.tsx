@@ -1,22 +1,22 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Purchases, { CustomerInfo, PurchasesOffering, PurchasesPackage } from 'react-native-purchases';
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Purchases, { CustomerInfo, PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 
-const termsUrl = 'https://yourdomain.com/terms';
-const privacyUrl = 'https://yourdomain.com/privacy';
+const termsUrl = "https://yourdomain.com/terms";
+const privacyUrl = "https://yourdomain.com/privacy";
 const testimonial = '"Unbound helped me reclaim 12 hours a week — now I hike, train, and read again."';
-const testimonialAuthor = 'James M., Texas';
+const testimonialAuthor = "James M., Texas";
 
 const COLORS = {
-  background: '#F3E2C7',
-  accent: '#A05A1A',
-  dark: '#2C1A05',
-  mid: '#4B3415',
-  green: '#265C28',
-  white: '#F3E2C7',
-  orange: '#E2C89A',
+  background: "#F3E2C7",
+  accent: "#A05A1A",
+  dark: "#2C1A05",
+  mid: "#4B3415",
+  green: "#265C28",
+  white: "#F3E2C7",
+  orange: "#E2C89A",
 };
 
 export default function PaywallPricing() {
@@ -33,7 +33,14 @@ export default function PaywallPricing() {
       setLoading(true);
       setError(null);
       try {
-        await Purchases.configure({ apiKey: 'appl_BYmaCExMCUEVMmUPdbhHAqZMqSx' });
+        // Skip RevenueCat in development mode
+        if (__DEV__) {
+          setError("Development mode - subscription disabled");
+          setLoading(false);
+          return;
+        }
+
+        await Purchases.configure({ apiKey: "appl_BYmaCExMCUEVMmUPdbhHAqZMqSx" });
         if (user?.id) {
           await Purchases.logIn(user.id);
         }
@@ -42,10 +49,10 @@ export default function PaywallPricing() {
           setOfferings(current);
           setSelected(current.availablePackages[0]);
         } else {
-          setError('No subscription options available.');
+          setError("No subscription options available.");
         }
       } catch (e: any) {
-        setError(e.message || 'Failed to load subscription options.');
+        setError(e.message || "Failed to load subscription options.");
       }
       setLoading(false);
     }
@@ -53,6 +60,12 @@ export default function PaywallPricing() {
   }, [user]);
 
   const handlePurchase = async () => {
+    // Skip purchase in development mode
+    if (__DEV__) {
+      router.replace("/(tabs)/camp");
+      return;
+    }
+
     if (!selected) return;
     setPurchasing(true);
     setError(null);
@@ -60,12 +73,12 @@ export default function PaywallPricing() {
       const { customerInfo } = await Purchases.purchasePackage(selected);
       if (customerInfo.activeSubscriptions.length > 0) {
         // Unlock app, navigate to main app
-        router.replace('/(tabs)/camp');
+        router.replace("/(tabs)/camp");
       } else {
-        setError('Subscription not activated.');
+        setError("Subscription not activated.");
       }
     } catch (e: any) {
-      setError(e.message || 'Purchase failed.');
+      setError(e.message || "Purchase failed.");
     }
     setPurchasing(false);
   };
@@ -76,19 +89,19 @@ export default function PaywallPricing() {
     try {
       const info: CustomerInfo = await Purchases.restorePurchases();
       if (info.activeSubscriptions.length > 0) {
-        router.replace('/(tabs)/camp');
+        router.replace("/(tabs)/camp");
       } else {
-        setError('No active subscription found.');
+        setError("No active subscription found.");
       }
     } catch (e: any) {
-      setError(e.message || 'Restore failed.');
+      setError(e.message || "Restore failed.");
     }
     setPurchasing(false);
   };
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center' }]}> 
+      <View style={[styles.container, { justifyContent: "center" }]}>
         <ActivityIndicator size="large" color={COLORS.accent} />
         <Text style={styles.loadingText}>Loading subscription options…</Text>
       </View>
@@ -109,10 +122,12 @@ export default function PaywallPricing() {
       </View>
       <View style={styles.pricingRow}>
         {offerings?.availablePackages.map((pkg) => {
-          const isAnnual = pkg.identifier.includes('annual');
+          const isAnnual = pkg.identifier.includes("annual");
           const isSelected = selected?.identifier === pkg.identifier;
           const price = pkg.product.priceString;
-          const trial = pkg.product.introPrice ? `${pkg.product.introPrice.periodNumberOfUnits} days free` : '7-day free trial';
+          const trial = pkg.product.introPrice
+            ? `${pkg.product.introPrice.periodNumberOfUnits} days free`
+            : "7-day free trial";
           return (
             <TouchableOpacity
               key={pkg.identifier}
@@ -122,7 +137,7 @@ export default function PaywallPricing() {
               {isAnnual && <Text style={styles.savings}>Save 44%!</Text>}
               <Text style={styles.price}>{price}</Text>
               <Text style={styles.trial}>{trial}</Text>
-              <Text style={styles.period}>{isAnnual ? 'per year' : 'per month'}</Text>
+              <Text style={styles.period}>{isAnnual ? "per year" : "per month"}</Text>
             </TouchableOpacity>
           );
         })}
@@ -131,27 +146,37 @@ export default function PaywallPricing() {
       <TouchableOpacity
         style={[styles.button, purchasing && styles.buttonDisabled]}
         onPress={handlePurchase}
-        disabled={purchasing || !selected}
+        disabled={purchasing || (!selected && !__DEV__)}
       >
-        <Text style={styles.buttonText}>{purchasing ? 'Processing…' : 'Start Free Trial'}</Text>
+        <Text style={styles.buttonText}>
+          {purchasing ? "Processing…" : __DEV__ ? "Continue (Dev Mode)" : "Start Free Trial"}
+        </Text>
       </TouchableOpacity>
+
+      {__DEV__ && <Text style={styles.error}>Development mode: RevenueCat disabled</Text>}
       <Text style={styles.testimonial}>{testimonial}</Text>
       <Text style={styles.testimonialAuthor}>{testimonialAuthor}</Text>
       <View style={styles.linksRow}>
-        <Text style={styles.link} onPress={() => Linking.openURL(termsUrl)}>Terms of Use</Text>
-        <Text style={styles.link} onPress={() => Linking.openURL(privacyUrl)}>Privacy Policy</Text>
-        <Text style={styles.link} onPress={handleRestore}>Restore Purchases</Text>
+        <Text style={styles.link} onPress={() => Linking.openURL(termsUrl)}>
+          Terms of Use
+        </Text>
+        <Text style={styles.link} onPress={() => Linking.openURL(privacyUrl)}>
+          Privacy Policy
+        </Text>
+        <Text style={styles.link} onPress={handleRestore}>
+          Restore Purchases
+        </Text>
       </View>
     </View>
   );
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 24,
     paddingTop: 32,
   },
@@ -164,22 +189,22 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: COLORS.dark,
-    fontFamily: 'Vollkorn-Bold',
+    fontFamily: "Vollkorn-Bold",
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
   },
   subheading: {
     color: COLORS.mid,
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   bullets: {
     marginBottom: 18,
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     paddingLeft: 12,
   },
   bullet: {
@@ -188,10 +213,10 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   pricingRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginBottom: 18,
-    width: '100%',
+    width: "100%",
   },
   pricingBox: {
     backgroundColor: COLORS.white,
@@ -199,7 +224,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 18,
     marginHorizontal: 8,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 2,
     borderColor: COLORS.accent,
     minWidth: 120,
@@ -213,14 +238,14 @@ const styles = StyleSheet.create({
   },
   savings: {
     color: COLORS.green,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 14,
     marginBottom: 2,
   },
   price: {
     color: COLORS.dark,
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   trial: {
     color: COLORS.mid,
@@ -236,10 +261,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 32,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
     marginBottom: 18,
-    width: '100%',
+    width: "100%",
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -247,43 +272,43 @@ const styles = StyleSheet.create({
   buttonText: {
     color: COLORS.white,
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   testimonial: {
     color: COLORS.mid,
     fontSize: 15,
-    fontStyle: 'italic',
-    textAlign: 'center',
+    fontStyle: "italic",
+    textAlign: "center",
     marginBottom: 2,
   },
   testimonialAuthor: {
     color: COLORS.green,
     fontSize: 15,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 12,
   },
   linksRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 12,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   link: {
     color: COLORS.green,
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginHorizontal: 8,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   loadingText: {
     color: COLORS.mid,
     fontSize: 16,
     marginTop: 12,
   },
-}); 
+});
