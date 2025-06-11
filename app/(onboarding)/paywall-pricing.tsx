@@ -19,6 +19,12 @@ const COLORS = {
   orange: "#E2C89A",
 };
 
+// Add debugging and better error handling
+const REVENUECAT_API_KEY = "appl_BYmaCExMCUEVMmUPdbhHAqZMqSx";
+
+// Add a toggle for testing RevenueCat in development
+const FORCE_PRODUCTION_MODE = true; // Set to true to test RevenueCat in development
+
 export default function PaywallPricing() {
   const router = useRouter();
   const { user } = useAuth();
@@ -32,53 +38,90 @@ export default function PaywallPricing() {
     async function setupRevenueCat() {
       setLoading(true);
       setError(null);
+      console.log("🔄 Setting up RevenueCat...");
+
       try {
-        // Skip RevenueCat in development mode
-        if (__DEV__) {
+        // Skip RevenueCat in development mode unless forced
+        if (__DEV__ && !FORCE_PRODUCTION_MODE) {
+          console.log("⚠️ Development mode - RevenueCat disabled");
           setError("Development mode - subscription disabled");
           setLoading(false);
           return;
         }
 
-        await Purchases.configure({ apiKey: "appl_BYmaCExMCUEVMmUPdbhHAqZMqSx" });
+        console.log("🔑 Configuring RevenueCat with API key...");
+        await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+
         if (user?.id) {
+          console.log("👤 Logging in user:", user.id);
           await Purchases.logIn(user.id);
         }
+
+        console.log("📦 Fetching offerings...");
         const { current } = await Purchases.getOfferings();
+
         if (current && current.availablePackages.length > 0) {
+          console.log("✅ Offerings loaded:", current.availablePackages.length, "packages");
+          current.availablePackages.forEach((pkg) => {
+            console.log(`  - ${pkg.identifier}: ${pkg.product.priceString}`);
+          });
           setOfferings(current);
-          setSelected(current.availablePackages[0]);
+          // Select annual package by default if available
+          const annualPackage = current.availablePackages.find((pkg) => pkg.identifier.includes("annual"));
+          setSelected(annualPackage || current.availablePackages[0]);
         } else {
-          setError("No subscription options available.");
+          console.log("❌ No offerings available - this is expected in testing");
+          console.log("💡 To fix: Configure StoreKit in Xcode scheme or set up RevenueCat dashboard");
+          setError(
+            "Configuration needed: StoreKit testing not enabled or RevenueCat dashboard not configured. See console for details."
+          );
         }
       } catch (e: any) {
-        setError(e.message || "Failed to load subscription options.");
+        console.error("❌ RevenueCat setup error:", e);
+        console.log("🔧 Possible solutions:");
+        console.log("  1. Enable StoreKit Configuration in Xcode scheme");
+        console.log("  2. Configure products in RevenueCat dashboard");
+        console.log("  3. Set FORCE_PRODUCTION_MODE = false for bypass mode");
+        setError("RevenueCat configuration error. Check console for solutions.");
       }
       setLoading(false);
     }
+
     setupRevenueCat();
   }, [user]);
 
   const handlePurchase = async () => {
-    // Skip purchase in development mode
-    if (__DEV__) {
+    // Skip purchase in development mode unless forced
+    if (__DEV__ && !FORCE_PRODUCTION_MODE) {
+      console.log("🚀 Development mode - bypassing to main app");
       router.replace("/(tabs)/camp");
       return;
     }
 
-    if (!selected) return;
+    if (!selected) {
+      setError("Please select a subscription plan.");
+      return;
+    }
+
     setPurchasing(true);
     setError(null);
+    console.log("💳 Starting purchase for package:", selected.identifier);
+
     try {
       const { customerInfo } = await Purchases.purchasePackage(selected);
+      console.log("✅ Purchase completed, checking entitlements...");
+
       if (customerInfo.activeSubscriptions.length > 0) {
+        console.log("🎉 Active subscription found, navigating to app");
         // Unlock app, navigate to main app
         router.replace("/(tabs)/camp");
       } else {
-        setError("Subscription not activated.");
+        console.log("❌ No active subscription after purchase");
+        setError("Subscription not activated. Please try again or contact support.");
       }
     } catch (e: any) {
-      setError(e.message || "Purchase failed.");
+      console.error("❌ Purchase error:", e);
+      setError(e.message || "Purchase failed. Please try again.");
     }
     setPurchasing(false);
   };
@@ -86,15 +129,22 @@ export default function PaywallPricing() {
   const handleRestore = async () => {
     setPurchasing(true);
     setError(null);
+    console.log("🔄 Restoring purchases...");
+
     try {
       const info: CustomerInfo = await Purchases.restorePurchases();
+      console.log("📱 Restore completed, checking active subscriptions...");
+
       if (info.activeSubscriptions.length > 0) {
+        console.log("✅ Active subscription found during restore");
         router.replace("/(tabs)/camp");
       } else {
-        setError("No active subscription found.");
+        console.log("❌ No active subscriptions found");
+        setError("No active subscription found. Please purchase a subscription or contact support.");
       }
     } catch (e: any) {
-      setError(e.message || "Restore failed.");
+      console.error("❌ Restore error:", e);
+      setError(e.message || "Restore failed. Please try again.");
     }
     setPurchasing(false);
   };
@@ -142,18 +192,35 @@ export default function PaywallPricing() {
           );
         })}
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.error}>{error}</Text>
+          {!offerings && (
+            <TouchableOpacity
+              style={[styles.button, styles.bypassButton]}
+              onPress={() => router.replace("/(tabs)/camp")}
+            >
+              <Text style={styles.buttonText}>Continue Anyway (Testing)</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
       <TouchableOpacity
         style={[styles.button, purchasing && styles.buttonDisabled]}
         onPress={handlePurchase}
-        disabled={purchasing || (!selected && !__DEV__)}
+        disabled={purchasing || (!selected && !(__DEV__ && !FORCE_PRODUCTION_MODE))}
       >
         <Text style={styles.buttonText}>
-          {purchasing ? "Processing…" : __DEV__ ? "Continue (Dev Mode)" : "Start Free Trial"}
+          {purchasing ? "Processing…" : __DEV__ && !FORCE_PRODUCTION_MODE ? "Continue (Dev Mode)" : "Start Free Trial"}
         </Text>
       </TouchableOpacity>
 
-      {__DEV__ && <Text style={styles.error}>Development mode: RevenueCat disabled</Text>}
+      {__DEV__ && !FORCE_PRODUCTION_MODE && (
+        <Text style={styles.error}>
+          Development mode: RevenueCat disabled
+          {"\n"}Set FORCE_PRODUCTION_MODE = true to test RevenueCat
+        </Text>
+      )}
       <Text style={styles.testimonial}>{testimonial}</Text>
       <Text style={styles.testimonialAuthor}>{testimonialAuthor}</Text>
       <View style={styles.linksRow}>
@@ -309,6 +376,14 @@ const styles = StyleSheet.create({
   loadingText: {
     color: COLORS.mid,
     fontSize: 16,
+    marginTop: 12,
+  },
+  errorContainer: {
+    marginBottom: 16,
+    alignItems: "center",
+  },
+  bypassButton: {
+    backgroundColor: COLORS.mid,
     marginTop: 12,
   },
 });
