@@ -1,131 +1,186 @@
-import { Feather, FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { useEffect, useState } from "react";
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+const heading = "When do you find yourself mindlessly scrolling?";
 const OPTIONS = [
-  { key: 'social', label: 'Social Media', icon: <Feather name="smartphone" size={36} color="#4B3415" /> },
-  { key: 'porn', label: 'Porn', icon: <MaterialCommunityIcons name="block-helper" size={36} color="#4B3415" /> },
-  { key: 'youtube', label: 'YouTube', icon: <Feather name="tv" size={36} color="#4B3415" /> },
-  { key: 'news', label: 'News/Reddit', icon: <MaterialCommunityIcons name="newspaper" size={36} color="#4B3415" /> },
-  { key: 'gaming', label: 'Gaming', icon: <FontAwesome5 name="gamepad" size={36} color="#4B3415" /> },
-  { key: 'all', label: 'All of the Above', icon: <Feather name="layers" size={36} color="#4B3415" /> },
+  {
+    key: "morning",
+    label: "MORNING",
+    desc: "Starting the day distracted",
+    image: require("../../assets/images/onboarding/morning.png"),
+  },
+  {
+    key: "work",
+    label: "WORK BREAKS",
+    desc: "Procrastinating productivity",
+    image: require("../../assets/images/onboarding/work.png"),
+  },
+  {
+    key: "evening",
+    label: "EVENING",
+    desc: "Unwinding becomes scrolling",
+    image: require("../../assets/images/onboarding/evening.png"),
+  },
+  {
+    key: "latenight",
+    label: "LATE NIGHT",
+    desc: "Can't stop, won't stop",
+    image: require("../../assets/images/onboarding/latenight.png"),
+  },
 ];
 
 export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
-    if (selected.length > 0 && enableSwipe) enableSwipe();
-  }, [selected]);
+    if (selected === null && disableSwipeFn) disableSwipeFn();
+    if (selected !== null && enableSwipe) enableSwipe();
+  }, [disableSwipeFn, enableSwipe, selected]);
 
   const toggleOption = (key: string) => {
-    setSelected(prev =>
-      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-    );
+    setSelected((prev) => (prev === key ? null : key));
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>What's stealing your time?</Text>
-      <View style={styles.progressRow}>
-        <Text style={styles.progressDot}>● ● ● ● ● ● ○ ○ ○</Text>
-        <Text style={styles.progressNum}>6 7</Text>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.heading}>{heading}</Text>
+          <View style={styles.optionsContainer}>
+            {OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.key}
+                style={[styles.option, selected === option.key && styles.optionSelected]}
+                onPress={() => toggleOption(option.key)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.iconWrap}>
+                  <Image source={option.image} style={styles.iconImage} />
+                </View>
+                <View style={styles.labelDescWrap}>
+                  <Text style={styles.optionLabel}>{option.label}</Text>
+                  <Text style={styles.optionDesc}>{option.desc}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[styles.nextBtn, !selected && styles.nextBtnDisabled]}
+          onPress={() => {
+            if (onSubmit) onSubmit();
+          }}
+          disabled={!selected}
+        >
+          <Text style={styles.nextBtnText}>Next</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.grid}>
-        {OPTIONS.map(option => (
-          <TouchableOpacity
-            key={option.key}
-            style={[styles.option, selected.includes(option.key) && styles.optionSelected]}
-            onPress={() => toggleOption(option.key)}
-            activeOpacity={0.8}
-          >
-            {option.icon}
-            <Text style={styles.optionLabel}>{option.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <TouchableOpacity
-        style={[styles.nextBtn, selected.length === 0 && { opacity: 0.5 }]}
-        onPress={() => { if (onSubmit) onSubmit(); }}
-        disabled={selected.length === 0}
-      >
-        <Text style={styles.nextBtnText}>Submit</Text>
-      </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
+    justifyContent: "space-between",
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
     paddingHorizontal: 24,
     paddingTop: 48,
   },
   heading: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C1A05',
-    textAlign: 'center',
-    marginBottom: 16,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: "900",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
+    marginTop: SPACING.xl,
   },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  progressDot: {
-    color: '#4B3415',
-    fontSize: 18,
-    marginRight: 8,
-  },
-  progressNum: {
-    color: '#4B3415',
-    fontSize: 14,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: 32,
+  optionsContainer: {
+    width: "100%",
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   option: {
-    width: 120,
-    height: 120,
-    backgroundColor: '#F7F2E0',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    borderColor: COLORS.textPrimary,
+    borderWidth: 1,
     borderRadius: 16,
-    margin: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    marginVertical: SPACING.md,
+    justifyContent: "flex-start",
   },
   optionSelected: {
-    borderColor: '#A05A1A',
-    backgroundColor: '#E2C89A',
+    backgroundColor: "rgba(159, 106, 0, 0.99)",
+    borderColor: COLORS.textPrimary,
+    opacity: 1,
+  },
+  iconWrap: {
+    width: 48,
+    alignItems: "center",
+    marginRight: SPACING.md,
+  },
+  iconImage: {
+    width: 48,
+    height: 48,
+    resizeMode: "contain",
+  },
+  labelDescWrap: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
   },
   optionLabel: {
-    marginTop: 12,
-    color: '#4B3415',
-    fontWeight: 'bold',
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    color: COLORS.textPrimary,
+    fontSize: 20,
+    textAlign: "left",
+    fontWeight: "bold",
+    marginRight: 8,
+    marginBottom: 2,
+  },
+  optionDesc: {
+    flex: 1,
+    color: COLORS.textPrimary,
     fontSize: 15,
-    textAlign: 'center',
+    textAlign: "left",
+    fontFamily: "Vollkorn-Regular",
+    marginRight: SPACING.sm,
+    marginTop: SPACING.xs,
   },
   nextBtn: {
-    backgroundColor: '#4B3415',
-    borderRadius: 8,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 16,
-    width: '100%',
+    backgroundColor: "#3C6845",
+    borderRadius: 12,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    minWidth: 200,
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: SPACING.huge,
+  },
+  nextBtnDisabled: {
+    opacity: 0.5,
   },
   nextBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-    textAlign: 'center',
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    color: COLORS.buttonText,
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
   },
-}); 
+});

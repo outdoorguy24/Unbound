@@ -1,73 +1,86 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-
-const heading = "TECHNOLOGY HAS BENEFITS. BUT IT'S STEALING YOUR LIFE.";
-const body = "CHEAP DOPAMINE. CONSTANT DISTRACTION. YOU'RE NOT BROKEN—YOU'RE OVERSTIMULATED. YOU KNOW WHAT YOU SHOULD BE DOING... BUT YOU SCROLL INSTEAD. THEN COMES THE GUILT. AND MORE SCROLLING TO ESCAPE THE GUILT.";
+import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 export default function Screen2() {
-  const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding2'); */ }, []);
   return (
-    <View style={[styles.container, { flex: 1 }]}>
-      <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.body}>{body}</Text>
-    </View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.content}>
+        <View style={styles.illustrationContainer}>
+          <Image source={require("../../assets/images/onboarding/trap.png")} style={styles.illustration} />
+        </View>
+        <Text style={styles.heading}>Technology has benefits,{"\n"}but it&apos;s stealing your life.</Text>
+        <Text style={styles.subheading}>
+          You know what you should be doing...but the phone is always there with a quick hit.
+        </Text>
+        <Text style={styles.body}>
+          It creates a <Text style={styles.underline}>cycle</Text> of cheap dopamine, constant distractions, and a lack
+          of purpose and drive.
+        </Text>
+      </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
+    paddingTop: SPACING.xxl,
+  },
+  illustrationContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xl,
+  },
+  illustration: {
+    width: "100%",
+    aspectRatio: 1.8,
+    height: undefined,
+    resizeMode: "contain",
+    marginBottom: SPACING.xl,
+    marginTop: SPACING.xxl,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: 900,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.md,
   },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 18,
+  subheading: {
+    fontFamily: TYPOGRAPHY.subheading.fontFamily,
+    fontSize: 20,
+    lineHeight: 28,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
   },
   body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
+    fontFamily: TYPOGRAPHY.body.fontFamily,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+    lineHeight: 30,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
   },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+  underline: {
+    textDecorationLine: "underline",
   },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
-  },
-}); 
+});

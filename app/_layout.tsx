@@ -17,6 +17,14 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    "Vollkorn-Bold": require("../assets/fonts/Vollkorn-Bold.ttf"),
+    "Vollkorn-BoldItalic": require("../assets/fonts/Vollkorn-BoldItalic.ttf"),
+    "Vollkorn-Italic": require("../assets/fonts/Vollkorn-Italic.ttf"),
+    "Vollkorn-Medium": require("../assets/fonts/Vollkorn-Medium.ttf"),
+    "Vollkorn-MediumItalic": require("../assets/fonts/Vollkorn-MediumItalic.ttf"),
+    "Vollkorn-Regular": require("../assets/fonts/Vollkorn-Regular.ttf"),
+    "Vollkorn-SemiBold": require("../assets/fonts/Vollkorn-Semibold.ttf"),
+    "Vollkorn-SemiBoldItalic": require("../assets/fonts/Vollkorn-SemiboldItalic.ttf"),
   });
   const [showSplash, setShowSplash] = useState(!splashShown);
 

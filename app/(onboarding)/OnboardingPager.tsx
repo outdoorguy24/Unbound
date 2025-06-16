@@ -1,52 +1,52 @@
-import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
-import { Animated, Dimensions, StyleSheet, View } from 'react-native';
-import PagerView from 'react-native-pager-view';
-import Screen1 from './Screen1';
-import Screen10 from './Screen10';
-import Screen2 from './Screen2';
-import Screen3 from './Screen3';
-import Screen4 from './Screen4';
-import Screen5 from './Screen5';
-import Screen6 from './Screen6';
-import Screen7 from './Screen7';
-import Screen8 from './Screen8';
+import { useRef, useState } from "react";
+import { Animated, StyleSheet, View } from "react-native";
+import PagerView from "react-native-pager-view";
+import Screen1 from "./Screen1";
+import Screen10 from "./Screen10";
+import Screen11 from "./Screen11";
+import Screen12 from "./Screen12";
+import Screen2 from "./Screen2";
+import Screen3 from "./Screen3";
+import Screen4 from "./Screen4";
+import Screen5 from "./Screen5";
+import Screen6 from "./Screen6";
+import Screen7 from "./Screen7";
+import Screen8 from "./Screen8";
+import Screen9 from "./Screen9";
 
 const SCREEN_ORDER = [
-  Screen1, // 0
-  Screen2, // 1
-  Screen3, // 2
-  Screen4, // 3
-  Screen5, // 4
-  Screen6, // 5
-  Screen7, // 6
-  Screen10, // 7
-  Screen8, // 8
+  Screen1,
+  Screen2,
+  Screen3,
+  Screen4,
+  Screen5,
+  Screen6,
+  Screen7,
+  Screen8,
+  Screen9,
+  Screen10,
+  Screen11,
+  Screen12,
 ];
 
-const PROGRESS_SCREENS = 9; // 1-8,10 (0-indexed 0-8)
-const { width } = Dimensions.get('window');
+const PROGRESS_SCREENS = 9;
 
 export default function OnboardingPager() {
   const pagerRef = useRef<PagerView>(null);
   const [page, setPage] = useState(0);
   const [canSwipe, setCanSwipe] = useState(true);
-  const router = useRouter();
 
   // Handler to go to next page programmatically
   const goToNext = () => {
     if (page < SCREEN_ORDER.length - 1) {
       pagerRef.current?.setPage(page + 1);
-    } else {
-      // Last onboarding screen, go to paywall
-      router.replace('/(onboarding)/paywall-pricing');
     }
   };
 
   // Handler for screens that require submit
   const getScreenProps = (screenIdx: number) => {
-    // Screens 6, 7, 10 (indexes 5, 6, 7) require submit
-    if ([5, 6, 7].includes(screenIdx)) {
+    // Screens 6, 7, 8, 9 (indexes 5, 6, 7, 8) require submit
+    if ([5, 6, 7, 8].includes(screenIdx)) {
       return {
         onSubmit: () => {
           setCanSwipe(true);
@@ -72,22 +72,30 @@ export default function OnboardingPager() {
   const progress = (page + 1) / PROGRESS_SCREENS;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3E2C7' }}>
+    <View style={{ flex: 1, backgroundColor: "#F3E2C7" }}>
       <PagerView
         ref={pagerRef}
         style={{ flex: 1 }}
         initialPage={0}
-        scrollEnabled={![5, 6, 7].includes(page) || canSwipe}
-        onPageSelected={e => setPage(e.nativeEvent.position)}
+        scrollEnabled={![5, 6, 7, 8].includes(page) || canSwipe}
+        onPageSelected={(e) => {
+          const newPage = e.nativeEvent.position;
+          setPage(newPage);
+          // Reset canSwipe when navigating to screens 6-9
+          if ([5, 6, 7, 8].includes(newPage)) {
+            setCanSwipe(false);
+          }
+        }}
         overdrag={false}
       >
         {renderScreens()}
       </PagerView>
-      {/* Progress bar only on screens 0-8 (1-8,10) */}
+      {/* Progress bar only on screens 0-8 (1-9) */}
       {page <= 8 && (
         <View style={styles.progressBarContainer}>
-          <View style={styles.progressBarBg} />
-          <Animated.View style={[styles.progressBarFill, { width: width * progress }]} />
+          <View style={styles.progressBarBg}>
+            <Animated.View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
+          </View>
         </View>
       )}
     </View>
@@ -96,30 +104,31 @@ export default function OnboardingPager() {
 
 const styles = StyleSheet.create({
   progressBarContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 32,
     left: 0,
-    width: '100%',
-    height: 12,
-    backgroundColor: 'transparent',
+    width: "100%",
+    height: 16,
+    backgroundColor: "transparent",
     zIndex: 10,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: 15,
   },
   progressBarBg: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: '100%',
-    height: 8,
-    backgroundColor: '#E5C98B',
+    width: "90%",
+    height: 12,
+    backgroundColor: "#ECC880",
     borderRadius: 8,
+    overflow: "hidden",
+    alignSelf: "center",
   },
   progressBarFill: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
-    height: 8,
-    backgroundColor: '#4B3415',
+    height: 12,
+    backgroundColor: "#2B1B10",
     borderRadius: 8,
   },
 });

@@ -1,145 +1,149 @@
-import { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { useEffect, useState } from "react";
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const heading = "WHAT'S YOUR BIGGEST FEAR ABOUT THIS ADDICTION?";
-const subheading = "Understanding your 'why' makes all the difference.";
-const options = [
-  'MISSING MY PRIME YEARS',
-  'DESTROYING MY RELATIONSHIPS',
-  'LOSING MY MENTAL EDGE',
-  'BECOMING WEAK & SOFT',
-  'DYING WITH REGRETS',
+const heading = "First, know your trap. What's stealing your time and focus?";
+const OPTIONS = [
+  { key: "social", label: "Social Media", image: require("../../assets/images/onboarding/social.png") },
+  { key: "porn", label: "Porn", image: require("../../assets/images/onboarding/porn.png") },
+  { key: "youtube", label: "YouTube", image: require("../../assets/images/onboarding/youtube.png") },
+  { key: "news", label: "Reddit", image: require("../../assets/images/onboarding/reddit.png") },
+  { key: "gaming", label: "Gaming", image: require("../../assets/images/onboarding/gaming.png") },
+  { key: "all", label: "All of the Above", image: require("../../assets/images/onboarding/all.png") },
 ];
 
 export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
-    if (selected.length > 0 && enableSwipe) enableSwipe();
-  }, [selected]);
+    if (selected === null && disableSwipeFn) disableSwipeFn();
+    if (selected !== null && enableSwipe) enableSwipe();
+  }, [disableSwipeFn, enableSwipe, selected]);
 
-  const toggleOption = (option: string) => {
-    setSelected((prev) =>
-      prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]
-    );
+  const toggleOption = (key: string) => {
+    setSelected((prev) => (prev === key ? null : key));
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>{heading}</Text>
-      <Text style={styles.subheading}>{subheading}</Text>
-      {/* Placeholder for illustration - replace with SVG/PNG when available */}
-      <View style={styles.illustrationPlaceholder}>
-        {/* <Image source={require('path/to/your/image.png')} style={styles.illustration} /> */}
-        <Text style={styles.illustrationText}>[Illustration Here]</Text>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.heading}>{heading}</Text>
+          <View style={styles.grid}>
+            {OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.key}
+                style={[styles.option, selected === option.key && styles.optionSelected, SHADOWS.small]}
+                onPress={() => toggleOption(option.key)}
+                activeOpacity={0.8}
+              >
+                <Image source={option.image} style={styles.iconImage} />
+                <Text style={[styles.optionLabel, selected === option.key && styles.optionLabelSelected]}>
+                  {option.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, !selected && styles.buttonDisabled, SHADOWS.medium]}
+          onPress={() => {
+            if (onSubmit) onSubmit();
+          }}
+          disabled={!selected}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.optionsContainer}>
-        {options.map((option) => (
-          <TouchableOpacity
-            key={option}
-            style={[styles.option, selected.includes(option) && styles.optionSelected]}
-            onPress={() => toggleOption(option)}
-          >
-            <Text style={[styles.optionText, selected.includes(option) && styles.optionTextSelected]}>{option}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <TouchableOpacity
-        style={[styles.button, selected.length === 0 && { opacity: 0.5 }]}
-        onPress={() => { if (onSubmit) onSubmit(); }}
-        disabled={selected.length === 0}
-      >
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    justifyContent: "space-between",
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
+    paddingTop: SPACING.xxl,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: "900",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
+    marginTop: SPACING.xl,
   },
-  subheading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 8,
-    marginTop: 4,
-    letterSpacing: 1.1,
-    lineHeight: 22,
-  },
-  illustrationPlaceholder: {
-    width: width * 0.5,
-    height: width * 0.3,
-    backgroundColor: '#E5C98B',
-    borderRadius: 24,
-    marginVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  illustrationText: {
-    color: '#4B3415',
-    fontSize: 14,
-    fontStyle: 'italic',
-  },
-  optionsContainer: {
-    width: '100%',
-    marginTop: 12,
-    marginBottom: 16,
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
   },
   option: {
-    backgroundColor: '#F3E2C7',
-    borderColor: '#4B3415',
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    marginVertical: 8,
-    alignItems: 'center',
+    width: "44%",
+    aspectRatio: 1,
+    backgroundColor: "transparent",
+    borderRadius: 16,
+    margin: "3%",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: COLORS.textPrimary,
   },
   optionSelected: {
-    backgroundColor: '#4B3415',
+    backgroundColor: "rgba(159, 106, 0, 0.99)",
+    borderColor: COLORS.textPrimary,
+    opacity: 1,
   },
-  optionText: {
-    color: '#4B3415',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
+  iconImage: {
+    width: 56,
+    height: 56,
+    resizeMode: "contain",
+    marginBottom: SPACING.md,
   },
-  optionTextSelected: {
-    color: '#F3E2C7',
+  optionLabel: {
+    color: COLORS.textPrimary,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 17,
+    textAlign: "center",
+    fontWeight: "bold",
+    marginTop: SPACING.sm,
+  },
+  optionLabelSelected: {
+    color: COLORS.textPrimary,
   },
   button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    backgroundColor: "#3C6845",
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    minWidth: 200,
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: SPACING.huge,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    color: COLORS.buttonText,
+    fontSize: 24,
+    fontWeight: "bold",
   },
-}); 
+});

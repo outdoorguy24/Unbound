@@ -1,73 +1,84 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-
-const heading = "THIS APP IS AN ACT OF REBELLION.";
-const body = "YOU'RE NOT HERE ON EARTH TO BE A MINDLESS CONSUMER. YOU'RE HERE TO WAKE UP. TO MAKE THE MOST OF THESE FLEETING MOMENTS. TO CREATE MORE THAN YOU CONSUME.";
+import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 export default function Screen4() {
-  const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding4'); */ }, []);
   return (
-    <View style={[styles.container, { flex: 1 }]}>
-      <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.body}>{body}</Text>
-    </View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.content}>
+        <Text style={styles.heading}>
+          Which is why this app{"\n"}is an act of <Text style={styles.underline}>rebellion.</Text>
+        </Text>
+        <View style={styles.illustrationContainer}>
+          <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
+        </View>
+        <Text style={styles.body}>Society wants a bunch of{"\n"}screen-addicted consumers.</Text>
+        <Text style={styles.subBody}>
+          But you&apos;re here to:{"\n"}Create.{"\n"}Explore.{"\n"}Build.
+        </Text>
+      </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: "900",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xl,
   },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 18,
+  underline: {
+    textDecorationLine: "underline",
+    fontWeight: "900",
+  },
+  illustrationContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xl,
+  },
+  illustration: {
+    width: "100%",
+    aspectRatio: 1.2,
+    height: undefined,
+    resizeMode: "contain",
+    marginBottom: SPACING.md,
   },
   body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+    fontFamily: TYPOGRAPHY.body.fontFamily,
+    fontSize: 20,
+    lineHeight: 30,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.lg,
+    fontWeight: "bold",
   },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+  subBody: {
+    fontFamily: TYPOGRAPHY.body.fontFamily,
+    fontSize: 20,
+    lineHeight: 30,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    fontWeight: "bold",
   },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
-  },
-}); 
+});

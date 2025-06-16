@@ -1,81 +1,81 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import OnboardingIllustration from '../components/OnboardingIllustration';
-
-const heading = "YOU COME FROM WHO HUNTED ON OPEN PLAINS. WHO STARTED FIRES WITH STONE. WHO TOLD STORIES UNDER STARS.";
-const subheading = "NOW WE SCROLL. WE SWIPE. WE SIT.";
-const body = "THE WORLD HAS CHANGED BUT THE FIRE INSIDE YOU HASN'T.";
+import { SPACING } from "@/constants/theme";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 export default function Screen1() {
-  const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding1'); */ }, []);
   return (
-    <View style={[styles.container, { flex: 1 }]}>
-      <Text style={styles.heading}>{heading}</Text>
-      <OnboardingIllustration />
-      <Text style={styles.subheading}>{subheading}</Text>
-      <Text style={styles.body}>{body}</Text>
-    </View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.textGroup}>
+          <Text style={styles.textBlock}>YOU COME FROM MEN{"\n"}WHO HUNTED ON OPEN PLAINS.</Text>
+          <Text style={styles.textBlock}>WHO BUILT THINGS{"\n"}WITH THEIR HANDS.</Text>
+          <Text style={styles.textBlock}>
+            WHO TOLD STORIES{"\n"}NEXT TO THE FIRE UNDER{"\n"}A BLANKET OF STARS.
+          </Text>
+          <Text style={styles.textBlock}>NOW WE SCROLL.{"\n"}WE SWIPE. WE SIT.</Text>
+          <Text style={styles.textBlock}>THE WORLD HAS CHANGED.</Text>
+          <Text style={styles.textBlockEmphasis}>BUT THAT FIRE INSIDE{"\n"}YOU HASN&apos;T.</Text>
+        </View>
+        <View style={styles.illustrationContainer}>
+          <Image source={require("../../assets/images/onboarding/lineageheads.png")} style={styles.illustration} />
+        </View>
+      </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
+  background: { flex: 1 },
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 24,
+    paddingBottom: 32,
+    paddingTop: "12%",
   },
-  heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
+  textGroup: {
+    width: "90%",
+    maxWidth: 400,
+    alignItems: "center",
+    marginBottom: 16,
+    marginTop: 32,
+  },
+  textBlock: {
+    color: "#2B1B10",
+    fontFamily: "Vollkorn-SemiBold",
     fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    textAlign: "center",
+    textTransform: "uppercase",
     lineHeight: 32,
+    letterSpacing: 0.5,
+    fontWeight: "bold",
+    marginBottom: 12,
   },
-  subheading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 18,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
-  },
-  body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
+  textBlockEmphasis: {
+    color: "#2B1B10",
+    fontFamily: "Vollkorn-Bold",
+    fontSize: 22,
+    textAlign: "center",
+    textTransform: "uppercase",
+    lineHeight: 32,
+    letterSpacing: 0.5,
+    fontWeight: "900",
     marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
   },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+  illustrationContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xs,
   },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
+  illustration: {
+    width: "100%",
+    aspectRatio: 1.8,
+    height: undefined,
+    resizeMode: "contain",
   },
-}); 
+});

@@ -1,73 +1,71 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
-const heading = "IT'S TIME TO REMEMBER WHO YOU ARE.";
-const body = "PICK UP THE PAINTBRUSH AND GRAB THE HAMMER. LACE UP YOUR SHOES OR BOXING GLOVES. GET A SPLINTER. WALK BAREFOOT IN THE GRASS. BECOME THE MAN YOU WERE MEANT TO BE. MAKE YOUR GRANDFATHER PROUD.";
+const heading = "So let's make your ancestors proud.";
+const body =
+  "You're not broken, just overstimulated. With Unbound, you'll finally pick up that book or grab the hammer. Lace up your shoes. Laugh deep. Start a business. Hike a mountain. Call a friend. You'll make progress towards a better life.";
 
 export default function Screen5() {
-  const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding5'); */ }, []);
   return (
-    <View style={[styles.container, { flex: 1 }]}>
-      <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.body}>{body}</Text>
-    </View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.content}>
+        <Text style={styles.heading}>{heading}</Text>
+        <View style={styles.illustrationContainer}>
+          <Image source={require("../../assets/images/onboarding/hiker.png")} style={styles.illustration} />
+        </View>
+        <Text style={styles.body}>{body}</Text>
+      </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: "900",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xl,
   },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 18,
+  illustrationContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  illustration: {
+    width: "100%",
+    aspectRatio: 1.2,
+    height: undefined,
+    resizeMode: "contain",
+    marginBottom: SPACING.md,
   },
   body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+    fontFamily: TYPOGRAPHY.body.fontFamily,
+    fontSize: 20,
+    lineHeight: 30,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
+    fontWeight: "bold",
   },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
-  },
-}); 
+});

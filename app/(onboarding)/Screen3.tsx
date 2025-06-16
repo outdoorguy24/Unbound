@@ -1,73 +1,75 @@
-import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-
-const heading = "EVERY MINUTE ON PORN OR SOCIAL MEDIA... IS A MINUTE YOU'LL NEVER GET BACK.";
-const body = "YOU'RE GIVING AWAY YOUR LIFE — ONE SWIPE AT A TIME — TO BILLIONAIRE TECH OVERLORDS WHO DON'T CARE ABOUT YOU. THIS IS A WAR FOR YOUR ATTENTION.";
+import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 export default function Screen3() {
-  const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding3'); */ }, []);
   return (
-    <View style={[styles.container, { flex: 1 }]}>
-      <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.body}>{body}</Text>
-    </View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.content}>
+        <View style={styles.illustrationContainer}>
+          <Image source={require("../../assets/images/onboarding/slotmachine.png")} style={styles.illustration} />
+        </View>
+        <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
+        <Text style={styles.body}>
+          You&apos;re giving away your life one swipe at a time to billionaire tech overlords who don&apos;t care about
+          your goals. We are the pawns in their battle to see who can extract our attention in the most addictive way
+          for <Text style={styles.underline}>profit</Text>.
+        </Text>
+      </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
+    paddingTop: SPACING.xxl,
+  },
+  illustrationContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xl,
+  },
+  illustration: {
+    width: "100%",
+    aspectRatio: 1.2,
+    height: undefined,
+    resizeMode: "contain",
+    marginBottom: SPACING.sm,
+    marginTop: SPACING.xl,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
-  },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 18,
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: "900",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
   },
   body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
+    fontFamily: TYPOGRAPHY.body.fontFamily,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+    lineHeight: 30,
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
+    fontWeight: "bold",
   },
-  button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+  underline: {
+    textDecorationLine: "underline",
   },
-  buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
-  },
-}); 
+});

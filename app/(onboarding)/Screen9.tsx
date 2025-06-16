@@ -1,177 +1,210 @@
-import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { useAuth } from '@/contexts/AuthContext';
-import { findOrCreatePartner } from '@/lib/partnerMatching';
-import { getUserProfile } from '@/lib/supabaseUserProfile';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS, SHADOWS, SPACING } from "@/constants/theme";
+import React, { useEffect, useState } from "react";
+import { Dimensions, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function Screen9() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const [searching, setSearching] = useState(true);
-  const [partnerProfile, setPartnerProfile] = useState<any>(null);
-  const [dotIndex, setDotIndex] = useState(0);
-  const [matched, setMatched] = useState(false);
-  const [timeoutReached, setTimeoutReached] = useState(false);
+const steps = [
+  {
+    key: 1,
+    icon: require("../../assets/images/onboarding/shield.png"),
+    title: "1. Choose what to block",
+    desc: "Social media, Porn, ESPN, etc",
+  },
+  {
+    key: 2,
+    icon: require("../../assets/images/onboarding/compass.png"),
+    title: "2. Set your schedule",
+    desc: "9-5, 5-9, or 23 hours/day. Your choice.",
+  },
+  {
+    key: 3,
+    icon: require("../../assets/images/onboarding/check.png"),
+    title: "3. Start the block",
+    desc: "Zero access. Zero excuses. ZERO way out.",
+  },
+  {
+    key: 4,
+    icon: require("../../assets/images/onboarding/mountains.png"),
+    title: "4. Live your damn life",
+    desc: "You only get one after all",
+  },
+];
+
+export default function Screen9({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
+  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    let dotTimer: ReturnType<typeof setInterval>;
-    let searchTimer: ReturnType<typeof setTimeout>;
-    let redirectTimer: ReturnType<typeof setTimeout>;
-    dotTimer = setInterval(() => setDotIndex((i) => (i + 1) % 3), 400);
-    // Simulate 2-3 second search
-    searchTimer = setTimeout(async () => {
-      if (!user?.id) return;
-      const res = await findOrCreatePartner(user.id);
-      setMatched(res.matched);
-      if (res.matched && res.partnerId) {
-        const profile = await getUserProfile(res.partnerId);
-        setPartnerProfile(profile);
-      }
-      setSearching(false);
-      clearInterval(dotTimer);
-    }, 2000 + Math.random() * 1000);
-    // Start a 10 second timer to auto-redirect if no partner is found
-    redirectTimer = setTimeout(() => {
-      setTimeoutReached(true);
-      setTimeout(() => {
-        router.replace('/(tabs)/camp');
-      }, 2000); // Show message for 2 seconds before redirect
-    }, 10000);
-    return () => {
-      clearTimeout(searchTimer);
-      clearInterval(dotTimer);
-      clearTimeout(redirectTimer);
-    };
-  }, [user]);
-
-  // Progress dots
-  const dots = [0, 1, 2].map((i) => (
-    <View
-      key={i}
-      style={{
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        margin: 4,
-        backgroundColor: dotIndex === i ? '#4B3415' : '#D6C08A',
-      }}
-    />
-  ));
+    if (selected === null && disableSwipeFn) disableSwipeFn();
+    if (selected !== null && enableSwipe) enableSwipe();
+  }, [disableSwipeFn, enableSwipe, selected]);
 
   return (
-    <ScreenContainer>
-      <ScreenHeader title="" />
-      <View style={styles.centered}>
-        <Text style={styles.bigTitle}>FINDING YOUR BATTLE PARTNER</Text>
-        <Text style={styles.subtitle}>Every warrior needs someone watching their back.</Text>
-        {/* Placeholder illustration */}
-        <View style={styles.illustration}><Text>[icon]</Text></View>
-        {timeoutReached ? (
-          <>
-            <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
-          </>
-        ) : searching ? (
-          <>
-            <Text style={styles.searching}>Searching for your accountability partner{'.'.repeat((dotIndex % 3) + 1)}</Text>
-          </>
-        ) : matched && partnerProfile ? (
-          <>
-            <Text style={styles.success}>You've been paired with <Text style={styles.partnerName}>{partnerProfile.first_name} from {partnerProfile.city}</Text>!</Text>
-            <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace('/defend')}>
-              <Text style={styles.continueText}>Continue</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <Text style={styles.noMatch}>You're first in line - your partner will join soon!</Text>
-            <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace('/defend')}>
-              <Text style={styles.continueText}>Continue</Text>
-            </TouchableOpacity>
-          </>
-        )}
-        <View style={styles.dotsRow}>{dots}</View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.topRightImageWrap}>
+          <Image source={require("../../assets/images/onboarding/climber.png")} style={styles.topRightImage} />
+        </View>
+        <View style={styles.content}>
+          <Text style={styles.heading}>Here&apos;s how {"\n"} Unbound works:</Text>
+          <View style={styles.stepsContainer}>
+            {steps.map((step) => (
+              <TouchableOpacity
+                key={step.key}
+                style={[styles.stepBox, selected === String(step.key) && styles.stepBoxSelected]}
+                onPress={() => setSelected(selected === String(step.key) ? null : String(step.key))}
+                activeOpacity={0.8}
+              >
+                <Image source={step.icon} style={styles.stepIcon} />
+                <View style={styles.stepTextWrap}>
+                  <Text style={styles.stepTitle}>{step.title}</Text>
+                  <Text style={styles.stepDesc}>{step.desc}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, SHADOWS.medium, !selected && styles.buttonDisabled]}
+          onPress={() => {
+            if (onSubmit) onSubmit();
+          }}
+          disabled={!selected}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
       </View>
-    </ScreenContainer>
+    </ImageBackground>
   );
 }
 
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
-  centered: {
+  container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: "space-between",
+    position: "relative",
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
-    paddingTop: 24,
   },
-  bigTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2C1A05',
-    textAlign: 'center',
-    marginBottom: 8,
+  heading: {
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 18,
+    marginTop: 24,
+    textTransform: "uppercase",
     letterSpacing: 1.2,
+    lineHeight: 32,
+    width: "100%",
   },
-  subtitle: {
+  placeholder: {
+    width: width * 0.7,
+    height: width * 0.35,
+    backgroundColor: "#4B3415",
+    borderRadius: 24,
+    marginVertical: 18,
+  },
+  body: {
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
     fontSize: 18,
-    color: '#2C1A05',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 8,
     marginBottom: 24,
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+    lineHeight: 28,
   },
-  illustration: {
-    width: 180,
-    height: 120,
-    backgroundColor: '#F7F2E0',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 32,
+  button: {
+    backgroundColor: "#3C6845",
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    minWidth: 200,
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: SPACING.huge,
   },
-  searching: {
-    fontSize: 20,
-    color: '#4B3415',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  success: {
-    fontSize: 20,
-    color: '#2C1A05',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  partnerName: {
-    color: '#A05A1A',
-    fontWeight: 'bold',
-  },
-  noMatch: {
-    fontSize: 20,
-    color: '#2C1A05',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  continueBtn: {
-    backgroundColor: '#4B3415',
-    borderRadius: 8,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 16,
-    width: '100%',
-  },
-  continueText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  buttonText: {
+    color: "#F3E2C7",
     fontSize: 18,
-    textAlign: 'center',
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
   },
-  dotsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 32,
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: SPACING.lg,
   },
-}); 
+  topRightImageWrap: {
+    position: "absolute",
+    top: SPACING.xl,
+    right: 0,
+    zIndex: 2,
+    paddingTop: 24,
+    paddingRight: SPACING.xs,
+  },
+  topRightImage: {
+    width: 150,
+    height: 150,
+    resizeMode: "contain",
+  },
+  stepsContainer: {
+    width: "100%",
+  },
+  stepBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: COLORS.textPrimary,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    backgroundColor: "transparent",
+  },
+  stepIcon: {
+    width: 54,
+    height: 54,
+    resizeMode: "contain",
+    marginRight: SPACING.md,
+  },
+  stepTextWrap: {
+    flex: 1,
+  },
+  stepTitle: {
+    fontFamily: "Arial",
+    fontSize: 20,
+    color: COLORS.textPrimary,
+    fontWeight: "bold",
+    marginBottom: SPACING.xs,
+  },
+  stepDesc: {
+    fontFamily: "Vollkorn-Regular",
+    fontSize: 12,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.xs,
+  },
+  stepBoxSelected: {
+    backgroundColor: "rgba(159, 106, 0, 0.99)",
+    borderColor: COLORS.textPrimary,
+    opacity: 1,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+});

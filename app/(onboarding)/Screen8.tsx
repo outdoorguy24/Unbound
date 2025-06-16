@@ -1,76 +1,136 @@
-import { useRouter } from 'expo-router';
-import React, { useEffect } from 'react';
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { useEffect, useState } from "react";
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const heading = "HERE'S HOW WE'LL HELP YOU RECLAIM YOUR TIME";
-const body = `SET YOUR SCHEDULE\nCHOOSE WHEN TO DEFEND YOUR ATTENTION.\n\nWE BLOCK THE DISTRACTIONS\nZERO ACCESS. ZERO EXCUSES. ZERO WAY OUT.\n\nYOU LIVE YOUR LIFE`;
+const heading = "What's your biggest fear?";
+const options = [
+  "Missing my prime years",
+  "Destroying my relationships",
+  "Losing touch with friends",
+  "Becoming weak & soft",
+  "Dying with regrets",
+];
 
-export default function Screen8() {
-  const router = useRouter();
-  useEffect(() => { /* logScreenView('Onboarding8'); */ }, []);
+export default function Screen8({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
+  const [selected, setSelected] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selected === null && disableSwipeFn) disableSwipeFn();
+    if (selected !== null && enableSwipe) enableSwipe();
+  }, [disableSwipeFn, enableSwipe, selected]);
+
+  const toggleOption = (option: string) => {
+    setSelected((prev) => (prev === option ? null : option));
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>{heading}</Text>
-      <View style={styles.placeholder} />
-      <Text style={styles.body}>{body}</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/(onboarding)/paywall-description')}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.heading}>{heading}</Text>
+          <View style={styles.optionsContainer}>
+            {options.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[styles.option, selected === option && styles.optionSelected, SHADOWS.small]}
+                onPress={() => toggleOption(option)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.optionText, selected === option && styles.optionTextSelected]}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, !selected && styles.buttonDisabled, SHADOWS.medium]}
+          onPress={() => {
+            if (onSubmit) onSubmit();
+          }}
+          disabled={!selected}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    justifyContent: "space-between",
+  },
+  background: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
   },
   heading: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    fontSize: 32,
+    lineHeight: 40,
+    fontWeight: "900",
+    color: COLORS.textPrimary,
+    textAlign: "center",
+    marginBottom: SPACING.md,
+    marginTop: SPACING.xl,
+  },
+  optionsContainer: {
+    width: "100%",
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  option: {
+    backgroundColor: "transparent",
+    borderColor: COLORS.textPrimary,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    marginVertical: SPACING.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  optionSelected: {
+    backgroundColor: "rgba(159, 106, 0, 0.99)",
+    borderColor: COLORS.textPrimary,
+    opacity: 1,
+  },
+  optionText: {
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    color: COLORS.textPrimary,
     fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.2,
-    lineHeight: 32,
+    textAlign: "center",
+    fontWeight: "bold",
   },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: '#4B3415',
-    borderRadius: 24,
-    marginVertical: 18,
-  },
-  body: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: 'uppercase',
-    letterSpacing: 1.1,
-    lineHeight: 28,
+  optionTextSelected: {
+    color: COLORS.textPrimary,
   },
   button: {
-    backgroundColor: '#5C3D18',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginTop: 16,
+    backgroundColor: "#3C6845",
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    minWidth: 200,
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: SPACING.huge,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonText: {
-    color: '#F3E2C7',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    color: COLORS.buttonText,
+    fontSize: 24,
+    fontWeight: "bold",
   },
-}); 
+});
