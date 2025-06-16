@@ -1,12 +1,22 @@
+import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Dimensions, Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ImageBackground,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Purchases, { CustomerInfo, PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 
 const termsUrl = "https://yourdomain.com/terms";
 const privacyUrl = "https://yourdomain.com/privacy";
-const testimonial = '"Unbound helped me reclaim 12 hours a week — now I hike, train, and read again."';
+const testimonial = `"Unbound helped\nme reclaim 12\nhours a week-\nnow I hike, train,\nand read again."`;
 const testimonialAuthor = "James M., Texas";
 
 const COLORS = {
@@ -17,6 +27,7 @@ const COLORS = {
   green: "#265C28",
   white: "#F3E2C7",
   orange: "#E2C89A",
+  gold: "#F1D593",
 };
 
 // Add debugging and better error handling
@@ -78,10 +89,6 @@ export default function PaywallPricing() {
         }
       } catch (e: any) {
         console.error("❌ RevenueCat setup error:", e);
-        console.log("🔧 Possible solutions:");
-        console.log("  1. Enable StoreKit Configuration in Xcode scheme");
-        console.log("  2. Configure products in RevenueCat dashboard");
-        console.log("  3. Set FORCE_PRODUCTION_MODE = false for bypass mode");
         setError("RevenueCat configuration error. Check console for solutions.");
       }
       setLoading(false);
@@ -91,10 +98,9 @@ export default function PaywallPricing() {
   }, [user]);
 
   const handlePurchase = async () => {
-    // Skip purchase in development mode unless forced
     if (__DEV__ && !FORCE_PRODUCTION_MODE) {
-      console.log("🚀 Development mode - bypassing to main app");
-      router.replace("/(tabs)/camp");
+      // Go to auth screen in dev mode
+      router.replace("/signup");
       return;
     }
 
@@ -151,232 +157,355 @@ export default function PaywallPricing() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: "center" }]}>
+      <View style={[styles.bg, { flex: 1, justifyContent: "center", alignItems: "center" }]}>
         <ActivityIndicator size="large" color={COLORS.accent} />
         <Text style={styles.loadingText}>Loading subscription options…</Text>
       </View>
     );
   }
 
-  return (
-    <View style={styles.container}>
-      {/* Placeholder for illustration */}
-      <View style={styles.illustration} />
-      <Text style={styles.heading}>Take Back Your Life.</Text>
-      <Text style={styles.subheading}>Stop choosing the screen over everything that matters.</Text>
-      <View style={styles.bullets}>
-        <Text style={styles.bullet}>• Block distractions before they block you</Text>
-        <Text style={styles.bullet}>• Build unstoppable focus and discipline</Text>
-        <Text style={styles.bullet}>• Reclaim your time, your clarity, your mission</Text>
-        <Text style={styles.bullet}>• Stay connected to purpose, not pings</Text>
-      </View>
-      <View style={styles.pricingRow}>
-        {offerings?.availablePackages.map((pkg) => {
-          const isAnnual = pkg.identifier.includes("annual");
-          const isSelected = selected?.identifier === pkg.identifier;
-          const price = pkg.product.priceString;
-          const trial = pkg.product.introPrice
-            ? `${pkg.product.introPrice.periodNumberOfUnits} days free`
-            : "7-day free trial";
-          return (
-            <TouchableOpacity
-              key={pkg.identifier}
-              style={[styles.pricingBox, isSelected && styles.selectedBox, isAnnual && styles.annualBox]}
-              onPress={() => setSelected(pkg)}
-            >
-              {isAnnual && <Text style={styles.savings}>Save 44%!</Text>}
-              <Text style={styles.price}>{price}</Text>
-              <Text style={styles.trial}>{trial}</Text>
-              <Text style={styles.period}>{isAnnual ? "per year" : "per month"}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.error}>{error}</Text>
-          {!offerings && (
-            <TouchableOpacity
-              style={[styles.button, styles.bypassButton]}
-              onPress={() => router.replace("/(tabs)/camp")}
-            >
-              <Text style={styles.buttonText}>Continue Anyway (Testing)</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      )}
-      <TouchableOpacity
-        style={[styles.button, purchasing && styles.buttonDisabled]}
-        onPress={handlePurchase}
-        disabled={purchasing || (!selected && !(__DEV__ && !FORCE_PRODUCTION_MODE))}
-      >
-        <Text style={styles.buttonText}>
-          {purchasing ? "Processing…" : __DEV__ && !FORCE_PRODUCTION_MODE ? "Continue (Dev Mode)" : "Start Free Trial"}
-        </Text>
-      </TouchableOpacity>
+  // Find packages for selection
+  const monthlyPkg = offerings?.availablePackages.find((pkg) => pkg.identifier.includes("month"));
+  const annualPkg = offerings?.availablePackages.find(
+    (pkg) => pkg.identifier.includes("year") || pkg.identifier.includes("annual")
+  );
 
-      {__DEV__ && !FORCE_PRODUCTION_MODE && (
-        <Text style={styles.error}>
-          Development mode: RevenueCat disabled
-          {"\n"}Set FORCE_PRODUCTION_MODE = true to test RevenueCat
-        </Text>
-      )}
-      <Text style={styles.testimonial}>{testimonial}</Text>
-      <Text style={styles.testimonialAuthor}>{testimonialAuthor}</Text>
-      <View style={styles.linksRow}>
-        <Text style={styles.link} onPress={() => Linking.openURL(termsUrl)}>
-          Terms of Use
-        </Text>
-        <Text style={styles.link} onPress={() => Linking.openURL(privacyUrl)}>
-          Privacy Policy
-        </Text>
-        <Text style={styles.link} onPress={handleRestore}>
-          Restore Purchases
-        </Text>
+  return (
+    <ImageBackground
+      source={require("../../assets/images/onboarding/paywall-bg.png")}
+      style={styles.bg}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Get Unbound</Text>
+          <View style={styles.features}>
+            <View style={styles.featureRow}>
+              <Image source={require("../../assets/images/onboarding/feature-1.png")} style={styles.featureIconImg} />
+              <Text style={styles.featureText}>Block distractions before{"\n"}they block you</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <Image source={require("../../assets/images/onboarding/feature-2.png")} style={styles.featureIconImg} />
+              <Text style={styles.featureText}>Build unstoppable focus{"\n"}and discipline</Text>
+            </View>
+            <View style={styles.featureRow}>
+              <Image source={require("../../assets/images/onboarding/feature-3.png")} style={styles.featureIconImg} />
+              <Text style={styles.featureText}>
+                Reclaim your time,{"\n"}your clarity, your{"\n"}mission
+              </Text>
+            </View>
+            <View style={styles.featureRow}>
+              <Image source={require("../../assets/images/onboarding/feature-4.png")} style={styles.featureIconImg} />
+              <Text style={styles.featureText}>
+                Be part of a{"\n"}like-minded{"\n"}community
+              </Text>
+            </View>
+          </View>
+          <View style={styles.pricingWrap}>
+            <View style={styles.monthlyBoxWrap}>
+              <View style={styles.mostPopularTag}>
+                <Text style={styles.mostPopularText}>MOST POPULAR</Text>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.pricingBoxMonthly,
+                  selected?.identifier === monthlyPkg?.identifier && styles.selectedBox,
+                ]}
+                onPress={() => {
+                  setSelected(monthlyPkg || null);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.priceMonthly}>{monthlyPkg?.product.priceString || "$2.99/month"}</Text>
+                <Text style={styles.trialText}>
+                  {monthlyPkg?.product.introPrice
+                    ? `${monthlyPkg.product.introPrice.periodNumberOfUnits || 7} days free`
+                    : "7-day free trial"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={purchasing || !selected ? styles.disabledStartTrialBtn : styles.startTrialBtn}
+                onPress={() => {
+                  handlePurchase();
+                }}
+                disabled={purchasing || !selected}
+              >
+                <Text style={styles.startTrialBtnText}>{purchasing ? "Processing…" : "Start Free Trial"}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.bottomRow}>
+              <TouchableOpacity
+                style={[styles.pricingBoxAnnual, selected?.identifier === annualPkg?.identifier && styles.selectedBox]}
+                onPress={() => {
+                  setSelected(annualPkg || null);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.priceAnnual}>{annualPkg?.product.priceString || "$19.99/year"}</Text>
+                <Text style={styles.saveText}>(Save 44%)</Text>
+              </TouchableOpacity>
+              <View style={styles.testimonialBlock}>
+                <Text style={styles.testimonialText}>{testimonial}</Text>
+                <Text style={styles.testimonialAuthor}>{testimonialAuthor}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View style={styles.footerLinks}>
+          <Text style={styles.footerLink} onPress={() => Linking.openURL(termsUrl)}>
+            Terms of Use
+          </Text>
+          <Text style={styles.footerLink}> - </Text>
+          <Text style={styles.footerLink} onPress={() => Linking.openURL(privacyUrl)}>
+            Privacy Policy
+          </Text>
+          <Text style={styles.footerLink}> - </Text>
+          <Text style={styles.footerLink} onPress={handleRestore}>
+            Restore Purchase
+          </Text>
+        </View>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
-const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
-  container: {
+  bg: {
     flex: 1,
-    backgroundColor: COLORS.background,
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 32,
-  },
-  illustration: {
-    width: width * 0.7,
-    height: width * 0.3,
-    backgroundColor: COLORS.orange,
-    borderRadius: 24,
-    marginBottom: 24,
-  },
-  heading: {
-    color: COLORS.dark,
-    fontFamily: "Vollkorn-Bold",
-    fontSize: 28,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  subheading: {
-    color: COLORS.mid,
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 16,
-    fontWeight: "bold",
-  },
-  bullets: {
-    marginBottom: 18,
-    alignSelf: "stretch",
-    paddingLeft: 12,
-  },
-  bullet: {
-    color: COLORS.dark,
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  pricingRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 18,
     width: "100%",
+    height: "100%",
   },
-  pricingBox: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    marginHorizontal: 8,
+  overlay: {
+    flex: 1,
+    justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: COLORS.accent,
-    minWidth: 120,
+    paddingTop: 0,
+    paddingBottom: 32,
   },
-  selectedBox: {
-    borderColor: COLORS.green,
-    borderWidth: 3,
+  content: {
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingTop: 48,
   },
-  annualBox: {
-    backgroundColor: COLORS.orange,
+  title: {
+    fontFamily: "Vollkorn-Bold",
+    fontSize: 36,
+    color: COLORS.dark,
+    fontWeight: "bold",
+    marginBottom: SPACING.xl,
+    textAlign: "center",
+    marginTop: SPACING.md,
   },
-  savings: {
-    color: COLORS.green,
+  features: {
+    width: "100%",
+    marginBottom: SPACING.md,
+  },
+  featureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+  },
+  featureIcon: {
+    fontSize: 28,
+    marginRight: 14,
+    width: 36,
+    textAlign: "center",
+  },
+  featureText: {
+    fontFamily: "Vollkorn-SemiBold",
+    fontSize: 15,
+    color: COLORS.dark,
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  pricingWrap: {
+    width: "100%",
+    marginBottom: SPACING.xl,
+  },
+  monthlyBoxWrap: {
+    width: 200,
+    alignItems: "center",
+    marginBottom: SPACING.md,
+    position: "relative",
+  },
+  mostPopularTag: {
+    position: "absolute",
+    top: -18,
+    left: 18,
+    zIndex: 2,
+    backgroundColor: "#AA6B05",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    alignSelf: "flex-start",
+    shadowColor: COLORS.dark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  mostPopularText: {
+    color: COLORS.gold,
     fontWeight: "bold",
     fontSize: 14,
-    marginBottom: 2,
+    fontFamily: "Vollkorn-Bold",
+    letterSpacing: 1,
   },
-  price: {
+  pricingBoxMonthly: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: COLORS.dark,
+    minWidth: 200,
+    marginBottom: 0,
+    shadowColor: COLORS.dark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    elevation: 4,
+    zIndex: 1,
+  },
+  priceMonthly: {
     color: COLORS.dark,
     fontSize: 22,
     fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
   },
-  trial: {
-    color: COLORS.mid,
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  period: {
-    color: COLORS.mid,
-    fontSize: 13,
-  },
-  button: {
-    backgroundColor: COLORS.accent,
-    borderRadius: 8,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 18,
-    width: "100%",
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: COLORS.white,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  testimonial: {
-    color: COLORS.mid,
+  trialText: {
+    color: COLORS.dark,
     fontSize: 15,
+    lineHeight: 20,
+    fontFamily: "Vollkorn-Regular",
+    marginTop: SPACING.sm,
+  },
+  startTrialBtn: {
+    backgroundColor: COLORS.accent,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    alignItems: "center",
+    width: 200,
+    marginTop: -5,
+    marginBottom: SPACING.md,
+    zIndex: 2,
+  },
+  disabledStartTrialBtn: {
+    backgroundColor: COLORS.accent,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    alignItems: "center",
+    width: 200,
+    marginTop: -5,
+    marginBottom: SPACING.md,
+    zIndex: 2,
+    opacity: 0.8,
+  },
+  startTrialBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+  },
+  bottomRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    width: "100%",
+    marginBottom: SPACING.md,
+    marginTop: -SPACING.md,
+  },
+  pricingBoxAnnual: {
+    backgroundColor: "transparent",
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xl,
+    alignItems: "center",
+    minWidth: 190,
+    maxWidth: 200,
+    borderStyle: "solid",
+    shadowColor: COLORS.white,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+    marginRight: SPACING.lg,
+  },
+  priceAnnual: {
+    color: COLORS.gold,
+    fontSize: 26,
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+  },
+  saveText: {
+    color: COLORS.gold,
+    fontSize: 16,
+    fontFamily: "Vollkorn-Regular",
+    marginTop: SPACING.xs,
+  },
+  testimonialBlock: {
+    maxWidth: 180,
+    marginBottom: 4,
+  },
+  testimonialText: {
+    color: COLORS.gold,
+    fontSize: 17,
+    fontFamily: "Vollkorn-MediumItalic",
     fontStyle: "italic",
-    textAlign: "center",
-    marginBottom: 2,
+    textAlign: "right",
+    lineHeight: 28,
   },
   testimonialAuthor: {
-    color: COLORS.green,
-    fontSize: 15,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 12,
+    color: COLORS.gold,
+    fontSize: 17,
+    fontFamily: "Vollkorn-MediumItalic",
+    fontStyle: "italic",
+    textAlign: "right",
+    marginTop: 8,
   },
-  linksRow: {
+  footerLinks: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 12,
+    alignItems: "center",
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.xl,
     flexWrap: "wrap",
+    width: "100%",
   },
-  link: {
-    color: COLORS.green,
-    fontSize: 14,
-    fontWeight: "bold",
-    marginHorizontal: 8,
-    textDecorationLine: "underline",
-  },
-  error: {
-    color: "red",
-    marginBottom: 8,
+  footerLink: {
+    color: COLORS.gold,
+    fontSize: 15,
+    fontFamily: "Vollkorn-SemiBold",
+    marginHorizontal: SPACING.xs,
     textAlign: "center",
   },
   loadingText: {
     color: COLORS.mid,
     fontSize: 16,
-    marginTop: 12,
+    marginTop: SPACING.md,
+  },
+  error: {
+    color: "red",
+    marginBottom: 8,
+    textAlign: "center",
   },
   errorContainer: {
     marginBottom: 16,
@@ -385,5 +514,18 @@ const styles = StyleSheet.create({
   bypassButton: {
     backgroundColor: COLORS.mid,
     marginTop: 12,
+  },
+  featureIconImg: {
+    width: 32,
+    height: 32,
+    marginRight: SPACING.md,
+    resizeMode: "contain",
+  },
+  selectedBox: {
+    borderColor: COLORS.gold,
+    shadowColor: COLORS.accent,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
 });
