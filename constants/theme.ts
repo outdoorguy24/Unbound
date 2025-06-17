@@ -17,6 +17,11 @@ export const COLORS = {
   buttonPrimary: "#5C3D18",
   buttonText: "#F3E2C7",
 
+  // Tab Bar colors
+  tabBarBackground: "#564110",
+  tabBarActive: "#F7E9CA",
+  tabBarInactive: "#F1D593",
+
   // Status colors
   success: "#4CAF50",
   error: "#F44336",

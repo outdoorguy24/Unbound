@@ -1,37 +1,50 @@
+import { HapticTab } from "@/components/HapticTab";
+import { COLORS, SPACING } from "@/constants/theme";
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform, useColorScheme } from "react-native";
-
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
+import { Image, Platform } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: COLORS.tabBarActive,
+        tabBarInactiveTintColor: COLORS.tabBarInactive,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
+            backgroundColor: COLORS.tabBarBackground,
+            borderTopWidth: 0,
+            paddingTop: SPACING.sm,
           },
-          default: {},
+          default: {
+            backgroundColor: COLORS.tabBarBackground,
+            borderTopWidth: 0,
+            paddingTop: SPACING.sm,
+          },
         }),
+        tabBarLabelStyle: {
+          fontFamily: "Vollkorn-Bold",
+          fontSize: 12,
+        },
       }}
     >
       <Tabs.Screen
         name="camp"
         options={{
-          title: "Camp",
+          title: "Home",
           headerShown: false,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="tent" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require("../../assets/images/home.png")}
+              style={{
+                width: 28,
+                height: 28,
+                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+              }}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -39,7 +52,16 @@ export default function TabLayout() {
         options={{
           title: "Defend",
           headerShown: false,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="shield" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require("../../assets/images/defend.png")}
+              style={{
+                width: 28,
+                height: 28,
+                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+              }}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -47,7 +69,16 @@ export default function TabLayout() {
         options={{
           title: "Trail Log",
           headerShown: false,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="signpost" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require("../../assets/images/traillog.png")}
+              style={{
+                width: 28,
+                height: 28,
+                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+              }}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -55,7 +86,16 @@ export default function TabLayout() {
         options={{
           title: "Profile",
           headerShown: false,
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="hat" color={color} />,
+          tabBarIcon: ({ focused }) => (
+            <Image
+              source={require("../../assets/images/profile.png")}
+              style={{
+                width: 28,
+                height: 28,
+                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+              }}
+            />
+          ),
         }}
       />
     </Tabs>
