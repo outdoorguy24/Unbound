@@ -1,11 +1,9 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { findOrCreatePartner } from "@/lib/partnerMatching";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Screen13() {
   const router = useRouter();
@@ -62,24 +60,24 @@ export default function Screen13() {
   ));
 
   return (
-    <ScreenContainer>
-      <ScreenHeader title="" />
+    <ImageBackground
+      source={require("../../assets/images/parchment-bg.png")}
+      style={{ flex: 1, width: "100%", height: "100%" }}
+      resizeMode="cover"
+    >
       <View style={styles.centered}>
-        <Text style={styles.bigTitle}>FINDING YOUR BATTLE PARTNER</Text>
-        <Text style={styles.subtitle}>Every warrior needs someone watching their back.</Text>
-        {/* Placeholder illustration */}
-        <View style={styles.illustration}>
-          <Text>[icon]</Text>
+        <Text style={styles.bigTitle}>FINDING YOUR ACCOUNTABILITY{"\n"}PARTNER</Text>
+        <View style={styles.messageBox}>
+          <Text style={styles.messageText}>
+            Connecting you with{"\n"}another guy who chooses{"\n"}growth over comfort.
+          </Text>
         </View>
         {timeoutReached ? (
-          <>
-            <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
-          </>
+          <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
         ) : searching ? (
           <>
-            <Text style={styles.searching}>
-              Searching for your accountability partner{".".repeat((dotIndex % 3) + 1)}
-            </Text>
+            <Text style={styles.searching}>Searching for your accountability partner</Text>
+            <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
           </>
         ) : matched && partnerProfile ? (
           <>
@@ -90,6 +88,7 @@ export default function Screen13() {
               </Text>
               !
             </Text>
+            <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
             <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace("/defend")}>
               <Text style={styles.continueText}>Continue</Text>
             </TouchableOpacity>
@@ -97,6 +96,7 @@ export default function Screen13() {
         ) : (
           <>
             <Text style={styles.noMatch}>You&apos;re first in line - your partner will join soon!</Text>
+            <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
             <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace("/defend")}>
               <Text style={styles.continueText}>Continue</Text>
             </TouchableOpacity>
@@ -104,7 +104,7 @@ export default function Screen13() {
         )}
         <View style={styles.dotsRow}>{dots}</View>
       </View>
-    </ScreenContainer>
+    </ImageBackground>
   );
 }
 
@@ -117,71 +117,82 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   bigTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
-    color: "#2C1A05",
-    textAlign: "center",
-    marginBottom: 8,
-    letterSpacing: 1.2,
-  },
-  subtitle: {
-    fontSize: 18,
     color: "#2C1A05",
     textAlign: "center",
     marginBottom: 24,
+    letterSpacing: 1.2,
+    fontFamily: "Vollkorn-Bold",
   },
-  illustration: {
-    width: 180,
-    height: 120,
-    backgroundColor: "#F7F2E0",
+  messageBox: {
+    borderWidth: 1.5,
+    borderColor: "#4B3415",
     borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 18,
     marginBottom: 32,
-  },
-  searching: {
-    fontSize: 20,
-    color: "#4B3415",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  success: {
-    fontSize: 20,
-    color: "#2C1A05",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  partnerName: {
-    color: "#A05A1A",
-    fontWeight: "bold",
-  },
-  noMatch: {
-    fontSize: 20,
-    color: "#2C1A05",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  continueBtn: {
-    backgroundColor: "#4B3415",
-    borderRadius: 8,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 16,
+    backgroundColor: "rgba(255,255,255,0.15)",
     width: "100%",
   },
-  continueText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 18,
+  messageText: {
+    fontSize: 22,
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
     textAlign: "center",
+    lineHeight: 32,
+  },
+  partnerImg: {
+    width: 320,
+    height: 160,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginBottom: 32,
   },
   dotsRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 32,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  searching: {
+    fontSize: 22,
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    textAlign: "center",
+    lineHeight: 32,
+  },
+  success: {
+    fontSize: 22,
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    textAlign: "center",
+    lineHeight: 32,
+  },
+  noMatch: {
+    fontSize: 22,
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    textAlign: "center",
+    lineHeight: 32,
+  },
+  partnerName: {
+    fontSize: 22,
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    textAlign: "center",
+    lineHeight: 32,
+  },
+  continueBtn: {
+    backgroundColor: "#4B3415",
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 24,
+  },
+  continueText: {
+    fontSize: 22,
+    color: "#FFFFFF",
+    fontFamily: "Vollkorn-Bold",
+    textAlign: "center",
   },
 });

@@ -1,12 +1,9 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-
-// --- Helper Functions ---
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 // 1. Format minutes as "X hours, Y minutes"
 function formatTimeSaved(minutes: number): string {
@@ -39,8 +36,6 @@ function calculateStreakDays(): number {
   return Math.floor(Math.random() * 50) + 1; // 1-50
 }
 
-// --- Main Component ---
-
 export default function CampScreen() {
   const { user: contextUser } = useAuth();
   const [user, setUser] = useState<any>(null);
@@ -51,18 +46,12 @@ export default function CampScreen() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      console.log("🏕️ Camp: Starting data fetch...");
-      console.log("🏕️ Camp: Context user state:", contextUser ? "Present" : "Missing");
-
       // Get current user
       const { data: authData } = await supabase.auth.getUser();
       const supaUser = authData?.user;
-      console.log("🏕️ Camp: Supabase user:", supaUser ? "Found" : "Not found");
-      console.log("🏕️ Camp: Context user:", contextUser ? "Found" : "Not found");
 
       // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
       if (__DEV__ && !supaUser && contextUser) {
-        console.log("🏕️ Camp: Using dev mode with context user");
         setUser({
           userId: contextUser.id,
           firstName: contextUser.name || "Dev",
@@ -80,20 +69,16 @@ export default function CampScreen() {
           totalTimeSaved: 56789,
         });
         setLoading(false);
-        console.log("🏕️ Camp: Dev mode setup complete");
         return;
       }
 
       if (!supaUser) {
-        console.log("🏕️ Camp: No user found, setting loading to false");
         setLoading(false);
         return;
       }
       // Get user profile
-      console.log("🏕️ Camp: Fetching user profile...");
       const userProfile = await getUserProfile(supaUser.id);
-      console.log("🏕️ Camp: User profile fetched:", userProfile ? "Success" : "Failed");
-      
+
       // TODO: Replace with real streak/time logic
       const streakDays = calculateStreakDays();
       const partnerStreak = calculateStreakDays();
@@ -101,7 +86,6 @@ export default function CampScreen() {
       const totalUsers = Math.floor(Math.random() * 1201) + 800; // 800-2000
       const totalTimeSaved = Math.floor(Math.random() * 100001) + 50000; // 50,000-150,000
 
-      console.log("🏕️ Camp: Setting user data...");
       setUser({
         userId: supaUser.id,
         firstName: userProfile?.first_name || "Warrior",
@@ -109,24 +93,19 @@ export default function CampScreen() {
         timeSavedThisWeek: timeSaved,
       });
 
-      // Fetch partnerId (stub: replace with real logic)
-      console.log("🏕️ Camp: Fetching partner data...");
-      // For now, simulate a partnerId (could be null for no partner)
-      const partnerId = supaUser.id === "1" ? "2" : "1"; // Replace with real matching logic
+      const partnerId = supaUser.id;
       let partnerProfile = null;
       try {
         if (partnerId) {
-          console.log("🏕️ Camp: Attempting to fetch partner profile for ID:", partnerId);
           partnerProfile = await getUserProfile(partnerId);
-          console.log("🏕️ Camp: Partner profile fetch result:", partnerProfile ? "Success" : "Failed");
+          console.log("🏕️ Camp: Partner profile fetch result:", partnerProfile);
         } else {
           console.log("🏕️ Camp: No partner ID available");
         }
       } catch (error) {
         console.error("🏕️ Camp: Error fetching partner profile:", error);
       }
-      
-      console.log("🏕️ Camp: Setting partner data...");
+
       try {
         setPartner(
           partnerProfile
@@ -138,26 +117,21 @@ export default function CampScreen() {
               }
             : null
         );
-        console.log("🏕️ Camp: Partner data set successfully");
       } catch (error) {
         console.error("🏕️ Camp: Error setting partner data:", error);
       }
 
-      console.log("🏕️ Camp: Setting community data...");
       try {
         setCommunity({
           totalUsers,
           totalTimeSaved,
         });
-        console.log("🏕️ Camp: Community data set successfully");
       } catch (error) {
         console.error("🏕️ Camp: Error setting community data:", error);
       }
-      
-      console.log("🏕️ Camp: Data fetch complete, setting loading to false");
+
       try {
         setLoading(false);
-        console.log("🏕️ Camp: Loading state set to false");
       } catch (error) {
         console.error("🏕️ Camp: Error setting loading state:", error);
       }
@@ -167,172 +141,215 @@ export default function CampScreen() {
 
   if (loading) {
     return (
-      <ScreenContainer>
-        <ScreenHeader title="Camp" />
+      <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
         <View style={styles.centered}>
           <Text style={styles.loadingText}>Loading your warrior status...</Text>
         </View>
-      </ScreenContainer>
+      </ImageBackground>
     );
   }
 
   // If no user data after loading, show a fallback
   if (!user) {
     return (
-      <ScreenContainer>
-        <ScreenHeader title="Camp" />
+      <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
         <View style={styles.centered}>
-          <Text style={styles.heroTitle}>WARRIOR</Text>
+          <Text style={styles.freeMind}>WARRIOR</Text>
           <Text style={styles.heroName}>GUEST</Text>
           <Text style={styles.heroSubtitle}>Day 1 of your liberation</Text>
           <View style={styles.sectionBox}>
-            <Text style={styles.sectionTitle}>WELCOME TO UNBOUND</Text>
+            <Text style={[styles.sectionTitle, styles.centeredText]}>WELCOME TO UNBOUND</Text>
             <Text style={styles.timeCompare}>Your journey begins now.</Text>
           </View>
         </View>
-      </ScreenContainer>
+      </ImageBackground>
     );
   }
 
   return (
-    <ScreenContainer>
-      <ScreenHeader title="Camp" />
+    <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
       <View style={styles.centered}>
-        <Text style={styles.heroTitle}>WARRIOR</Text>
-        <Text style={styles.heroName}>{user.firstName.toUpperCase()}</Text>
+        <Image source={require("../../assets/images/camp-avatar.png")} style={styles.avatar} />
+        <Text style={styles.heroName}>{user.firstName}</Text>
         <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
 
         <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>TIME RECLAIMED THIS WEEK</Text>
-          <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
+          <Text style={[styles.sectionTitle, styles.centeredText]}>Time reclaimed this week</Text>
+          <View style={[styles.rowCenter, styles.centeredRow]}>
+            <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
+            <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
+          </View>
           <Text style={styles.timeCompare}>{getTimeComparison(user.timeSavedThisWeek)}</Text>
         </View>
 
-        <View style={styles.sectionBoxNoBorder}>
-          <Text style={styles.sectionTitle}>YOUR ACCOUNTABILITY PARTNER</Text>
-          {partner ? (
-            <>
-              <Text style={styles.partnerName}>
-                {partner.name} from {partner.city} – Day {partner.streakDays}
-              </Text>
-              <Text style={styles.partnerStatus}>{partner.status}</Text>
-            </>
-          ) : (
-            <Text style={styles.partnerName}>Your partner is setting up their profile</Text>
-          )}
+        <View style={styles.sectionBox}>
+          <View style={styles.rowCenter}>
+            <Image source={require("../../assets/images/handshake.png")} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>Your accountability partner</Text>
+          </View>
+          <View style={styles.rowCenter}>
+            <Text style={styles.partnerHighlight}>
+              {partner
+                ? `${partner.name} from ${partner.city} - Day ${partner.streakDays}`
+                : "Your partner is setting up their profile"}
+            </Text>
+          </View>
+          {partner && <Text style={styles.partnerStatus}>{partner.status}</Text>}
         </View>
 
-        <View style={styles.sectionBoxNoBorder}>
-          <Text style={styles.sectionTitle}>THIS WEEK'S WARRIORS</Text>
-          <Text style={styles.communityStats}>You and {community.totalUsers.toLocaleString()} others reclaimed</Text>
+        <View style={styles.sectionBox}>
+          <View style={styles.rowCenter}>
+            <Image source={require("../../assets/images/axe.png")} style={styles.sectionIcon} />
+            <Text style={styles.sectionTitle}>This week&apos;s warriors</Text>
+          </View>
+          <View style={styles.rowCenter}>
+            <Text style={styles.communityStats}>You and {community.totalUsers.toLocaleString()} others reclaimed</Text>
+          </View>
           <Text style={styles.communityTime}>{formatTimeSaved(community.totalTimeSaved)}</Text>
         </View>
-
-        <View style={styles.footerBox}>
-          <Text style={styles.footerText}>Your ancestors conquered wildernesses.</Text>
-          <Text style={styles.footerText}>You're being conquered by notifications.</Text>
-        </View>
       </View>
-    </ScreenContainer>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   centered: {
     flex: 1,
     alignItems: "center",
-    paddingTop: 24,
-    backgroundColor: "#F3E2C7",
+    justifyContent: "flex-start",
+    paddingTop: SPACING.xxxl,
+    paddingBottom: 24,
   },
-  heroTitle: {
+  freeMind: {
     fontSize: 28,
     fontWeight: "bold",
     color: "#2C1A05",
-    marginTop: 8,
-    letterSpacing: 1.5,
+    fontFamily: "Vollkorn-Bold",
+    marginTop: SPACING.xl,
+    marginBottom: 8,
+    textAlign: "center",
+    width: "92%",
+  },
+  avatar: {
+    width: 180,
+    height: 180,
+    resizeMode: "contain",
+    marginBottom: 12,
   },
   heroName: {
-    fontSize: 44,
+    fontSize: 36,
     fontWeight: "bold",
     color: "#2C1A05",
-    marginBottom: 4,
-    letterSpacing: 1.5,
+    fontFamily: "Vollkorn-Bold",
+    marginBottom: 0,
+    textAlign: "center",
+    width: "92%",
   },
   heroSubtitle: {
     fontSize: 18,
     color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
     marginBottom: 18,
+    textAlign: "center",
+    width: "92%",
   },
   sectionBox: {
-    borderWidth: 2,
-    borderColor: "#D6C08A",
-    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "#E6D3A7",
+    borderRadius: 16,
     padding: 18,
     marginBottom: 18,
-    width: "95%",
-    alignItems: "center",
-    backgroundColor: "#F7F2E0",
-  },
-  sectionBoxNoBorder: {
-    borderTopWidth: 2,
-    borderColor: "#D6C08A",
-    padding: 18,
-    marginBottom: 8,
-    width: "95%",
-    alignItems: "center",
-    backgroundColor: "#F7F2E0",
+    width: "92%",
+    alignItems: "flex-start",
+    backgroundColor: COLORS.textGold,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    marginBottom: 8,
+    textAlign: "left",
+    width: "100%",
+  },
+  rowCenter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
     marginBottom: 6,
+    width: "100%",
+  },
+  centeredRow: {
+    justifyContent: "center",
+  },
+  centeredText: {
+    textAlign: "center",
+  },
+  sectionIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+    resizeMode: "contain",
   },
   timeSaved: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#2C1A05",
-    marginBottom: 4,
+    fontFamily: "Vollkorn-Bold",
   },
   timeCompare: {
-    fontSize: 16,
+    fontSize: 15,
     color: "#2C1A05",
-    marginBottom: 2,
+    fontFamily: "Vollkorn-SemiBold",
+    marginTop: 2,
+    textAlign: "center",
+    width: "100%",
   },
-  partnerName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2C1A05",
-    marginBottom: 2,
+  partnerHighlight: {
+    fontSize: 18,
+    color: "#1B5E20",
+    fontFamily: "Vollkorn-Bold",
+    textDecorationLine: "underline",
   },
   partnerStatus: {
     fontSize: 16,
     color: "#2C1A05",
-    marginBottom: 2,
+    fontFamily: "Vollkorn-Bold",
+    marginTop: 2,
+    textAlign: "left",
+    width: "100%",
   },
   communityStats: {
     fontSize: 16,
     color: "#2C1A05",
-    marginBottom: 2,
+    fontFamily: "Vollkorn-Regular",
+    marginRight: 4,
   },
   communityTime: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
-    color: "#2C1A05",
-    marginBottom: 2,
-  },
-  footerBox: {
-    marginTop: 18,
-    alignItems: "center",
-  },
-  footerText: {
-    fontSize: 15,
-    color: "#2C1A05",
+    color: "#1B5E20",
+    fontFamily: "Vollkorn-Bold",
+    marginTop: 2,
+    textAlign: "left",
+    width: "100%",
   },
   loadingText: {
     fontSize: 18,
     color: "#2C1A05",
     textAlign: "center",
     marginTop: 32,
+    fontFamily: "Vollkorn-Bold",
+    width: "92%",
   },
 });
