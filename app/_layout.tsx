@@ -54,6 +54,7 @@ function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: a
   return (
     <Stack
       screenOptions={{
+        headerShown: false,
         headerStyle: {
           backgroundColor: colorScheme === "dark" ? "#000" : "#fff",
         },
@@ -69,8 +70,8 @@ function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: a
       )}
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="defend-modal" options={{ presentation: "modal", headerShown: false }} />
-      <Stack.Screen name="founder" options={{ title: "Talk with the Founder" }} />
-      <Stack.Screen name="+not-found" />
+      <Stack.Screen name="founder" options={{ title: "Talk with the Founder", headerShown: true }} />
+      <Stack.Screen name="+not-found" options={{ headerShown: true }} />
     </Stack>
   );
 }
