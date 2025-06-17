@@ -1,5 +1,4 @@
 import { COLORS, SPACING } from "@/constants/theme";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -13,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DefendModal from "../defend-modal";
 
 const APP_ICONS = {
   instagram: require("../../assets/images/instagram.png"),
@@ -50,7 +50,7 @@ function isValidDomain(domain: string) {
 }
 
 export default function DefendScreen() {
-  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
   const [blocked, setBlocked] = useState<{ [key: string]: boolean }>(
     Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
   );
@@ -276,11 +276,12 @@ export default function DefendScreen() {
               <Text style={styles.scheduleName}>Defend Your Time</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert("Coming soon")}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => setShowModal(true)}>
             <Text style={styles.actionButtonText}>Start Blocking</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+      {showModal && <DefendModal onClose={() => setShowModal(false)} />}
     </ImageBackground>
   );
 }
