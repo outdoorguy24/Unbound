@@ -1,97 +1,242 @@
-import { ScreenContainer } from '@/components/ui/ScreenContainer';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS, SPACING } from "@/constants/theme";
+import { useAuth } from "@/contexts/AuthContext";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { login, isLoadingAuth } = useAuth();
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSignup = async () => {
-    setError(null);
+  const handleGoogleSignup = async () => {
     try {
+      setIsLoading(true);
       await login();
     } catch (err: any) {
-      setError(err.message || 'Signup failed');
+      setError(err.message || "Signup failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  const handleSignup = async () => {
+    setIsLoading(true);
+    setError(null);
+    // TODO: Implement manual signup
+    setTimeout(() => setIsLoading(false), 1000);
+  };
+
   return (
-    <ScreenContainer>
-      <ScreenHeader title="Sign Up" />
-      <View style={styles.content}>
-        <Text style={styles.heading}>Join the Movement</Text>
-        <Text style={styles.subheading}>Create your account to start reclaiming your time</Text>
+    <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
+      <View style={styles.container}>
+        <Text style={styles.heading}>Create Account</Text>
+        <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleSignup} disabled={isLoading}>
+          <Image source={require("../../assets/images/google.png")} style={styles.googleIcon} />
+          <Text style={styles.googleBtnText}>Continue with Google</Text>
+        </TouchableOpacity>
+        <Text style={styles.divider}>or manually</Text>
         {error && <Text style={styles.error}>{error}</Text>}
-        <TouchableOpacity 
-          style={[styles.button, isLoadingAuth && styles.buttonDisabled]}
-          onPress={login}
-          disabled={isLoadingAuth}
-        >
-          {isLoadingAuth ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign up with Google</Text>}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email Address</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email Address"
+            placeholderTextColor="#7A5A2F"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordInputWrap}>
+            <TextInput
+              style={[styles.input, { paddingRight: 40 }]}
+              placeholder="Password"
+              placeholderTextColor="#7A5A2F"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword((v) => !v)} style={styles.eyeBtnAbsolute}>
+              <MaterialCommunityIcons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="#7A5A2F"
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.createBtn} onPress={handleSignup} disabled={isLoading}>
+          {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.createBtnText}>Create Account</Text>}
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.linkButton}
-          onPress={() => router.push('/(auth)/login')}
-        >
-          <Text style={styles.linkText}>
-            Already have an account? <Text style={styles.linkTextBold}>Sign in</Text>
+        <Text style={styles.loginRow}>
+          Already have an account ?{" "}
+          <Text style={styles.loginLink} onPress={() => router.push("/(auth)/login")}>
+            Login
           </Text>
-        </TouchableOpacity>
+        </Text>
+        <View style={{ flex: 1 }} />
+        <View style={styles.mountainWrap}>
+          <Image source={require("../../assets/images/mountain.png")} style={styles.mountain} />
+        </View>
       </View>
-    </ScreenContainer>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
+  bg: {
     flex: 1,
-    padding: 24,
+    width: "100%",
+    height: "100%",
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    alignItems: "center",
   },
   heading: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C1A05',
-    marginBottom: 8,
-    textAlign: 'center',
+    fontSize: 36,
+    fontWeight: "bold",
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
+    marginBottom: SPACING.xl,
+    marginTop: SPACING.xl,
+    textAlign: "center",
   },
-  subheading: {
+  googleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#112710",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    width: "100%",
+    marginTop: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  googleIcon: {
+    width: 28,
+    height: 28,
+    marginRight: 16,
+    resizeMode: "contain",
+  },
+  googleBtnText: {
+    color: COLORS.textGold,
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+  },
+  divider: {
+    fontSize: 18,
+    color: "#2C1A05",
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+    marginVertical: 18,
+    textAlign: "center",
+    marginBottom: SPACING.xl,
+  },
+  inputGroup: {
+    width: "100%",
+    marginBottom: SPACING.xl,
+  },
+  label: {
+    fontSize: 18,
+    color: "#2C1A05",
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+    marginBottom: 6,
+  },
+  input: {
+    borderWidth: 2,
+    borderColor: "#2C1A05",
+    borderRadius: 10,
+    padding: 14,
     fontSize: 16,
-    color: '#4B3415',
-    marginBottom: 32,
-    textAlign: 'center',
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Regular",
+    backgroundColor: "rgba(255,255,255,0.5)",
   },
-  button: {
-    backgroundColor: '#4B3415',
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
+  passwordInputWrap: {
+    position: "relative",
+    width: "100%",
+    justifyContent: "center",
+  },
+  eyeBtnAbsolute: {
+    position: "absolute",
+    right: 10,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    height: "100%",
+    zIndex: 2,
+    padding: 8,
+  },
+  createBtn: {
+    backgroundColor: "#265C28",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    width: "100%",
+    alignItems: "center",
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xl,
+  },
+  createBtnText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+  },
+  loginRow: {
+    fontSize: 18,
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
     marginBottom: 16,
+    textAlign: "center",
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  linkButton: {
-    alignItems: 'center',
-  },
-  linkText: {
-    color: '#4B3415',
-    fontSize: 14,
-  },
-  linkTextBold: {
-    fontWeight: 'bold',
+  loginLink: {
+    color: "#265C28",
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+    fontFamily: "Vollkorn-Bold",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
-}); 
+  mountainWrap: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 32,
+    marginTop: 8,
+  },
+  mountain: {
+    width: 207,
+    height: 80,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginTop: 0,
+    marginBottom: SPACING.xl,
+  },
+});

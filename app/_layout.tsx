@@ -67,6 +67,7 @@ function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: a
       ) : (
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       )}
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="defend-modal" options={{ presentation: "modal", headerShown: false }} />
       <Stack.Screen name="founder" options={{ title: "Talk with the Founder" }} />
       <Stack.Screen name="+not-found" />

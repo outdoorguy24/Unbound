@@ -1,14 +1,23 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { saveUserProfile } from '@/lib/supabaseUserProfile';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from "@/contexts/AuthContext";
+import { saveUserProfile } from "@/lib/supabaseUserProfile";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ScreenProfileSetup() {
   const { user } = useAuth();
   const router = useRouter();
-  const [firstName, setFirstName] = useState('');
-  const [city, setCity] = useState('');
+  const [firstName, setFirstName] = useState("");
+  const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,16 +31,16 @@ export default function ScreenProfileSetup() {
     setError(null);
     try {
       await saveUserProfile(user.id, firstName.trim(), city.trim());
-      router.replace('/(onboarding)/Screen9');
+      router.replace("/(onboarding)/Screen9");
     } catch (e: any) {
-      setError(e.message || 'Failed to save profile');
+      setError(e.message || "Failed to save profile");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
         <Text style={styles.title}>WELCOME TO THE BROTHERHOOD</Text>
         <Text style={styles.subtitle}>Tell us who you are, warrior</Text>
@@ -71,70 +80,70 @@ export default function ScreenProfileSetup() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F3E2C7',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F3E2C7",
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   title: {
-    color: '#2C1A05',
-    fontFamily: 'Vollkorn-Bold',
+    color: "#2C1A05",
+    fontFamily: "Vollkorn-Bold",
     fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1.2,
     lineHeight: 36,
   },
   subtitle: {
-    color: '#7A4B13',
-    fontFamily: 'Vollkorn-Regular',
+    color: "#7A4B13",
+    fontFamily: "Vollkorn-Regular",
     fontSize: 20,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 24,
     letterSpacing: 1.1,
   },
   illustration: {
     width: 120,
     height: 60,
-    backgroundColor: '#2C1A05', // Placeholder for mountain illustration
+    backgroundColor: "#2C1A05", // Placeholder for mountain illustration
     borderRadius: 12,
     marginBottom: 32,
   },
   input: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderColor: '#2C1A05',
+    width: "100%",
+    backgroundColor: "#fff",
+    borderColor: "#2C1A05",
     borderWidth: 2,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 18,
     marginBottom: 16,
-    fontFamily: 'Vollkorn-Regular',
-    color: '#2C1A05',
+    fontFamily: "Vollkorn-Regular",
+    color: "#2C1A05",
   },
   button: {
-    backgroundColor: '#4B3415',
+    backgroundColor: "#4B3415",
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
-    width: '100%',
+    alignItems: "center",
+    width: "100%",
     marginTop: 8,
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: 'Vollkorn-Bold',
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
-}); 
+});

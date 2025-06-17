@@ -9,7 +9,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 interface User {
   id: string;
   email: string;
-  name: string;
+  name?: string;
   pushToken?: string;
 }
 
@@ -114,15 +114,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const pushToken = await getStoredPushToken();
-      const user: User = {
+      const userData: User = {
         id: "1",
         email,
         name,
         pushToken: pushToken || undefined,
       };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
-      setUser(user);
-      router.replace("/(onboarding)/signup");
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+      setUser(userData);
+      router.replace("/(onboarding)/ScreenProfileSetup");
     } catch (error) {
       console.error("Error signing up:", error);
       throw error;

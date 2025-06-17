@@ -11,6 +11,7 @@ export const COLORS = {
   // Text colors
   textPrimary: "#2C1A05",
   textSecondary: "#4B3415",
+  textGold: "#F1D593",
 
   // UI colors
   buttonPrimary: "#5C3D18",
