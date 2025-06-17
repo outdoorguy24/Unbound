@@ -82,8 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return;
           }
           // Profile exists, go to partner matching
-          if (inAuthGroup || (inOnboardingGroup && segments[1] !== "Screen9")) {
-            router.replace("/(onboarding)/Screen9");
+          if (inAuthGroup || (inOnboardingGroup && segments[1] !== "Screen13")) {
+            router.replace("/(onboarding)/Screen13");
           }
         } catch (e) {
           // If error is not 'no rows found', log it

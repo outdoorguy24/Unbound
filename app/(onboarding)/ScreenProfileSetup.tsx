@@ -1,11 +1,12 @@
+import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { saveUserProfile } from "@/lib/supabaseUserProfile";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Image,
+  ImageBackground,
   StyleSheet,
   Text,
   TextInput,
@@ -31,7 +32,7 @@ export default function ScreenProfileSetup() {
     setError(null);
     try {
       await saveUserProfile(user.id, firstName.trim(), city.trim());
-      router.replace("/(onboarding)/Screen9");
+      router.replace("/(onboarding)/Screen13");
     } catch (e: any) {
       setError(e.message || "Failed to save profile");
     } finally {
@@ -40,104 +41,123 @@ export default function ScreenProfileSetup() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
       <View style={styles.container}>
-        <Text style={styles.title}>WELCOME TO THE BROTHERHOOD</Text>
-        <Text style={styles.subtitle}>Tell us who you are, warrior</Text>
-        {/* Optionally add an illustration here */}
-        <View style={styles.illustration} />
-        <TextInput
-          style={styles.input}
-          placeholder="First Name *"
-          value={firstName}
-          onChangeText={setFirstName}
-          autoCapitalize="words"
-          autoCorrect={false}
-          maxLength={32}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="City (optional)"
-          value={city}
-          onChangeText={setCity}
-          autoCapitalize="words"
-          autoCorrect={false}
-          maxLength={32}
-        />
+        <Text style={styles.heading}>SMART MOVE.</Text>
+        <Text style={styles.description}>
+          Welcome to the crew. Please give{`\n`}us a little info about you so we{`\n`}can match you with an{`\n`}
+          accountability partner.
+        </Text>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>First Name *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="First Name"
+            value={firstName}
+            onChangeText={setFirstName}
+            autoCapitalize="words"
+            autoCorrect={false}
+            maxLength={32}
+            placeholderTextColor="#7A5A2F"
+          />
+        </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>City *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="City"
+            value={city}
+            onChangeText={setCity}
+            autoCapitalize="words"
+            autoCorrect={false}
+            maxLength={32}
+            placeholderTextColor="#7A5A2F"
+          />
+        </View>
         {error && <Text style={styles.error}>{error}</Text>}
         <TouchableOpacity
           style={[styles.button, !canSubmit && styles.buttonDisabled]}
           onPress={handleSubmit}
           disabled={!canSubmit || loading}
         >
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>JOIN THE RANKS</Text>}
+          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Submit</Text>}
         </TouchableOpacity>
+        <View style={{ flex: 1 }} />
+        <View style={styles.fireWrap}>
+          <Image source={require("../../assets/images/fire.png")} style={styles.fire} />
+        </View>
       </View>
-    </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  bg: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#F3E2C7",
-    alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 24,
+    paddingTop: 48,
+    alignItems: "center",
   },
-  title: {
+  heading: {
+    fontSize: 36,
+    fontWeight: "bold",
     color: "#2C1A05",
     fontFamily: "Vollkorn-Bold",
-    fontSize: 28,
-    fontWeight: "bold",
+    marginBottom: 16,
+    marginTop: SPACING.xl,
     textAlign: "center",
-    marginBottom: 8,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    lineHeight: 36,
   },
-  subtitle: {
-    color: "#7A4B13",
-    fontFamily: "Vollkorn-Regular",
+  description: {
     fontSize: 20,
+    color: "#4B3415",
+    fontFamily: "Vollkorn-Bold",
     textAlign: "center",
-    marginBottom: 24,
-    letterSpacing: 1.1,
-  },
-  illustration: {
-    width: 120,
-    height: 60,
-    backgroundColor: "#2C1A05", // Placeholder for mountain illustration
-    borderRadius: 12,
     marginBottom: 32,
+    marginHorizontal: 8,
+    lineHeight: SPACING.xl,
+  },
+  inputGroup: {
+    width: "100%",
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 20,
+    color: "#2C1A05",
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+    marginBottom: 6,
   },
   input: {
-    width: "100%",
-    backgroundColor: "#fff",
-    borderColor: "#2C1A05",
     borderWidth: 2,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderColor: "#2C1A05",
+    borderRadius: 10,
+    padding: 14,
     fontSize: 18,
-    marginBottom: 16,
-    fontFamily: "Vollkorn-Regular",
     color: "#2C1A05",
+    fontFamily: "Vollkorn-Regular",
+    backgroundColor: "rgba(255,255,255,0.5)",
   },
   button: {
-    backgroundColor: "#4B3415",
-    borderRadius: 8,
+    backgroundColor: "#265C28",
+    borderRadius: 16,
     paddingVertical: 16,
-    alignItems: "center",
+    paddingHorizontal: 24,
     width: "100%",
+    alignItems: "center",
     marginTop: 8,
+    marginBottom: 16,
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     fontFamily: "Vollkorn-Bold",
   },
@@ -145,5 +165,19 @@ const styles = StyleSheet.create({
     color: "red",
     marginBottom: 12,
     textAlign: "center",
+  },
+  fireWrap: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 32,
+    marginTop: 8,
+  },
+  fire: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginTop: 0,
+    marginBottom: 0,
   },
 });

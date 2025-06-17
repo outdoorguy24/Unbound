@@ -17,7 +17,7 @@ export default function AuthLayout() {
       router.replace("/(auth)/login");
     } else if (user && inAuthGroup) {
       // Redirect to home if authenticated and in auth group
-      router.replace("/(onboarding)/Screen9");
+      router.replace("/(onboarding)/Screen13");
     }
   }, [user, segments, isLoadingAuth, router]);
 
