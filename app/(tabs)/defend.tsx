@@ -194,7 +194,7 @@ export default function DefendScreen() {
           </View>
         ))}
 
-        <View style={[styles.appRow, blockPorn && styles.appRowActive]}>
+        <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
           <Image source={APP_ICONS.porn} style={styles.appIcon} />
           <View style={styles.appTextContainer}>
             <Text style={[styles.appName, blockPorn && styles.appNameActive]}>Porn</Text>
@@ -636,5 +636,8 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     flex: 1,
     flexWrap: "wrap",
+  },
+  pornRow: {
+    borderWidth: 4,
   },
 });
