@@ -33,8 +33,8 @@ const COLORS = {
 // Add debugging and better error handling
 const REVENUECAT_API_KEY = "appl_BYmaCExMCUEVMmUPdbhHAqZMqSx";
 
-// Add a toggle for testing RevenueCat in development
-const FORCE_PRODUCTION_MODE = true; // Set to true to test RevenueCat in development
+// Set to true to test RevenueCat in development
+const FORCE_PRODUCTION_MODE = true;
 
 export default function PaywallPricing() {
   const router = useRouter();
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
   features: {
     width: "100%",
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   featureRow: {
     flexDirection: "row",
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   pricingWrap: {
     width: "100%",
-    marginBottom: SPACING.xl,
+    marginTop: SPACING.massive,
   },
   monthlyBoxWrap: {
     width: 200,
@@ -446,7 +446,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 2,
-    marginRight: SPACING.lg,
+    marginRight: SPACING.xl,
+    marginBottom: SPACING.xxl,
   },
   priceAnnual: {
     color: COLORS.gold,
@@ -470,28 +471,29 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-MediumItalic",
     fontStyle: "italic",
     textAlign: "right",
-    lineHeight: 28,
+    lineHeight: 24,
+    marginBottom: SPACING.sm,
   },
   testimonialAuthor: {
-    color: COLORS.gold,
+    color: COLORS.accent,
     fontSize: 17,
     fontFamily: "Vollkorn-MediumItalic",
     fontStyle: "italic",
     textAlign: "right",
-    marginTop: 8,
+    marginBottom: SPACING.md,
   },
   footerLinks: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: SPACING.xl,
     marginBottom: SPACING.xl,
     flexWrap: "wrap",
     width: "100%",
+    bottom: SPACING.md,
   },
   footerLink: {
     color: COLORS.gold,
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Vollkorn-SemiBold",
     marginHorizontal: SPACING.xs,
     textAlign: "center",
