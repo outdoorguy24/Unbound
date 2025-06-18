@@ -4,16 +4,16 @@ export default function DefendModal({ onClose }: { onClose: () => void }) {
   return (
     <View style={styles.modalOverlay}>
       <ImageBackground
-        source={require("../assets/images/parchment-bg.png")}
+        source={require("../../assets/images/parchment-bg.png")}
         style={styles.bg}
         imageStyle={styles.bgImage}
       >
         <View style={styles.container}>
           <Pressable style={styles.closeButton} onPress={onClose}>
-            <Image source={require("../assets/images/remove-circle.png")} style={styles.closeIcon} />
+            <Image source={require("../../assets/images/remove-circle.png")} style={styles.closeIcon} />
           </Pressable>
           <Text style={styles.title}>WARNING</Text>
-          <Image source={require("../assets/images/double-arrow.png")} style={styles.arrow} />
+          <Image source={require("../../assets/images/double-arrow.png")} style={styles.arrow} />
           <Text style={styles.body}>
             This is an act of rebellion.{"\n"}
             You&rsquo;re done being the product.{"\n"}

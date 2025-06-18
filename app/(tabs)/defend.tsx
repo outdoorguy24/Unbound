@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import DefendModal from "../defend-modal";
+import DefendModal from "../components/DefendModal";
+import PornBlockModal from "../components/PornBlockModal";
 
 const APP_ICONS = {
   instagram: require("../../assets/images/instagram.png"),
@@ -66,6 +67,8 @@ export default function DefendScreen() {
     end: "22:00",
   });
   const [allDayEveryDay, setAllDayEveryDay] = useState(false);
+  const [showPornModal, setShowPornModal] = useState(false);
+  const [pornModalVariant, setPornModalVariant] = useState<1 | 2>(1);
 
   // Keep all the handler functions
   const toggleBlock = (key: string) => {
@@ -89,6 +92,8 @@ export default function DefendScreen() {
 
   const handleTogglePorn = () => {
     setBlockPorn((val) => !val);
+    setPornModalVariant(blockPorn ? 2 : 1);
+    setShowPornModal(true);
   };
 
   const handleDayToggle = (day: string) => {
@@ -282,6 +287,7 @@ export default function DefendScreen() {
         </View>
       </ScrollView>
       {showModal && <DefendModal onClose={() => setShowModal(false)} />}
+      <PornBlockModal visible={showPornModal} onClose={() => setShowPornModal(false)} variant={pornModalVariant} />
     </ImageBackground>
   );
 }
