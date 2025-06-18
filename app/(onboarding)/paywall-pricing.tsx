@@ -100,7 +100,7 @@ export default function PaywallPricing() {
   const handlePurchase = async () => {
     if (__DEV__ && !FORCE_PRODUCTION_MODE) {
       // Go to auth screen in dev mode
-      router.replace("/signup");
+      router.replace("/(auth)/signup");
       return;
     }
 
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: COLORS.dark,
     minWidth: 200,
     marginBottom: 0,
@@ -378,7 +378,6 @@ const styles = StyleSheet.create({
   priceMonthly: {
     color: COLORS.dark,
     fontSize: 22,
-    fontWeight: "bold",
     fontFamily: "Vollkorn-Bold",
   },
   trialText: {
@@ -434,7 +433,7 @@ const styles = StyleSheet.create({
   pricingBoxAnnual: {
     backgroundColor: "transparent",
     borderRadius: 16,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: COLORS.gold,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xl,
@@ -458,8 +457,8 @@ const styles = StyleSheet.create({
   saveText: {
     color: COLORS.gold,
     fontSize: 16,
-    fontFamily: "Vollkorn-Regular",
-    marginTop: SPACING.xs,
+    fontFamily: "Vollkorn-SemiBold",
+    marginTop: SPACING.sm,
   },
   testimonialBlock: {
     maxWidth: 180,

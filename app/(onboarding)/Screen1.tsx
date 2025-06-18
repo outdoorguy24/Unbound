@@ -15,7 +15,7 @@ export default function Screen1() {
           <Text style={styles.textBlock}>
             WHO TOLD STORIES{"\n"}NEXT TO THE FIRE UNDER{"\n"}A BLANKET OF STARS.
           </Text>
-          <Text style={styles.textBlock}>NOW WE SCROLL.{"\n"}WE SWIPE. WE SIT.</Text>
+          <Text style={[styles.textBlock, { fontSize: 22 }]}>NOW WE SCROLL.{"\n"}WE SWIPE. WE SIT.</Text>
           <Text style={styles.textBlock}>THE WORLD HAS CHANGED.</Text>
           <Text style={styles.textBlockEmphasis}>BUT THAT FIRE INSIDE{"\n"}YOU HASN&apos;T.</Text>
         </View>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   textBlock: {
     color: "#2B1B10",
     fontFamily: "Vollkorn-SemiBold",
-    fontSize: 22,
+    fontSize: 20,
     textAlign: "center",
     textTransform: "uppercase",
     lineHeight: 32,

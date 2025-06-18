@@ -1,6 +1,6 @@
 import { COLORS, SHADOWS, SPACING } from "@/constants/theme";
-import React, { useEffect, useState } from "react";
-import { Dimensions, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from "react";
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const steps = [
   {
@@ -30,13 +30,6 @@ const steps = [
 ];
 
 export default function Screen9({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (selected === null && disableSwipeFn) disableSwipeFn();
-    if (selected !== null && enableSwipe) enableSwipe();
-  }, [disableSwipeFn, enableSwipe, selected]);
-
   return (
     <ImageBackground
       source={require("../../assets/images/parchment-bg.png")}
@@ -51,27 +44,21 @@ export default function Screen9({ onSubmit, disableSwipe, enableSwipe, disableSw
           <Text style={styles.heading}>Here&apos;s how {"\n"} Unbound works:</Text>
           <View style={styles.stepsContainer}>
             {steps.map((step) => (
-              <TouchableOpacity
-                key={step.key}
-                style={[styles.stepBox, selected === String(step.key) && styles.stepBoxSelected]}
-                onPress={() => setSelected(selected === String(step.key) ? null : String(step.key))}
-                activeOpacity={0.8}
-              >
+              <View key={step.key} style={styles.stepBox}>
                 <Image source={step.icon} style={styles.stepIcon} />
                 <View style={styles.stepTextWrap}>
                   <Text style={styles.stepTitle}>{step.title}</Text>
                   <Text style={styles.stepDesc}>{step.desc}</Text>
                 </View>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.button, SHADOWS.medium, !selected && styles.buttonDisabled]}
+          style={[styles.button, SHADOWS.medium]}
           onPress={() => {
             if (onSubmit) onSubmit();
           }}
-          disabled={!selected}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
@@ -80,7 +67,6 @@ export default function Screen9({ onSubmit, disableSwipe, enableSwipe, disableSw
   );
 }
 
-const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -101,31 +87,12 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-Bold",
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 18,
-    marginTop: 24,
+    marginBottom: SPACING.xxl,
+    marginTop: SPACING.lg,
     textTransform: "uppercase",
     letterSpacing: 1.2,
     lineHeight: 32,
     width: "100%",
-  },
-  placeholder: {
-    width: width * 0.7,
-    height: width * 0.35,
-    backgroundColor: "#4B3415",
-    borderRadius: 24,
-    marginVertical: 18,
-  },
-  body: {
-    color: "#2C1A05",
-    fontFamily: "Vollkorn-Bold",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 8,
-    marginBottom: 24,
-    textTransform: "uppercase",
-    letterSpacing: 1.1,
-    lineHeight: 28,
   },
   button: {
     backgroundColor: "#3C6845",
@@ -142,13 +109,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     fontFamily: "Vollkorn-Bold",
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: SPACING.lg,
   },
   topRightImageWrap: {
     position: "absolute",
@@ -195,16 +155,8 @@ const styles = StyleSheet.create({
   },
   stepDesc: {
     fontFamily: "Vollkorn-Regular",
-    fontSize: 12,
+    fontSize: 18,
     color: COLORS.textPrimary,
     marginTop: SPACING.xs,
-  },
-  stepBoxSelected: {
-    backgroundColor: "rgba(159, 106, 0, 0.99)",
-    borderColor: COLORS.textPrimary,
-    opacity: 1,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
   },
 });
