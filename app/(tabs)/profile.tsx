@@ -56,22 +56,6 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Profile</Text>
         <Text style={styles.subtitle}>All the fun stuff</Text>
-        <Text style={styles.sectionTitle}>Settings</Text>
-        {SETTINGS.map((item) => (
-          <TouchableOpacity key={item.label} style={styles.menuCard} onPress={() => router.push(item.route)}>
-            {item.icon}
-            <Text style={styles.menuLabel}>{item.label}</Text>
-            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-          </TouchableOpacity>
-        ))}
-        <Text style={styles.sectionTitle}>Account</Text>
-        {ACCOUNT.map((item) => (
-          <TouchableOpacity key={item.label} style={styles.menuCard} onPress={() => router.push(item.route)}>
-            {item.icon}
-            <Text style={styles.menuLabel}>{item.label}</Text>
-            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-          </TouchableOpacity>
-        ))}
         <Text style={styles.sectionTitle}>Community</Text>
         {COMMUNITY.map((item) => (
           <TouchableOpacity
@@ -93,6 +77,22 @@ export default function ProfileScreen() {
               }
             }}
           >
+            {item.icon}
+            <Text style={styles.menuLabel}>{item.label}</Text>
+            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+          </TouchableOpacity>
+        ))}
+        <Text style={styles.sectionTitle}>Account</Text>
+        {ACCOUNT.map((item) => (
+          <TouchableOpacity key={item.label} style={styles.menuCard} onPress={() => router.push(item.route)}>
+            {item.icon}
+            <Text style={styles.menuLabel}>{item.label}</Text>
+            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+          </TouchableOpacity>
+        ))}
+        <Text style={styles.sectionTitle}>Settings</Text>
+        {SETTINGS.map((item) => (
+          <TouchableOpacity key={item.label} style={styles.menuCard} onPress={() => router.push(item.route)}>
             {item.icon}
             <Text style={styles.menuLabel}>{item.label}</Text>
             <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />

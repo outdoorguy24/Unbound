@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   textBlock: {
     color: "#2B1B10",
     fontFamily: "Vollkorn-SemiBold",
-    fontSize: 20,
+    fontSize: 18,
     textAlign: "center",
     textTransform: "uppercase",
     lineHeight: 32,

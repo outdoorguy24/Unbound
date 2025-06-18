@@ -76,7 +76,6 @@ export default function Screen13() {
           <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
         ) : searching ? (
           <>
-            <Text style={styles.searching}>Searching for your accountability partner</Text>
             <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
           </>
         ) : matched && partnerProfile ? (

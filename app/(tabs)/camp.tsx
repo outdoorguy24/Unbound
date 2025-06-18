@@ -158,7 +158,7 @@ export default function CampScreen() {
           <Text style={styles.heroName}>GUEST</Text>
           <Text style={styles.heroSubtitle}>Day 1 of your liberation</Text>
           <View style={styles.sectionBox}>
-            <Text style={[styles.sectionTitle, styles.centeredText]}>WELCOME TO UNBOUND</Text>
+            <Text style={styles.sectionTitle}>WELCOME TO UNBOUND</Text>
             <Text style={styles.timeCompare}>Your journey begins now.</Text>
           </View>
         </View>
@@ -174,7 +174,7 @@ export default function CampScreen() {
         <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
 
         <View style={styles.sectionBox}>
-          <Text style={[styles.sectionTitle, styles.centeredText]}>Time reclaimed this week</Text>
+          <Text style={styles.sectionTitle}>Time reclaimed this week</Text>
           <View style={[styles.rowCenter, styles.centeredRow]}>
             <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
             <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
@@ -183,29 +183,29 @@ export default function CampScreen() {
         </View>
 
         <View style={styles.sectionBox}>
-          <View style={styles.rowCenter}>
+          <View style={[styles.rowCenter, styles.centeredRow]}>
             <Image source={require("../../assets/images/handshake.png")} style={styles.sectionIcon} />
             <Text style={styles.sectionTitle}>Your accountability partner</Text>
           </View>
-          <View style={styles.rowCenter}>
+          <View style={[styles.rowCenter, styles.centeredRow]}>
             <Text style={styles.partnerHighlight}>
               {partner
                 ? `${partner.name} from ${partner.city} - Day ${partner.streakDays}`
                 : "Your partner is setting up their profile"}
             </Text>
           </View>
-          {partner && <Text style={styles.partnerStatus}>{partner.status}</Text>}
+          {partner && <Text style={[styles.partnerStatus, styles.sectionTitle]}>{partner.status}</Text>}
         </View>
 
         <View style={styles.sectionBox}>
-          <View style={styles.rowCenter}>
+          <View style={[styles.rowCenter, styles.centeredRow]}>
             <Image source={require("../../assets/images/axe.png")} style={styles.sectionIcon} />
             <Text style={styles.sectionTitle}>This week&apos;s warriors</Text>
           </View>
-          <View style={styles.rowCenter}>
+          <View style={[styles.rowCenter, styles.centeredRow]}>
             <Text style={styles.communityStats}>You and {community.totalUsers.toLocaleString()} others reclaimed</Text>
           </View>
-          <Text style={styles.communityTime}>{formatTimeSaved(community.totalTimeSaved)}</Text>
+          <Text style={[styles.communityTime, styles.sectionTitle]}>{formatTimeSaved(community.totalTimeSaved)}</Text>
         </View>
       </View>
     </ImageBackground>
@@ -254,7 +254,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#2C1A05",
     fontFamily: "Vollkorn-Bold",
-    marginBottom: 18,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
     textAlign: "center",
     width: "92%",
   },
@@ -279,21 +280,17 @@ const styles = StyleSheet.create({
     color: "#2C1A05",
     fontFamily: "Vollkorn-Bold",
     marginBottom: 8,
-    textAlign: "left",
-    width: "100%",
+    textAlign: "center",
+    alignSelf: "center",
   },
   rowCenter: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     marginBottom: 6,
     width: "100%",
   },
   centeredRow: {
     justifyContent: "center",
-  },
-  centeredText: {
-    textAlign: "center",
   },
   sectionIcon: {
     width: 24,
@@ -308,7 +305,7 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-Bold",
   },
   timeCompare: {
-    fontSize: 15,
+    fontSize: 16,
     color: "#2C1A05",
     fontFamily: "Vollkorn-SemiBold",
     marginTop: 2,
@@ -326,14 +323,14 @@ const styles = StyleSheet.create({
     color: "#2C1A05",
     fontFamily: "Vollkorn-Bold",
     marginTop: 2,
-    textAlign: "left",
     width: "100%",
   },
   communityStats: {
     fontSize: 16,
     color: "#2C1A05",
-    fontFamily: "Vollkorn-Regular",
+    fontFamily: "Vollkorn-SemiBold",
     marginRight: 4,
+    textAlign: "center",
   },
   communityTime: {
     fontSize: 20,
@@ -341,7 +338,6 @@ const styles = StyleSheet.create({
     color: "#1B5E20",
     fontFamily: "Vollkorn-Bold",
     marginTop: 2,
-    textAlign: "left",
     width: "100%",
   },
   loadingText: {

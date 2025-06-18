@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: SPACING.xxl,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
     textTransform: "uppercase",
     letterSpacing: 1.2,
     lineHeight: 32,
