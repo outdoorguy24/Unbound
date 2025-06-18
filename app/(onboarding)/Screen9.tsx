@@ -41,7 +41,7 @@ export default function Screen9({ onSubmit, disableSwipe, enableSwipe, disableSw
           <Image source={require("../../assets/images/onboarding/climber.png")} style={styles.topRightImage} />
         </View>
         <View style={styles.content}>
-          <Text style={styles.heading}>Here&apos;s how {"\n"} Unbound works:</Text>
+          <Text style={styles.heading}>Here&apos;s how {"\n"}Unbound works:</Text>
           <View style={styles.stepsContainer}>
             {steps.map((step) => (
               <View key={step.key} style={styles.stepBox}>

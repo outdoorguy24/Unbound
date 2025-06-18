@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   optionText: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
     color: COLORS.textPrimary,
-    fontSize: 22,
+    fontSize: 20,
     textAlign: "center",
     fontWeight: "bold",
   },

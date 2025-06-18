@@ -17,7 +17,7 @@ export default function Screen4() {
         </View>
         <Text style={styles.body}>Society wants a bunch of{"\n"}screen-addicted consumers.</Text>
         <Text style={styles.subBody}>
-          But you&apos;re here to:{"\n"}Create.{"\n"}Explore.{"\n"}Build.
+          But you&apos;re here to:{"\n"}CREATE.{"\n"}EXPLORE.{"\n"}BUILD.
         </Text>
       </View>
     </ImageBackground>
