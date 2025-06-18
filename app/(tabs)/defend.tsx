@@ -388,8 +388,9 @@ const styles = StyleSheet.create({
   appRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F1D593",
     borderRadius: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.textPrimary,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
   },
