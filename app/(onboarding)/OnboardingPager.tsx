@@ -29,7 +29,7 @@ const SCREEN_ORDER = [
   Screen12,
 ];
 
-const PROGRESS_SCREENS = 9;
+const PROGRESS_SCREENS = 10;
 
 export default function OnboardingPager() {
   const pagerRef = useRef<PagerView>(null);
@@ -68,8 +68,8 @@ export default function OnboardingPager() {
       </View>
     ));
 
-  // Progress bar width
-  const progress = (page + 1) / PROGRESS_SCREENS;
+  // Progress bar width (10 segments, 10% per screen)
+  const progress = (page + 1) / 10;
 
   return (
     <View style={{ flex: 1, backgroundColor: "#F3E2C7" }}>
@@ -90,8 +90,8 @@ export default function OnboardingPager() {
       >
         {renderScreens()}
       </PagerView>
-      {/* Progress bar only on screens 0-8 (1-9) */}
-      {page <= 8 && (
+      {/* Progress bar only on screens 0-9 (1-10) */}
+      {page <= 9 && (
         <View style={styles.progressBarContainer}>
           <View style={styles.progressBarBg}>
             <Animated.View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />
