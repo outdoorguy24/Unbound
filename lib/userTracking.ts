@@ -143,18 +143,19 @@ export function subscribeToPartnerActivity(partnerId: string, callback: (payload
 // Get partner data including profile and streak
 export async function getPartnerData(userId: string) {
   try {
-    // Get partner ID
+    // Get partner ID by checking both columns
     const { data: pairData, error: pairError } = await supabase
       .from('accountability_pairs')
-      .select('partner_id')
-      .eq('user_id', userId)
+      .select('user_id, partner_id')
+      .or(`user_id.eq.${userId},partner_id.eq.${userId}`)
       .single();
     
-    if (pairError || !pairData?.partner_id) {
+    if (pairError || !pairData) {
       return null;
     }
 
-    const partnerId = pairData.partner_id;
+    // Determine which ID is the partner's
+    const partnerId = pairData.user_id === userId ? pairData.partner_id : pairData.user_id;
 
     // Get partner profile
     const { data: profileData, error: profileError } = await supabase
