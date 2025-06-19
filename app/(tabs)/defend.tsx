@@ -149,7 +149,7 @@ export default function DefendScreen() {
         <Text style={styles.title}>Start Your Block</Text>
 
         <View style={{ marginBottom: SPACING.sm }}>
-          <View style={styles.pillHeader}>
+          <View style={styles.stepPillHeader}>
             <View style={styles.pillNumber}>
               <Text style={styles.pillNumberText}>1</Text>
             </View>
@@ -245,7 +245,7 @@ export default function DefendScreen() {
         </View>
 
         <View style={{ marginBottom: SPACING.sm }}>
-          <View style={styles.pillHeader}>
+          <View style={styles.stepPillHeader}>
             <View style={styles.pillNumber}>
               <Text style={styles.pillNumberText}>2</Text>
             </View>
@@ -277,7 +277,7 @@ export default function DefendScreen() {
         </View>
 
         <View style={{ marginBottom: SPACING.sm }}>
-          <View style={styles.pillHeader}>
+          <View style={styles.stepPillHeader}>
             <View style={styles.pillNumber}>
               <Text style={styles.pillNumberText}>3</Text>
             </View>
@@ -287,7 +287,7 @@ export default function DefendScreen() {
         <View style={styles.sectionBox}>
           <View style={styles.scheduleBox}>
             <View style={styles.iconCircle}>
-              <Image source={APP_ICONS.security} style={styles.iconImage} />
+              <Image source={require("../../assets/images/onboarding/shield.png")} style={styles.iconImage} />
             </View>
             <View style={styles.scheduleTextContainer}>
               <Text style={styles.scheduleName}>Defend Your Time</Text>
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
     textAlign: "center",
   },
-  pillHeader: {
+  stepPillHeader: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
@@ -339,6 +339,13 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
+    borderWidth: 2.5,
+    borderColor: "#564110",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   pillNumber: {
     width: 28,
@@ -371,6 +378,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
+  },
+  stepSectionBox: {
+    backgroundColor: "#F9E7B0",
+    borderRadius: SPACING.md,
+    borderWidth: 2.5,
+    borderColor: "#564110",
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
   },
   infoContainer: {
     backgroundColor: "#F1D593",
@@ -512,9 +532,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scheduleName: {
-    fontSize: 16,
-    fontFamily: "Vollkorn-SemiBold",
+    fontSize: 20,
+    fontFamily: "Vollkorn-Bold",
     color: COLORS.textPrimary,
+    lineHeight: 26,
   },
   actionButton: {
     backgroundColor: "#3D7A4C",
