@@ -13,7 +13,7 @@ export default function Screen11({ onFinish }: { onFinish: () => void }) {
       duration: 1800,
       useNativeDriver: true,
     }).start(() => {
-      // Stay for 4 seconds, then fade out
+      // Stay for 2 seconds, then fade out
       setTimeout(() => {
         Animated.timing(opacity, {
           toValue: 0,
@@ -22,7 +22,7 @@ export default function Screen11({ onFinish }: { onFinish: () => void }) {
         }).start(() => {
           if (onFinish) onFinish();
         });
-      }, 3000);
+      }, 2000);
     });
   }, [onFinish, opacity]);
 

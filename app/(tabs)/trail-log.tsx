@@ -1,54 +1,11 @@
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTrailLog } from "@/lib/trailLog";
+import { getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 const MILESTONES = [10, 50, 100, 500, 1000]; // in days
-
-function calcTimeSavedDays(logs: { action: string; created_at: string }[]) {
-  let totalMs = 0;
-  let lastEnabled: Date | null = null;
-  logs.forEach((log) => {
-    if (log.action === "blocking_enabled") {
-      lastEnabled = new Date(log.created_at);
-    } else if (log.action === "blocking_disabled" && lastEnabled !== null) {
-      const disabledAt = new Date(log.created_at);
-      totalMs += disabledAt.getTime() - (lastEnabled as Date).getTime();
-      lastEnabled = null;
-    }
-  });
-  if (lastEnabled !== null) {
-    totalMs += Date.now() - (lastEnabled as Date).getTime();
-  }
-  return totalMs / (1000 * 60 * 60 * 24); // convert ms to days
-}
-
-function calcTotalBlocks(logs: any[]) {
-  return logs.filter((log) => log.action === "blocked_attempt").length;
-}
-
-function calcStreakDays(logs: any[]) {
-  const days = new Set(
-    logs
-      .filter((log) => log.action === "blocked_attempt" || log.action === "streak_day")
-      .map((log) => new Date(log.created_at).toISOString().slice(0, 10))
-  );
-  const sorted = Array.from(days).sort((a, b) => b.localeCompare(a));
-  if (sorted.length === 0) return 0;
-  let streak = 0;
-  let d = new Date();
-  for (let i = 0; i < sorted.length; i++) {
-    const dayStr = d.toISOString().slice(0, 10);
-    if (sorted.includes(dayStr)) {
-      streak++;
-      d.setDate(d.getDate() - 1);
-    } else {
-      break;
-    }
-  }
-  return streak;
-}
 
 function getNextMilestone(currentDays: number) {
   for (let m of MILESTONES) {
@@ -60,17 +17,36 @@ function getNextMilestone(currentDays: number) {
 export default function TrailLogScreen() {
   const { user } = useAuth();
   const [logs, setLogs] = useState<any[]>([]);
+  const [streakData, setStreakData] = useState<any>(null);
+  const [totalTimeSaved, setTotalTimeSaved] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchLogs() {
+    async function fetchData() {
       if (!user?.id) return;
       setLoading(true);
-      const data = await getTrailLog(user.id, { limit: 500 });
-      setLogs(data || []);
-      setLoading(false);
+      
+      try {
+        // Fetch trail logs for total blocks count
+        const logsData = await getTrailLog(user.id, { limit: 500 });
+        setLogs(logsData || []);
+
+        // Fetch real streak data
+        const streak = await getStreak(user.id);
+        setStreakData(streak);
+
+        // Fetch total time saved (all time)
+        const startDate = new Date(0); // Beginning of time
+        const endDate = new Date();
+        const totalTime = await getTotalBlockedTime(user.id, startDate, endDate);
+        setTotalTimeSaved(totalTime || 0);
+      } catch (error) {
+        console.error("Error fetching trail log data:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchLogs();
+    fetchData();
   }, [user]);
 
   if (loading) {
@@ -81,9 +57,9 @@ export default function TrailLogScreen() {
     );
   }
 
-  const timeSavedDays = calcTimeSavedDays(logs);
-  const totalBlocks = calcTotalBlocks(logs);
-  const streakDays = calcStreakDays(logs);
+  const totalBlocks = logs.filter((log) => log.action === "blocked_attempt").length;
+  const streakDays = streakData?.current_streak || 0;
+  const timeSavedDays = totalTimeSaved / (24 * 60); // Convert minutes to days
   const nextMilestone = getNextMilestone(timeSavedDays);
   const milestoneHours = nextMilestone ? nextMilestone * 24 : 100;
 

@@ -2,6 +2,7 @@ import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
+import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import { useEffect, useState } from "react";
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
@@ -31,11 +32,6 @@ function getPartnerStatus(streakDays: number): string {
   return "Unstoppable";
 }
 
-// 4. Calculate streak days (random for placeholder)
-function calculateStreakDays(): number {
-  return Math.floor(Math.random() * 50) + 1; // 1-50
-}
-
 export default function CampScreen() {
   const { user: contextUser } = useAuth();
   const [user, setUser] = useState<any>(null);
@@ -46,94 +42,96 @@ export default function CampScreen() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      // Get current user
-      const { data: authData } = await supabase.auth.getUser();
-      const supaUser = authData?.user;
-
-      // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
-      if (__DEV__ && !supaUser && contextUser) {
-        setUser({
-          userId: contextUser.id,
-          firstName: contextUser.name || "Dev",
-          streakDays: 7,
-          timeSavedThisWeek: 123,
-        });
-        setPartner({
-          name: "Partner",
-          city: "Pairtown",
-          streakDays: 5,
-          status: "Getting started",
-        });
-        setCommunity({
-          totalUsers: 1234,
-          totalTimeSaved: 56789,
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (!supaUser) {
-        setLoading(false);
-        return;
-      }
-      // Get user profile
-      const userProfile = await getUserProfile(supaUser.id);
-
-      // TODO: Replace with real streak/time logic
-      const streakDays = calculateStreakDays();
-      const partnerStreak = calculateStreakDays();
-      const timeSaved = Math.floor(Math.random() * 741) + 60; // 60-800
-      const totalUsers = Math.floor(Math.random() * 1201) + 800; // 800-2000
-      const totalTimeSaved = Math.floor(Math.random() * 100001) + 50000; // 50,000-150,000
-
-      setUser({
-        userId: supaUser.id,
-        firstName: userProfile?.first_name || "Warrior",
-        streakDays,
-        timeSavedThisWeek: timeSaved,
-      });
-
-      const partnerId = supaUser.id;
-      let partnerProfile = null;
       try {
-        if (partnerId) {
-          partnerProfile = await getUserProfile(partnerId);
-          console.log("🏕️ Camp: Partner profile fetch result:", partnerProfile);
-        } else {
-          console.log("🏕️ Camp: No partner ID available");
+        // Get current user
+        const { data: authData } = await supabase.auth.getUser();
+        const supaUser = authData?.user;
+
+        // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
+        if (__DEV__ && !supaUser && contextUser) {
+          setUser({
+            userId: contextUser.id,
+            firstName: contextUser.name || "Dev",
+            streakDays: 7,
+            timeSavedThisWeek: 123,
+          });
+          setPartner({
+            name: "Partner",
+            city: "Pairtown",
+            streakDays: 5,
+            status: "Getting started",
+          });
+          setCommunity({
+            totalUsers: 1234,
+            totalTimeSaved: 56789,
+          });
+          setLoading(false);
+          return;
         }
-      } catch (error) {
-        console.error("🏕️ Camp: Error fetching partner profile:", error);
-      }
 
-      try {
-        setPartner(
-          partnerProfile
-            ? {
-                name: partnerProfile.first_name,
-                city: partnerProfile.city,
-                streakDays: partnerStreak,
-                status: getPartnerStatus(partnerStreak),
-              }
-            : null
-        );
-      } catch (error) {
-        console.error("🏕️ Camp: Error setting partner data:", error);
-      }
+        if (!supaUser) {
+          setLoading(false);
+          return;
+        }
 
-      try {
-        setCommunity({
-          totalUsers,
-          totalTimeSaved,
+        // Get user profile
+        const userProfile = await getUserProfile(supaUser.id);
+
+        // Get real streak data
+        const streakData = await getStreak(supaUser.id);
+        const streakDays = streakData.current_streak || 0;
+
+        // Calculate time saved this week (from Monday to Sunday)
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+        startOfWeek.setHours(0, 0, 0, 0);
+        
+        const timeSavedThisWeek = await getTotalBlockedTime(supaUser.id, startOfWeek, now) || 0;
+
+        setUser({
+          userId: supaUser.id,
+          firstName: userProfile?.first_name || "Warrior",
+          streakDays,
+          timeSavedThisWeek,
         });
-      } catch (error) {
-        console.error("🏕️ Camp: Error setting community data:", error);
-      }
 
-      try {
-        setLoading(false);
+        // Get real partner data
+        const partnerData = await getPartnerData(supaUser.id);
+        
+        if (partnerData) {
+          setPartner({
+            name: partnerData.name,
+            city: partnerData.city,
+            streakDays: partnerData.streakDays,
+            status: getPartnerStatus(partnerData.streakDays),
+          });
+        } else {
+          setPartner(null);
+        }
+
+        // Get real community stats
+        const communityStats = await getCommunityStats();
+        setCommunity(communityStats);
+
       } catch (error) {
-        console.error("🏕️ Camp: Error setting loading state:", error);
+        console.error("🏕️ Camp: Error fetching data:", error);
+        // Set fallback data on error
+        const { data: authData } = await supabase.auth.getUser();
+        const supaUser = authData?.user;
+        setUser({
+          userId: supaUser?.id || contextUser?.id,
+          firstName: "Warrior",
+          streakDays: 1,
+          timeSavedThisWeek: 0,
+        });
+        setPartner(null);
+        setCommunity({
+          totalUsers: 1000,
+          totalTimeSaved: 50000,
+        });
+      } finally {
+        setLoading(false);
       }
     }
     fetchData();

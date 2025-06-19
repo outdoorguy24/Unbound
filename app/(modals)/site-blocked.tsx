@@ -1,12 +1,55 @@
 import { ScreenContainer } from '@/components/ui/ScreenContainer';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { useAuth } from '@/contexts/AuthContext';
+import { getStreak, getTotalBlockedTime } from '@/lib/userTracking';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SiteBlockedModal() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [timeSavedToday, setTimeSavedToday] = useState<number>(0);
+  const [daysReclaimed, setDaysReclaimed] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Get time saved today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const timeToday = await getTotalBlockedTime(user.id, today, new Date());
+        setTimeSavedToday(timeToday || 0);
+
+        // Get streak days (days reclaimed)
+        const streakData = await getStreak(user.id);
+        setDaysReclaimed(streakData.current_streak || 0);
+      } catch (error) {
+        console.error('Error fetching blocked site data:', error);
+        // Set fallback values
+        setTimeSavedToday(0);
+        setDaysReclaimed(0);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [user]);
+
+  const formatTimeSaved = (minutes: number): string => {
+    if (!minutes || minutes < 1) return "0h";
+    const hours = minutes / 60;
+    return `${hours.toFixed(1)}h`;
+  };
+
   return (
     <ScreenContainer>
       <ScreenHeader 
@@ -26,11 +69,15 @@ export default function SiteBlockedModal() {
         </Text>
         <View style={styles.statsContainer}>
           <View style={styles.statBox}>
-            <Text style={styles.statValue}>5.4h</Text>
+            <Text style={styles.statValue}>
+              {loading ? "..." : formatTimeSaved(timeSavedToday)}
+            </Text>
             <Text style={styles.statLabel}>Time Saved Today</Text>
           </View>
           <View style={styles.statBox}>
-            <Text style={styles.statValue}>82d</Text>
+            <Text style={styles.statValue}>
+              {loading ? "..." : `${daysReclaimed}d`}
+            </Text>
             <Text style={styles.statLabel}>Days Reclaimed</Text>
           </View>
         </View>

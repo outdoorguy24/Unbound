@@ -138,4 +138,98 @@ export function subscribeToPartnerActivity(partnerId: string, callback: (payload
       callback
     )
     .subscribe();
+}
+
+// Get partner data including profile and streak
+export async function getPartnerData(userId: string) {
+  try {
+    // Get partner ID
+    const { data: pairData, error: pairError } = await supabase
+      .from('accountability_pairs')
+      .select('partner_id')
+      .eq('user_id', userId)
+      .single();
+    
+    if (pairError || !pairData?.partner_id) {
+      return null;
+    }
+
+    const partnerId = pairData.partner_id;
+
+    // Get partner profile
+    const { data: profileData, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('first_name, city')
+      .eq('user_id', partnerId)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching partner profile:', profileError);
+      return null;
+    }
+
+    // Get partner streak
+    const { data: streakData, error: streakError } = await supabase
+      .from('streaks')
+      .select('current_streak')
+      .eq('id', partnerId)
+      .single();
+
+    if (streakError && streakError.code !== 'PGRST116') {
+      console.error('Error fetching partner streak:', streakError);
+    }
+
+    return {
+      id: partnerId,
+      name: profileData.first_name,
+      city: profileData.city,
+      streakDays: streakData?.current_streak || 0,
+    };
+  } catch (error) {
+    console.error('Error getting partner data:', error);
+    return null;
+  }
+}
+
+// Get community statistics
+export async function getCommunityStats() {
+  try {
+    // Get total users with profiles
+    const { count: totalUsers, error: usersError } = await supabase
+      .from('user_profiles')
+      .select('*', { count: 'exact', head: true });
+
+    if (usersError) {
+      console.error('Error fetching total users:', usersError);
+      return { totalUsers: 1000, totalTimeSaved: 50000 };
+    }
+
+    // Get total time saved this week across all users
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const { data: timeData, error: timeError } = await supabase
+      .from('blocked_sessions')
+      .select('duration_minutes')
+      .gte('start_time', startOfWeek.toISOString())
+      .lte('start_time', now.toISOString())
+      .not('duration_minutes', 'is', null);
+
+    if (timeError) {
+      console.error('Error fetching total time saved:', timeError);
+      return { totalUsers: totalUsers || 1000, totalTimeSaved: 50000 };
+    }
+
+    const totalTimeSaved = timeData?.reduce((sum, session) => sum + (session.duration_minutes || 0), 0) || 0;
+
+    return {
+      totalUsers: totalUsers || 1000,
+      totalTimeSaved,
+    };
+  } catch (error) {
+    console.error('Error getting community stats:', error);
+    return { totalUsers: 1000, totalTimeSaved: 50000 };
+  }
 } 
