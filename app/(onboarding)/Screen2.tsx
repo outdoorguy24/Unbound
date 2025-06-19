@@ -14,7 +14,7 @@ export default function Screen2() {
         </View>
         <Text style={styles.heading}>Technology has benefits,{"\n"}but it&apos;s stealing your life.</Text>
         <Text style={styles.subheading}>
-          You know what you should be doing...but the phone is always there with a quick hit.
+          You know what you should be doing, but the phone is always there with a quick hit.
         </Text>
         <Text style={styles.body}>
           It creates a <Text style={styles.underline}>cycle</Text> of cheap dopamine, constant distractions, and a lack

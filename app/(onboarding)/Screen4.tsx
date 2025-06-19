@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   illustrationContainer: {
     width: "100%",
     alignItems: "center",
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.md / 4,
     marginTop: SPACING.xl,
   },
   illustration: {
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1.2,
     height: undefined,
     resizeMode: "contain",
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.md / 4,
   },
   body: {
     fontFamily: TYPOGRAPHY.body.fontFamily,

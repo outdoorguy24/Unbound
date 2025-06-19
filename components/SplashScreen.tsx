@@ -13,7 +13,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
       duration: 1800,
       useNativeDriver: true,
     }).start(() => {
-      // Stay for 3 seconds, then fade out
+      // Stay for 4 seconds, then fade out
       setTimeout(() => {
         Animated.timing(opacity, {
           toValue: 0,
@@ -22,7 +22,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         }).start(() => {
           onFinish();
         });
-      }, 3000);
+      }, 4000);
     });
   }, [onFinish, opacity]);
 

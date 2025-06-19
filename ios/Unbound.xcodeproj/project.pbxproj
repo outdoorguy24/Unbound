@@ -11,6 +11,8 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		4F85DFB794264B47BF50EBC4 /* libPods-Unbound.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 25ED7E46102720A1120F3E33 /* libPods-Unbound.a */; };
 		64C042362DF6F34F0060E7E4 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C042352DF6F34E0060E7E4 /* StoreKit.framework */; };
+		64E35EAA2E0191F000F67DE2 /* ScreenTimeManager1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E35EA92E0191F000F67DE2 /* ScreenTimeManager1.swift */; };
+		64E35EAC2E01921400F67DE2 /* ScreenTimeManager1.m in Sources */ = {isa = PBXBuildFile; fileRef = 64E35EAB2E01921400F67DE2 /* ScreenTimeManager1.m */; };
 		73B496CEF0B8FF4BFA9D8E35 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CF4EDD57CBEC2302C2028289 /* PrivacyInfo.xcprivacy */; };
 		9093E08AEC104812BA2DD85D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC57AC2BA0D1AF77F136AD3 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
@@ -25,6 +27,8 @@
 		25ED7E46102720A1120F3E33 /* libPods-Unbound.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Unbound.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B4B36A769E184A951E71AB1 /* Pods-Unbound.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Unbound.release.xcconfig"; path = "Target Support Files/Pods-Unbound/Pods-Unbound.release.xcconfig"; sourceTree = "<group>"; };
 		64C042352DF6F34E0060E7E4 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		64E35EA92E0191F000F67DE2 /* ScreenTimeManager1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeManager1.swift; sourceTree = "<group>"; };
+		64E35EAB2E01921400F67DE2 /* ScreenTimeManager1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScreenTimeManager1.m; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Unbound/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		CF4EDD57CBEC2302C2028289 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Unbound/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -57,6 +61,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				CF4EDD57CBEC2302C2028289 /* PrivacyInfo.xcprivacy */,
+				64E35EA92E0191F000F67DE2 /* ScreenTimeManager1.swift */,
+				64E35EAB2E01921400F67DE2 /* ScreenTimeManager1.m */,
 			);
 			name = Unbound;
 			sourceTree = "<group>";
@@ -357,7 +363,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64E35EAA2E0191F000F67DE2 /* ScreenTimeManager1.swift in Sources */,
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
+				64E35EAC2E01921400F67DE2 /* ScreenTimeManager1.m in Sources */,
 				9093E08AEC104812BA2DD85D /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

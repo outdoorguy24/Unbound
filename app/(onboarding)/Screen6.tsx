@@ -13,15 +13,17 @@ const OPTIONS = [
 ];
 
 export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
-    if (selected === null && disableSwipeFn) disableSwipeFn();
-    if (selected !== null && enableSwipe) enableSwipe();
+    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
+    if (selected.length > 0 && enableSwipe) enableSwipe();
   }, [disableSwipeFn, enableSwipe, selected]);
 
   const toggleOption = (key: string) => {
-    setSelected((prev) => (prev === key ? null : key));
+    setSelected((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   };
 
   return (
@@ -37,12 +39,12 @@ export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSw
             {OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.key}
-                style={[styles.option, selected === option.key && styles.optionSelected, SHADOWS.small]}
+                style={[styles.option, selected.includes(option.key) && styles.optionSelected, SHADOWS.small]}
                 onPress={() => toggleOption(option.key)}
                 activeOpacity={0.8}
               >
                 <Image source={option.image} style={styles.iconImage} />
-                <Text style={[styles.optionLabel, selected === option.key && styles.optionLabelSelected]}>
+                <Text style={[styles.optionLabel, selected.includes(option.key) && styles.optionLabelSelected]}>
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -50,11 +52,11 @@ export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSw
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.button, !selected && styles.buttonDisabled, SHADOWS.medium]}
+          style={[styles.button, selected.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
           onPress={() => {
             if (onSubmit) onSubmit();
           }}
-          disabled={!selected}
+          disabled={selected.length === 0}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>

@@ -1,0 +1,35 @@
+//
+//  ScreenTimeManager.m
+//  nativeModule
+//
+//  Created by Mehroz Afzal on 10/06/2025.
+//
+
+#import <Foundation/Foundation.h>
+#import "React/RCTBridgeModule.h"
+
+@interface RCT_EXTERN_MODULE(ScreenTimeManager, NSObject)
+
+RCT_EXTERN_METHOD(requestAuthorization:(NSString *)type
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getAuthorizationStatus:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(displayFamilyActivityPicker:(NSDictionary *)options
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(setActivitySelection:(NSDictionary *)selectionDict
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(removeActivitySelection:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+@end
+
+// // This is required for the module to be properly registered
+// @interface RCT_EXTERN_MODULE(ScreenTimeManagerModule, NSObject)
+// @end 

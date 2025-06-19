@@ -2,25 +2,26 @@ import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme"
 import { useEffect, useState } from "react";
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const heading = "What's your biggest fear?";
+const heading = "What concerns you the most about too much phone use?";
 const options = [
-  "Missing my prime years",
-  "Destroying my relationships",
-  "Losing touch with friends",
+  "Easy to not prioritize in-person relationships",
+  "Wrecked attention span",
   "Becoming weak & soft",
-  "Dying with regrets",
+  "Dying with regrets about not being present",
 ];
 
 export default function Screen8({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
-    if (selected === null && disableSwipeFn) disableSwipeFn();
-    if (selected !== null && enableSwipe) enableSwipe();
+    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
+    if (selected.length > 0 && enableSwipe) enableSwipe();
   }, [disableSwipeFn, enableSwipe, selected]);
 
   const toggleOption = (option: string) => {
-    setSelected((prev) => (prev === option ? null : option));
+    setSelected((prev) =>
+      prev.includes(option) ? prev.filter((o) => o !== option) : [...prev, option]
+    );
   };
 
   return (
@@ -36,21 +37,21 @@ export default function Screen8({ onSubmit, disableSwipe, enableSwipe, disableSw
             {options.map((option) => (
               <TouchableOpacity
                 key={option}
-                style={[styles.option, selected === option && styles.optionSelected, SHADOWS.small]}
+                style={[styles.option, selected.includes(option) && styles.optionSelected, SHADOWS.small]}
                 onPress={() => toggleOption(option)}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.optionText, selected === option && styles.optionTextSelected]}>{option}</Text>
+                <Text style={[styles.optionText, selected.includes(option) && styles.optionTextSelected]}>{option}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.button, !selected && styles.buttonDisabled, SHADOWS.medium]}
+          style={[styles.button, selected.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
           onPress={() => {
             if (onSubmit) onSubmit();
           }}
-          disabled={!selected}
+          disabled={selected.length === 0}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
