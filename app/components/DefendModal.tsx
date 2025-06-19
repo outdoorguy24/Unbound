@@ -1,6 +1,27 @@
 import { Image, ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function DefendModal({ onClose }: { onClose: () => void }) {
+interface DefendModalProps {
+  onClose: () => void;
+  schedule: {
+    days: string[];
+    start_time: string;
+    end_time: string;
+  };
+}
+
+export default function DefendModal({ onClose, schedule }: DefendModalProps) {
+  const getScheduleDisplay = () => {
+    const days = schedule.days.length === 7 ? "Every day" : schedule.days.join(", ");
+    return `${days} from ${schedule.start_time} to ${schedule.end_time}`;
+  };
+
+  const handleStartBlock = () => {
+    // TODO: Implement actual blocking logic with schedule
+    console.log("Starting block with schedule:", schedule);
+    // This is where the actual blocking would start using the schedule
+    onClose();
+  };
+
   return (
     <View style={styles.modalOverlay}>
       <ImageBackground
@@ -18,14 +39,15 @@ export default function DefendModal({ onClose }: { onClose: () => void }) {
             This is an act of rebellion.{"\n"}
             You&rsquo;re done being the product.{"\n"}
             Done trading your dreams for dopamine hits. Done with algorithms deciding what you want. Your future self
-            will thank you.
+            thanks you.
           </Text>
-          <Pressable
-            style={styles.defendButton}
-            onPress={() => {
-              /* TODO: Start block logic */
-            }}
-          >
+          
+          <View style={styles.scheduleInfo}>
+            <Text style={styles.scheduleLabel}>Your Schedule:</Text>
+            <Text style={styles.scheduleText}>{getScheduleDisplay()}</Text>
+          </View>
+          
+          <Pressable style={styles.defendButton} onPress={handleStartBlock}>
             <Text style={styles.defendButtonText}>START THE BLOCK</Text>
           </Pressable>
           <Text style={styles.fyi}>
@@ -99,6 +121,27 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginVertical: 16,
     lineHeight: 30,
+  },
+  scheduleInfo: {
+    backgroundColor: "#F9E7B0",
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 16,
+    width: "100%",
+    alignItems: "center",
+  },
+  scheduleLabel: {
+    fontSize: 14,
+    fontFamily: "Vollkorn-Bold",
+    color: "#564110",
+    marginBottom: 4,
+  },
+  scheduleText: {
+    fontSize: 16,
+    fontFamily: "Vollkorn-Bold",
+    color: "#564110",
+    textAlign: "center",
+    lineHeight: 22,
   },
   defendButton: {
     backgroundColor: "#564110",

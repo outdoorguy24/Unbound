@@ -232,4 +232,71 @@ export async function getCommunityStats() {
     console.error('Error getting community stats:', error);
     return { totalUsers: 1000, totalTimeSaved: 50000 };
   }
+}
+
+// User schedule functions
+export async function getUserSchedule(userId: string) {
+  const { data, error } = await supabase
+    .from('user_schedules')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') throw error;
+  return data || null;
+}
+
+export async function saveUserSchedule(userId: string, schedule: {
+  days: string[];
+  start_time: string;
+  end_time: string;
+}) {
+  const { data, error } = await supabase
+    .from('user_schedules')
+    .upsert({
+      user_id: userId,
+      days: schedule.days,
+      start_time: schedule.start_time,
+      end_time: schedule.end_time,
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    }, {
+      onConflict: 'user_id',
+      ignoreDuplicates: false
+    })
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function updateUserSchedule(userId: string, schedule: {
+  days: string[];
+  start_time: string;
+  end_time: string;
+}) {
+  const { data, error } = await supabase
+    .from('user_schedules')
+    .update({
+      days: schedule.days,
+      start_time: schedule.start_time,
+      end_time: schedule.end_time,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function deactivateUserSchedule(userId: string) {
+  const { error } = await supabase
+    .from('user_schedules')
+    .update({ is_active: false })
+    .eq('user_id', userId);
+  
+  if (error) throw error;
 } 

@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import DefendModal from "../components/DefendModal";
 import PornBlockModal from "../components/PornBlockModal";
+import ScheduleModal from "../components/ScheduleModal";
 
 const APP_ICONS = {
   instagram: require("../../assets/images/instagram.png"),
@@ -52,6 +53,7 @@ function isValidDomain(domain: string) {
 
 export default function DefendScreen() {
   const [showModal, setShowModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [blocked, setBlocked] = useState<{ [key: string]: boolean }>(
     Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
   );
@@ -61,10 +63,10 @@ export default function DefendScreen() {
   const [customInput, setCustomInput] = useState("");
   const [blockPorn, setBlockPorn] = useState(false);
   const [showPornInfo, setShowPornInfo] = useState(false);
-  const [schedule, setSchedule] = useState<{ days: string[]; start: string; end: string }>({
+  const [schedule, setSchedule] = useState<{ days: string[]; start_time: string; end_time: string }>({
     days: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-    start: "08:00",
-    end: "22:00",
+    start_time: "12:00 PM",
+    end_time: "6:00 PM",
   });
   const [allDayEveryDay, setAllDayEveryDay] = useState(false);
   const [showPornModal, setShowPornModal] = useState(false);
@@ -103,23 +105,23 @@ export default function DefendScreen() {
     }));
   };
 
-  const handleTimeChange = (field: "start" | "end", value: string) => {
+  const handleTimeChange = (field: "start_time" | "end_time", value: string) => {
     setSchedule((prev) => ({ ...prev, [field]: value }));
   };
 
-  const scheduleSummary = `${schedule.days.join(", ")} | ${schedule.start}–${schedule.end}`;
+  const scheduleSummary = `${schedule.days.join(", ")} | ${schedule.start_time}–${schedule.end_time}`;
 
   function toggleAllDayEveryDay(val: boolean) {
     setAllDayEveryDay(val);
     if (val) {
-      setSchedule({ days: [...DAYS], start: "12:00 AM", end: "11:59 PM" });
+      setSchedule({ days: [...DAYS], start_time: "12:00 PM", end_time: "11:59 PM" });
     }
   }
 
   function getScheduleSummary() {
     if (allDayEveryDay) return "Blocking all day, every day";
-    const start = schedule.start;
-    const end = schedule.end;
+    const start = schedule.start_time;
+    const end = schedule.end_time;
     const days = schedule.days.length === 7 ? "Every day" : schedule.days.join(", ");
     // Calculate duration
     const [sh, sm, sampm] = start.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, "08", "00", "AM"];
@@ -137,9 +139,9 @@ export default function DefendScreen() {
     return `Blocking ${days} from ${start} to ${end} (${hours}h ${mins}m)`;
   }
 
-  function handleSaveSchedule() {
-    // Placeholder: could persist or show a toast
-  }
+  const handleScheduleSaved = (savedSchedule: { days: string[]; start_time: string; end_time: string }) => {
+    setSchedule(savedSchedule);
+  };
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
@@ -253,15 +255,25 @@ export default function DefendScreen() {
         <View style={styles.sectionBox}>
           <View style={styles.scheduleBox}>
             <View style={styles.iconCircle}>
-              <Image source={APP_ICONS["clock-circle"]} style={styles.iconImage} />
+              <Image source={require("../../assets/images/onboarding/compass.png")} style={styles.iconImage} />
             </View>
             <View style={styles.scheduleTextContainer}>
               <Text style={styles.scheduleName}>Set up your blocking schedule to automate your focus time</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.actionButton} onPress={() => Alert.alert("Coming soon")}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => setShowScheduleModal(true)}>
             <Text style={styles.actionButtonText}>Set Schedule</Text>
           </TouchableOpacity>
+          {schedule.days.length > 0 && (
+            <View style={styles.schedulePreview}>
+              <View style={styles.schedulePreviewIcon}>
+                <Image source={APP_ICONS["clock-circle"]} style={styles.schedulePreviewIconImage} />
+              </View>
+              <Text style={styles.schedulePreviewText}>
+                Current schedule: {schedule.days.length === 7 ? "Every day" : schedule.days.join(", ")} | {schedule.start_time.replace(":00", "")} - {schedule.end_time.replace(":00", "")}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={{ marginBottom: SPACING.sm }}>
@@ -286,8 +298,13 @@ export default function DefendScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      {showModal && <DefendModal onClose={() => setShowModal(false)} />}
+      {showModal && <DefendModal onClose={() => setShowModal(false)} schedule={schedule} />}
       <PornBlockModal visible={showPornModal} onClose={() => setShowPornModal(false)} variant={pornModalVariant} />
+      <ScheduleModal 
+        visible={showScheduleModal} 
+        onClose={() => setShowScheduleModal(false)} 
+        onScheduleSaved={handleScheduleSaved}
+      />
     </ImageBackground>
   );
 }
@@ -446,10 +463,20 @@ const styles = StyleSheet.create({
   sectionContainer: {
     marginTop: SPACING.xl,
   },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.sm,
+  },
   sectionIcon: {
     width: 32,
     height: 32,
     marginRight: SPACING.sm,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontFamily: "Vollkorn-Bold",
+    color: COLORS.textPrimary,
   },
   inputContainer: {
     flexDirection: "row",
@@ -645,5 +672,36 @@ const styles = StyleSheet.create({
   },
   pornRow: {
     borderWidth: 4,
+  },
+  schedulePreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F9E7B0",
+    borderRadius: 12,
+    padding: SPACING.sm,
+    marginTop: SPACING.md,
+    borderWidth: 1,
+    borderColor: "#E6D3A7",
+  },
+  schedulePreviewIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#D6C08D",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: SPACING.sm,
+  },
+  schedulePreviewIconImage: {
+    width: 20,
+    height: 20,
+    resizeMode: "contain",
+  },
+  schedulePreviewText: {
+    flex: 1,
+    fontSize: 14,
+    fontFamily: "Vollkorn-SemiBold",
+    color: COLORS.textPrimary,
+    lineHeight: 20,
   },
 });
