@@ -194,7 +194,7 @@ export default function PaywallPricing() {
                 Reclaim your time,{"\n"}your clarity, your{"\n"}mission
               </Text>
             </View>
-            <View style={styles.featureRow}>
+            <View style={[styles.featureRow, { marginTop: 2 }]}>
               <Image source={require("../../assets/images/onboarding/feature-4.png")} style={styles.featureIconImg} />
               <Text style={styles.featureText}>
                 Be part of a{"\n"}like-minded{"\n"}community
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
     flexWrap: "wrap",
     width: "100%",
-    bottom: SPACING.md,
+    bottom: SPACING.sm,
   },
   footerLink: {
     color: COLORS.gold,

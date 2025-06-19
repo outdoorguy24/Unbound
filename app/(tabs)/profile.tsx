@@ -1,33 +1,25 @@
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
-import { registerForPushNotificationsAsync, sendTestNotification } from "@/utils/notifications";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { ImageBackground, Platform, ScrollView, Share, StyleSheet, Text, TouchableOpacity } from "react-native";
 
-const SETTINGS = [
+const ACCOUNT = [
   {
-    label: "Weekly Summary",
-    icon: <Feather name="calendar" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    route: "/profile/weekly-summary",
+    label: "Terms of Use",
+    icon: <Feather name="file-text" size={24} color="#564110" style={{ marginRight: 16 }} />,
+    route: "/profile/privacy-policy",
   },
   {
     label: "Privacy Policy",
     icon: <Feather name="lock" size={24} color="#564110" style={{ marginRight: 16 }} />,
     route: "/profile/privacy-policy",
   },
-];
-const ACCOUNT = [
   {
-    label: "Export Data",
-    icon: <Feather name="download" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    route: "/profile/export-data",
-  },
-  {
-    label: "Delete Account",
-    icon: <Feather name="trash-2" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    route: "/profile/delete-account",
+    label: "Notifications",
+    icon: <Feather name="bell" size={24} color="#564110" style={{ marginRight: 16 }} />,
+    route: "/profile/privacy-policy",
   },
 ];
 const COMMUNITY = [
@@ -90,34 +82,9 @@ export default function ProfileScreen() {
             <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
           </TouchableOpacity>
         ))}
-        <Text style={styles.sectionTitle}>Settings</Text>
-        {SETTINGS.map((item) => (
-          <TouchableOpacity key={item.label} style={styles.menuCard} onPress={() => router.push(item.route)}>
-            {item.icon}
-            <Text style={styles.menuLabel}>{item.label}</Text>
-            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-          </TouchableOpacity>
-        ))}
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
-        {/* DEV-ONLY: Push notification test button */}
-        {__DEV__ && (
-          <>
-            <TouchableOpacity
-              style={[styles.logoutButton, { backgroundColor: "#F7E0A3", marginTop: SPACING.md }]}
-              onPress={registerForPushNotificationsAsync}
-            >
-              <Text style={[styles.logoutText, { color: "#4B3415" }]}>Register for Push Notifications</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.logoutButton, { backgroundColor: "#F7E0A3", marginTop: SPACING.md }]}
-              onPress={sendTestNotification}
-            >
-              <Text style={[styles.logoutText, { color: "#4B3415" }]}>Send Test Notification</Text>
-            </TouchableOpacity>
-          </>
-        )}
       </ScrollView>
     </ImageBackground>
   );
@@ -156,7 +123,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: "Vollkorn-Bold",
     color: "#2C1A05",
-    marginTop: SPACING.sm,
     marginBottom: SPACING.md,
     marginLeft: 24,
     textAlign: "left",

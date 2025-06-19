@@ -91,13 +91,6 @@ export default function TrailLogScreen() {
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <View style={styles.container}>
         <Text style={styles.header}>Trail Log</Text>
-        <Text style={styles.subtitle}>Total time reclaimed since installation</Text>
-        <View style={styles.milestoneBox}>
-          <Image source={require("../../assets/images/flag.png")} style={styles.milestoneIcon} />
-          <Text style={styles.milestoneValue}>{milestoneHours} Hours</Text>
-          <Text style={styles.milestoneSub}>Time Saved Goal</Text>
-        </View>
-
         <View style={styles.quoteBox}>
           <Text style={styles.quoteText}>
             The edge... there is no honest way to explain it because the only thing that matters.
@@ -122,6 +115,11 @@ export default function TrailLogScreen() {
             <Text style={styles.statValue}>{streakDays}</Text>
             <Text style={styles.statLabel}>Streak Days</Text>
           </View>
+        </View>
+        <View style={styles.milestoneBox}>
+          <Image source={require("../../assets/images/flag.png")} style={styles.milestoneIcon} />
+          <Text style={styles.milestoneValue}>{milestoneHours} Hours</Text>
+          <Text style={styles.milestoneSub}>Time Saved Goal</Text>
         </View>
       </View>
     </ImageBackground>
@@ -148,19 +146,12 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     textAlign: "center",
   },
-  subtitle: {
-    color: "#2C1A05",
-    fontSize: 18,
-    fontFamily: "Vollkorn-SemiBold",
-    textAlign: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.sm,
-  },
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: SPACING.md,
+    marginTop: SPACING.md,
+    marginBottom: -1 * SPACING.xxl,
     width: "100%",
     height: undefined,
   },
@@ -221,7 +212,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#E6D3A7",
     padding: SPACING.md,
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xl,
     marginBottom: SPACING.md,
     width: "100%",
     alignItems: "center",
