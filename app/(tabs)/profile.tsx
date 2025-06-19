@@ -47,7 +47,6 @@ export default function ProfileScreen() {
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Profile</Text>
-        <Text style={styles.subtitle}>All the fun stuff</Text>
         <Text style={styles.sectionTitle}>Community</Text>
         {COMMUNITY.map((item) => (
           <TouchableOpacity
@@ -106,18 +105,9 @@ const styles = StyleSheet.create({
     color: "#2C1A05",
     top: SPACING.xl,
     marginTop: SPACING.xl,
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xl * 1.35,
     textAlign: "left",
     marginLeft: 24,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontFamily: "Vollkorn-SemiBold",
-    color: "#2C1A05",
-    marginBottom: 32,
-    marginTop: SPACING.xl,
-    marginLeft: 24,
-    textAlign: "left",
   },
   sectionTitle: {
     fontSize: 22,
