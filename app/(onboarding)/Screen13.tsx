@@ -2,8 +2,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { findOrCreatePartner } from "@/lib/partnerMatching";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 export default function Screen13() {
   const router = useRouter();
@@ -17,31 +17,44 @@ export default function Screen13() {
   useEffect(() => {
     let dotTimer: ReturnType<typeof setInterval>;
     let searchTimer: ReturnType<typeof setTimeout>;
-    let redirectTimer: ReturnType<typeof setTimeout>;
+    let noMatchTimer: ReturnType<typeof setTimeout>;
+    
+    // Animate the dots
     dotTimer = setInterval(() => setDotIndex((i) => (i + 1) % 3), 400);
-    // Simulate 2-3 second search
+
+    // Search for partner after 2-3 second delay
     searchTimer = setTimeout(async () => {
       if (!user?.id) return;
       const res = await findOrCreatePartner(user.id);
       setMatched(res.matched);
+      
       if (res.matched && res.partnerId) {
+        // Found a match
         const profile = await getUserProfile(res.partnerId);
         setPartnerProfile(profile);
+        setSearching(false);
+        
+        // Show match for 2-3 seconds then redirect
+        setTimeout(() => {
+          router.replace("/(tabs)/camp");
+        }, 2000 + Math.random() * 1000);
+      } else {
+        // No match found
+        setSearching(false);
+        // Start the no-match message timer
+        noMatchTimer = setTimeout(() => {
+          setTimeoutReached(true);
+          setTimeout(() => {
+            router.replace("/(tabs)/camp");
+          }, 2000);
+        }, 3000);
       }
-      setSearching(false);
-      clearInterval(dotTimer);
     }, 2000 + Math.random() * 1000);
-    // Start a 10 second timer to auto-redirect if no partner is found
-    redirectTimer = setTimeout(() => {
-      setTimeoutReached(true);
-      setTimeout(() => {
-        router.replace("/(tabs)/camp");
-      }, 2000);
-    }, 10000);
+
     return () => {
-      clearTimeout(searchTimer);
       clearInterval(dotTimer);
-      clearTimeout(redirectTimer);
+      clearTimeout(searchTimer);
+      clearTimeout(noMatchTimer);
     };
   }, [router, user]);
 
@@ -88,17 +101,11 @@ export default function Screen13() {
               !
             </Text>
             <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
-            <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace("/defend")}>
-              <Text style={styles.continueText}>Continue</Text>
-            </TouchableOpacity>
           </>
         ) : (
           <>
             <Text style={styles.noMatch}>You&apos;re first in line - your partner will join soon!</Text>
             <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
-            <TouchableOpacity style={styles.continueBtn} onPress={() => router.replace("/defend")}>
-              <Text style={styles.continueText}>Continue</Text>
-            </TouchableOpacity>
           </>
         )}
         <View style={styles.dotsRow}>{dots}</View>
@@ -181,17 +188,5 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-Bold",
     textAlign: "center",
     lineHeight: 32,
-  },
-  continueBtn: {
-    backgroundColor: "#4B3415",
-    padding: 16,
-    borderRadius: 16,
-    marginTop: 24,
-  },
-  continueText: {
-    fontSize: 22,
-    color: "#FFFFFF",
-    fontFamily: "Vollkorn-Bold",
-    textAlign: "center",
-  },
+  }
 });

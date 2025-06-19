@@ -22,9 +22,17 @@ export default function ScreenProfileSetup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isValidName = (name: string) => /^[A-Za-z]{3,}$/.test(name);
-  const isValidCity = (city: string) => /^[A-Za-z ]{3,}$/.test(city);
-  const canSubmit = isValidName(firstName) && (city.length === 0 || isValidCity(city));
+  const isValidName = (name: string) => {
+    const trimmed = name.trim();
+    return trimmed.length >= 2 && /^[A-Za-z\s'-]+$/.test(trimmed);
+  };
+  
+  const isValidCity = (city: string) => {
+    const trimmed = city.trim();
+    return trimmed.length >= 2 && /^[A-Za-z\s'-]+$/.test(trimmed);
+  };
+
+  const canSubmit = isValidName(firstName) && isValidCity(city);
 
   const handleSubmit = async () => {
     if (!user?.id) return;
