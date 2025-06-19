@@ -1,7 +1,7 @@
-import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { ImageBackground, StyleSheet, Text, View } from "react-native";
+import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
+import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function Screen10() {
+export default function Screen10({ onSubmit }: { onSubmit?: () => void }) {
   return (
     <ImageBackground
       source={require("../../assets/images/parchment-bg.png")}
@@ -17,6 +17,14 @@ export default function Screen10() {
             So you&apos;ll also be paired{"\n"}with another guy to see{"\n"}each others&apos; progress.
           </Text>
         </View>
+        <TouchableOpacity
+          style={[styles.button, SHADOWS.medium]}
+          onPress={() => {
+            if (onSubmit) onSubmit();
+          }}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
@@ -28,14 +36,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
+    justifyContent: "space-between",
   },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: LAYOUT.paddingHorizontal,
   },
   title: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
@@ -58,5 +65,21 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     textAlign: "center",
     marginTop: SPACING.xl,
+  },
+  button: {
+    backgroundColor: "#3C6845",
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    minWidth: 200,
+    alignItems: "center",
+    alignSelf: "center",
+    marginBottom: SPACING.huge,
+  },
+  buttonText: {
+    fontFamily: TYPOGRAPHY.heading.fontFamily,
+    color: COLORS.buttonText,
+    fontSize: 24,
+    fontWeight: "bold",
   },
 });

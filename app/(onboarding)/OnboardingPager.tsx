@@ -45,8 +45,9 @@ export default function OnboardingPager() {
 
   // Handler for screens that require submit
   const getScreenProps = (screenIdx: number) => {
-    // Screens 6, 7, 8, 9 (indexes 5, 6, 7, 8) require submit
-    if ([5, 6, 7, 8].includes(screenIdx)) {
+    // Screens 6, 7, 8, 9, 10 (indexes 5, 6, 7, 8, 9) require submit
+    // Note: Screen11 (index 10) is rendered separately as an overlay
+    if ([5, 6, 7, 8, 9].includes(screenIdx)) {
       return {
         onSubmit: () => {
           setCanSwipe(true);
@@ -62,12 +63,20 @@ export default function OnboardingPager() {
 
   // Render screens with props for submit screens
   const renderScreens = () =>
-    SCREEN_ORDER.map((Screen, idx) => (
-      <View key={idx} style={{ flex: 1 }}>
-        {/* Do not render Screen11 as a pager child */}
-        {idx !== 10 && <Screen {...getScreenProps(idx)} />}
-      </View>
-    ));
+    SCREEN_ORDER.map((Screen, idx) => {
+      // Screen11 is rendered separately as an overlay
+      if (idx === 10) {
+        return <View key={idx} style={{ flex: 1 }} />;
+      }
+      
+      // Regular screens get props based on whether they need submit
+      const props = getScreenProps(idx);
+      return (
+        <View key={idx} style={{ flex: 1 }}>
+          <Screen {...props} />
+        </View>
+      );
+    });
 
   // Progress bar width (10 segments, 10% per screen)
   const progress = (page + 1) / 10;
