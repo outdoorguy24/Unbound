@@ -64,7 +64,8 @@ export default function OnboardingPager() {
   const renderScreens = () =>
     SCREEN_ORDER.map((Screen, idx) => (
       <View key={idx} style={{ flex: 1 }}>
-        <Screen {...getScreenProps(idx)} />
+        {/* Do not render Screen11 as a pager child */}
+        {idx !== 10 && <Screen {...getScreenProps(idx)} />}
       </View>
     ));
 
@@ -90,6 +91,8 @@ export default function OnboardingPager() {
       >
         {renderScreens()}
       </PagerView>
+      {/* Render Screen11 as an overlay when on page 10 */}
+      {page === 10 && <Screen11 onFinish={goToNext} />}
       {/* Progress bar only on screens 0-9 (1-10) */}
       {page <= 9 && (
         <View style={styles.progressBarContainer}>
