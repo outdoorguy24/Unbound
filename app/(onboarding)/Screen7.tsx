@@ -31,15 +31,16 @@ const OPTIONS = [
 ];
 
 export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
-    if (selected === null && disableSwipeFn) disableSwipeFn();
-    if (selected !== null && enableSwipe) enableSwipe();
-  }, [disableSwipeFn, enableSwipe, selected]);
+    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
+  }, [disableSwipeFn, selected]);
 
   const toggleOption = (key: string) => {
-    setSelected((prev) => (prev === key ? null : key));
+    setSelected((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   };
 
   return (
@@ -55,7 +56,7 @@ export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSw
             {OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.key}
-                style={[styles.option, selected === option.key && styles.optionSelected]}
+                style={[styles.option, selected.includes(option.key) && styles.optionSelected]}
                 onPress={() => toggleOption(option.key)}
                 activeOpacity={0.8}
               >
@@ -71,11 +72,12 @@ export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSw
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.nextBtn, !selected && styles.nextBtnDisabled]}
+          style={[styles.nextBtn, selected.length === 0 && styles.nextBtnDisabled]}
           onPress={() => {
+            if (enableSwipe) enableSwipe();
             if (onSubmit) onSubmit();
           }}
-          disabled={!selected}
+          disabled={selected.length === 0}
         >
           <Text style={styles.nextBtnText}>Next</Text>
         </TouchableOpacity>
