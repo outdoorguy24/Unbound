@@ -94,8 +94,10 @@ export default function DefendScreen() {
 
   const handleTogglePorn = () => {
     setBlockPorn((val) => !val);
-    setPornModalVariant(blockPorn ? 2 : 1);
-    setShowPornModal(true);
+    if (!blockPorn) {
+      setPornModalVariant(2);
+      setShowPornModal(true);
+    }
   };
 
   const handleDayToggle = (day: string) => {
