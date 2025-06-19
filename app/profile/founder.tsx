@@ -2,10 +2,97 @@ import { SPACING } from "@/constants/theme";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Image, ImageBackground, Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ImageBackground, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+// Contact information
+const CONTACT_PHONE = process.env.EXPO_PUBLIC_CONTACT_PHONE || "+19164207262"; // Unbound contact number
+const CONTACT_EMAIL = "howdy@unboundapp.live";
+const EMAIL_SUBJECT = "Thoughts about Unbound";
+const EMAIL_BODY = ""; // Empty body text
 
 export default function FounderScreen() {
   const router = useRouter();
+  
+  const handleSendText = () => {
+    // Format the phone number to ensure it works on all devices
+    const formattedPhone = CONTACT_PHONE.replace(/[^\d+]/g, '');
+    Linking.openURL(`sms:${formattedPhone}`);
+  };
+
+  const handleEmail = async () => {
+    // Encode the email parameters
+    const emailUrl = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(EMAIL_SUBJECT)}&body=${encodeURIComponent(EMAIL_BODY)}`;
+    
+    // Different URL schemes for Gmail
+    const gmailUrls = Platform.select({
+      ios: [
+        // Try different known Gmail URL schemes for iOS
+        `googlegmail:///co?to=${CONTACT_EMAIL}`,
+        `googlegmail://co?to=${CONTACT_EMAIL}`,
+        `gmail://co?to=${CONTACT_EMAIL}`,
+      ],
+      android: [`googlegmail://co?to=${CONTACT_EMAIL}`]
+    }) || [];
+
+    try {
+      // Check if Gmail is available first
+      let canOpenGmail = false;
+      let workingGmailUrl = '';
+      
+      // Try each Gmail URL scheme
+      for (const url of gmailUrls) {
+        try {
+          const canOpen = await Linking.canOpenURL(url);
+          if (canOpen) {
+            canOpenGmail = true;
+            workingGmailUrl = url;
+            break;
+          }
+        } catch (e) {
+          console.log('Error checking URL:', url, e);
+        }
+      }
+
+      // If Gmail is available, show choice dialog
+      if (canOpenGmail) {
+        Alert.alert(
+          'Choose Email App',
+          'Which email app would you like to use?',
+          [
+            {
+              text: 'Gmail',
+              onPress: () => {
+                const fullGmailUrl = `${workingGmailUrl}&subject=${encodeURIComponent(EMAIL_SUBJECT)}&body=${encodeURIComponent(EMAIL_BODY)}`;
+                Linking.openURL(fullGmailUrl).catch(() => {
+                  // Fallback to default mail if Gmail fails
+                  Linking.openURL(emailUrl);
+                });
+              }
+            },
+            {
+              text: 'Mail',
+              onPress: () => Linking.openURL(emailUrl)
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel'
+            }
+          ]
+        );
+      } else {
+        // If Gmail is not available, just open default mail
+        await Linking.openURL(emailUrl);
+      }
+    } catch (error) {
+      console.log('Email error:', error);
+      Alert.alert(
+        'Error',
+        'Could not open email app. Please make sure you have an email app installed.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <View style={styles.headerRow}>
@@ -32,13 +119,13 @@ export default function FounderScreen() {
             feedback.
           </Text>
         </View>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => Linking.openURL("sms:+1234567890")}>
+        <TouchableOpacity style={styles.actionBtn} onPress={handleSendText}>
           <Image source={require("../../assets/images/message.png")} style={styles.actionIcon} />
           <Text style={styles.actionBtnText}>Send a Text</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionBtn, { marginTop: 18 }]}
-          onPress={() => Linking.openURL("mailto:alex@unboundapp.com")}
+          onPress={handleEmail}
         >
           <Image source={require("../../assets/images/email.png")} style={styles.actionIcon} />
           <Text style={styles.actionBtnText}>Email Me</Text>
