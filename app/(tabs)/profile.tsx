@@ -3,18 +3,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { ImageBackground, Platform, ScrollView, Share, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { ImageBackground, Linking, Platform, ScrollView, Share, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 const ACCOUNT = [
   {
     label: "Terms of Use",
     icon: <Feather name="file-text" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    route: "/profile/privacy-policy",
+    action: "terms",
   },
   {
     label: "Privacy Policy",
     icon: <Feather name="lock" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    route: "/profile/privacy-policy",
+    action: "privacy",
   },
   {
     label: "Notifications",
@@ -43,6 +43,27 @@ const COMMUNITY = [
 export default function ProfileScreen() {
   const router = useRouter();
   const { logout } = useAuth();
+
+  const handleAccountPress = async (item: typeof ACCOUNT[0]) => {
+    if (item.route) {
+      router.push(item.route);
+    }
+    if (item.action === "terms") {
+      try {
+        await Linking.openURL("https://www.unboundapp.live/terms-of-use");
+      } catch (error) {
+        console.error("Error opening terms:", error);
+      }
+    }
+    if (item.action === "privacy") {
+      try {
+        await Linking.openURL("https://www.unboundapp.live/privacy-policy");
+      } catch (error) {
+        console.error("Error opening privacy policy:", error);
+      }
+    }
+  };
+
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -75,7 +96,11 @@ export default function ProfileScreen() {
         ))}
         <Text style={styles.sectionTitle}>Account</Text>
         {ACCOUNT.map((item) => (
-          <TouchableOpacity key={item.label} style={styles.menuCard} onPress={() => router.push(item.route)}>
+          <TouchableOpacity 
+            key={item.label} 
+            style={styles.menuCard} 
+            onPress={() => handleAccountPress(item)}
+          >
             {item.icon}
             <Text style={styles.menuLabel}>{item.label}</Text>
             <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
