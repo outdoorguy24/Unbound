@@ -19,7 +19,7 @@ const ACCOUNT = [
   {
     label: "Notifications",
     icon: <Feather name="bell" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    route: "/profile/privacy-policy",
+    action: "notifications",
   },
 ];
 const COMMUNITY = [
@@ -60,6 +60,17 @@ export default function ProfileScreen() {
         await Linking.openURL("https://www.unboundapp.live/privacy-policy");
       } catch (error) {
         console.error("Error opening privacy policy:", error);
+      }
+    }
+    if (item.action === "notifications") {
+      try {
+        if (Platform.OS === 'ios') {
+          await Linking.openURL('app-settings:');
+        } else {
+          await Linking.openSettings();
+        }
+      } catch (error) {
+        console.error("Error opening settings:", error);
       }
     }
   };
