@@ -209,7 +209,9 @@ export default function PaywallPricing() {
               <TouchableOpacity
                 style={[
                   styles.pricingBoxMonthly,
-                  selected?.identifier === monthlyPkg?.identifier && styles.selectedBox,
+                  selected?.identifier === monthlyPkg?.identifier
+                    ? { borderColor: COLORS.dark }
+                    : { borderColor: COLORS.gold },
                 ]}
                 onPress={() => {
                   setSelected(monthlyPkg || null);
@@ -235,7 +237,12 @@ export default function PaywallPricing() {
             </View>
             <View style={styles.bottomRow}>
               <TouchableOpacity
-                style={[styles.pricingBoxAnnual, selected?.identifier === annualPkg?.identifier && styles.selectedBox]}
+                style={[
+                  styles.pricingBoxAnnual,
+                  selected?.identifier === annualPkg?.identifier
+                    ? { borderColor: COLORS.dark }
+                    : { borderColor: COLORS.gold },
+                ]}
                 onPress={() => {
                   setSelected(annualPkg || null);
                 }}
@@ -304,6 +311,7 @@ const styles = StyleSheet.create({
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: SPACING.md,
     marginBottom: SPACING.md,
   },
   featureIcon: {
@@ -314,19 +322,20 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontFamily: "Vollkorn-SemiBold",
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.dark,
     flex: 1,
     flexWrap: "wrap",
+    lineHeight: 22,
   },
   pricingWrap: {
     width: "100%",
-    marginTop: SPACING.massive,
+    marginTop: SPACING.md,
   },
   monthlyBoxWrap: {
     width: 200,
     alignItems: "center",
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
     position: "relative",
   },
   mostPopularTag: {
@@ -335,37 +344,25 @@ const styles = StyleSheet.create({
     left: 18,
     zIndex: 2,
     backgroundColor: "#AA6B05",
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
+    borderRadius: 5,
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
     alignSelf: "flex-start",
-    shadowColor: COLORS.dark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
-    elevation: 2,
   },
   mostPopularText: {
     color: COLORS.gold,
     fontWeight: "bold",
     fontSize: 14,
-    fontFamily: "Vollkorn-Bold",
+    fontFamily: "Vollkorn-SemiBold",
     letterSpacing: 1,
   },
   pricingBoxMonthly: {
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
+    borderRadius: 16,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     alignItems: "center",
     borderWidth: 3,
-    borderColor: COLORS.dark,
     minWidth: 200,
     marginBottom: 0,
     shadowColor: COLORS.dark,
@@ -389,29 +386,23 @@ const styles = StyleSheet.create({
   },
   startTrialBtn: {
     backgroundColor: COLORS.accent,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    borderRadius: 12,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     alignItems: "center",
     width: 200,
-    marginTop: -5,
+    marginTop: -10,
     marginBottom: SPACING.md,
     zIndex: 2,
   },
   disabledStartTrialBtn: {
     backgroundColor: COLORS.accent,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    borderRadius: 12,
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     alignItems: "center",
     width: 200,
-    marginTop: -5,
+    marginTop: -10,
     marginBottom: SPACING.md,
     zIndex: 2,
     opacity: 0.8,
@@ -431,12 +422,11 @@ const styles = StyleSheet.create({
     marginTop: -SPACING.md,
   },
   pricingBoxAnnual: {
-    backgroundColor: "transparent",
+    backgroundColor: "#192E0E",
     borderRadius: 16,
     borderWidth: 3,
-    borderColor: COLORS.gold,
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.xl,
+    paddingVertical: 1.2 * SPACING.md,
     alignItems: "center",
     minWidth: 190,
     maxWidth: 200,
@@ -447,7 +437,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
     marginRight: SPACING.xl,
-    marginBottom: SPACING.xxl,
+    marginBottom: SPACING.xxxl,
   },
   priceAnnual: {
     color: COLORS.gold,
