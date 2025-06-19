@@ -207,7 +207,7 @@ export default function DefendScreen() {
             <Text style={[styles.appName, blockPorn && styles.appNameActive]}>Porn</Text>
             <TouchableOpacity onPress={() => setShowPornInfo((val) => !val)}>
               <Text style={[styles.appDescription, blockPorn && styles.appDescriptionActive]}>
-                This enables comprehensive adult content filtering. NoFap engaged. {showPornInfo ? "(Hide)" : "(Info)"}
+                This enables comprehensive adult content filtering. NoFap engaged.
               </Text>
             </TouchableOpacity>
           </View>
@@ -281,7 +281,7 @@ export default function DefendScreen() {
             <View style={styles.pillNumber}>
               <Text style={styles.pillNumberText}>3</Text>
             </View>
-            <Text style={styles.pillTitle}>Start Blocking</Text>
+            <Text style={styles.pillTitle}>Start Your Block</Text>
           </View>
         </View>
         <View style={styles.sectionBox}>
@@ -294,7 +294,7 @@ export default function DefendScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.actionButton} onPress={() => setShowModal(true)}>
-            <Text style={styles.actionButtonText}>Start Blocking</Text>
+            <Text style={styles.actionButtonText}>Start Block</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
