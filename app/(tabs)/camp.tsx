@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
 
 // 1. Format minutes as "X hours, Y minutes"
 function formatTimeSaved(minutes: number): string {
@@ -191,7 +191,11 @@ export default function CampScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
-      <View style={styles.centered}>
+      <ScrollView
+        alwaysBounceVertical={true}
+        contentContainerStyle={styles.centered}
+        showsVerticalScrollIndicator={false}
+      >
         <Image source={require("../../assets/images/camp-avatar.png")} style={styles.avatar} />
         <Text style={styles.heroName}>{user.firstName}</Text>
         <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
@@ -230,7 +234,7 @@ export default function CampScreen() {
           </View>
           <Text style={[styles.communityTime, styles.sectionTitle]}>{formatTimeSaved(community.totalTimeSaved)}</Text>
         </View>
-      </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -242,7 +246,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   centered: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingTop: SPACING.xxxl,
