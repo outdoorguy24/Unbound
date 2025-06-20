@@ -2,8 +2,9 @@ import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
-import { ImageBackground, Linking, Platform, ScrollView, Share, StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, { useRef, useState } from "react";
+import { Alert, Animated, ImageBackground, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TouchableOpacity } from "react-native";
+import FounderModal from "../components/FounderModal";
 
 const ACCOUNT = [
   {
@@ -43,6 +44,34 @@ const COMMUNITY = [
 export default function ProfileScreen() {
   const router = useRouter();
   const { logout } = useAuth();
+  const [founderModalVisible, setFounderModalVisible] = useState(false);
+  const pressTimer = useRef<NodeJS.Timeout>();
+  const animatedValue = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.timing(animatedValue, {
+      toValue: 0.5,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+
+    pressTimer.current = setTimeout(() => {
+      Alert.alert("🎉 Founder Mode Activated");
+      setFounderModalVisible(true);
+    }, 5000); // 5 seconds
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+    }
+  };
 
   const handleAccountPress = async (item: typeof ACCOUNT[0]) => {
     if (item.route) {
@@ -75,36 +104,52 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleCommunityPress = async (item: typeof COMMUNITY[0]) => {
+    if (item.action === "refer") {
+      Share.share({
+        message: "Try Unbound! Reclaim your time: https://yourapp.com/referral",
+      });
+      return;
+    }
+    if (item.route) {
+      router.push(item.route);
+    }
+  };
+
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Profile</Text>
         <Text style={styles.sectionTitle}>Community</Text>
-        {COMMUNITY.map((item) => (
-          <TouchableOpacity
-            key={item.label}
-            style={styles.menuCard}
-            onPress={async () => {
-              if (item.route) router.push(item.route);
-              if (item.action === "review") {
-                const url =
-                  Platform.OS === "ios"
-                    ? "https://apps.apple.com/app/idYOUR_APP_ID"
-                    : "https://play.google.com/store/apps/details?id=YOUR_PACKAGE_NAME";
-                Share.share({ message: url });
-              }
-              if (item.action === "refer") {
-                Share.share({
-                  message: "Try Unbound! Reclaim your time: https://yourapp.com/referral",
-                });
-              }
-            }}
-          >
-            {item.icon}
-            <Text style={styles.menuLabel}>{item.label}</Text>
-            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-          </TouchableOpacity>
-        ))}
+        {COMMUNITY.map((item) => {
+          if (item.action === "refer") {
+            return (
+              <Pressable
+                key={item.label}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={() => handleCommunityPress(item)}
+              >
+                <Animated.View style={[styles.menuCard, { opacity: animatedValue }]}>
+                  {item.icon}
+                  <Text style={styles.menuLabel}>{item.label}</Text>
+                  <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+                </Animated.View>
+              </Pressable>
+            );
+          }
+          return (
+            <TouchableOpacity
+              key={item.label}
+              style={styles.menuCard}
+              onPress={() => handleCommunityPress(item)}
+            >
+              {item.icon}
+              <Text style={styles.menuLabel}>{item.label}</Text>
+              <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+            </TouchableOpacity>
+          );
+        })}
         <Text style={styles.sectionTitle}>Account</Text>
         {ACCOUNT.map((item) => (
           <TouchableOpacity 
@@ -121,6 +166,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
+      <FounderModal visible={founderModalVisible} onClose={() => setFounderModalVisible(false)} />
     </ImageBackground>
   );
 }
