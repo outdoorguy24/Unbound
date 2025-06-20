@@ -44,39 +44,39 @@ export default function CampScreen() {
     async function fetchData() {
       setLoading(true);
       try {
-        // Get current user
-        const { data: authData } = await supabase.auth.getUser();
-        const supaUser = authData?.user;
+      // Get current user
+      const { data: authData } = await supabase.auth.getUser();
+      const supaUser = authData?.user;
 
-        // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
-        if (__DEV__ && !supaUser && contextUser) {
-          setUser({
-            userId: contextUser.id,
-            firstName: contextUser.name || "Dev",
-            streakDays: 7,
-            timeSavedThisWeek: 123,
-          });
-          setPartner({
-            name: "Partner",
-            city: "Pairtown",
-            streakDays: 5,
-            status: "Getting started",
-          });
-          setCommunity({
-            totalUsers: 1234,
-            totalTimeSaved: 56789,
-          });
-          setLoading(false);
-          return;
-        }
+      // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
+      if (__DEV__ && !supaUser && contextUser) {
+        setUser({
+          userId: contextUser.id,
+          firstName: contextUser.name || "Dev",
+          streakDays: 7,
+          timeSavedThisWeek: 123,
+        });
+        setPartner({
+          name: "Partner",
+          city: "Pairtown",
+          streakDays: 5,
+          status: "Getting started",
+        });
+        setCommunity({
+          totalUsers: 1234,
+          totalTimeSaved: 56789,
+        });
+        setLoading(false);
+        return;
+      }
 
-        if (!supaUser) {
-          setLoading(false);
-          return;
-        }
+      if (!supaUser) {
+        setLoading(false);
+        return;
+      }
 
-        // Get user profile
-        const userProfile = await getUserProfile(supaUser.id);
+      // Get user profile
+      const userProfile = await getUserProfile(supaUser.id);
 
         // Get real streak data
         const streakData = await getStreak(supaUser.id);
@@ -90,12 +90,12 @@ export default function CampScreen() {
         
         const timeSavedThisWeek = await getTotalBlockedTime(supaUser.id, startOfWeek, now) || 0;
 
-        setUser({
-          userId: supaUser.id,
-          firstName: userProfile?.first_name || "Warrior",
-          streakDays,
+      setUser({
+        userId: supaUser.id,
+        firstName: userProfile?.first_name || "Warrior",
+        streakDays,
           timeSavedThisWeek,
-        });
+      });
 
         // Get real partner data
         const partnerData = await getPartnerData(supaUser.id);
@@ -127,12 +127,12 @@ export default function CampScreen() {
           timeSavedThisWeek: 0,
         });
         setPartner(null);
-        setCommunity({
+      setCommunity({
           totalUsers: 1000,
           totalTimeSaved: 50000,
-        });
+      });
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     }
     fetchData();
@@ -204,7 +204,7 @@ export default function CampScreen() {
           <Text style={styles.sectionTitle}>Time reclaimed this week</Text>
           <View style={[styles.rowCenter, styles.centeredRow]}>
             <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
-            <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
+          <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
           </View>
           <Text style={styles.timeCompare}>{getTimeComparison(user.timeSavedThisWeek)}</Text>
         </View>
@@ -219,7 +219,7 @@ export default function CampScreen() {
               {partner
                 ? `${partner.name} from ${partner.city} - Day ${partner.streakDays}`
                 : "Your partner is setting up their profile"}
-            </Text>
+              </Text>
           </View>
           {partner && <Text style={[styles.partnerStatus, styles.sectionTitle]}>{partner.status}</Text>}
         </View>
@@ -230,8 +230,8 @@ export default function CampScreen() {
             <Text style={styles.sectionTitle}>This week&apos;s warriors</Text>
           </View>
           <View style={[styles.rowCenter, styles.centeredRow]}>
-            <Text style={styles.communityStats}>You and {community.totalUsers.toLocaleString()} others reclaimed</Text>
-          </View>
+          <Text style={styles.communityStats}>You and {community.totalUsers.toLocaleString()} others reclaimed</Text>
+        </View>
           <Text style={[styles.communityTime, styles.sectionTitle]}>{formatTimeSaved(community.totalTimeSaved)}</Text>
         </View>
       </ScrollView>

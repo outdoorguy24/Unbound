@@ -21,7 +21,7 @@ RCT_EXTERN_METHOD(displayFamilyActivityPicker:(NSDictionary *)options
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(setActivitySelection:(NSDictionary *)selectionDict
+RCT_EXTERN_METHOD(setActivitySelection:(NSString *)selectionString
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

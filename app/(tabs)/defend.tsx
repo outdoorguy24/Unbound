@@ -1,9 +1,12 @@
 import { COLORS, SPACING } from "@/constants/theme";
-import React, { useState } from "react";
+import ScreenTime from "@/lib/ScreenTime";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
   ImageBackground,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -15,6 +18,8 @@ import {
 import DefendModal from "../components/DefendModal";
 import PornBlockModal from "../components/PornBlockModal";
 import ScheduleModal from "../components/ScheduleModal";
+
+const SELECTION_STORAGE_KEY = "UNBOUND_SELECTION_KEY";
 
 const APP_ICONS = {
   instagram: require("../../assets/images/instagram.png"),
@@ -44,7 +49,6 @@ const SOCIAL_APPS = [
   },
 ];
 
-// Keep all the time-related functions and constants
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function isValidDomain(domain: string) {
@@ -58,7 +62,6 @@ export default function DefendScreen() {
     Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
   );
 
-  // Keep all the state variables
   const [customSites, setCustomSites] = useState<{ key: string; name: string; url: string }[]>([]);
   const [customInput, setCustomInput] = useState("");
   const [blockPorn, setBlockPorn] = useState(false);
@@ -71,8 +74,51 @@ export default function DefendScreen() {
   const [allDayEveryDay, setAllDayEveryDay] = useState(false);
   const [showPornModal, setShowPornModal] = useState(false);
   const [pornModalVariant, setPornModalVariant] = useState<1 | 2>(1);
+  const [isBlockingEnabled, setIsBlockingEnabled] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [preSelected, setPreSelected] = useState<{ [key: string]: boolean }>(
+    Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
+  );
+  const [confirmedApps, setConfirmedApps] = useState<string[]>([]);
 
-  // Keep all the handler functions
+  useEffect(() => {
+    if (Platform.OS !== "ios") return;
+    const checkStatus = async () => {
+      const status = await ScreenTime.getAuthorizationStatus();
+      if (status.isAuthorized) {
+        const selection = await AsyncStorage.getItem(SELECTION_STORAGE_KEY);
+        if (!selection) {
+          setIsSelectionMode(true);
+          setIsBlockingEnabled(false);
+        } else {
+          // Load confirmed apps from storage if needed
+          const apps = await AsyncStorage.getItem("UNBOUND_CONFIRMED_APPS");
+          setConfirmedApps(apps ? JSON.parse(apps) : []);
+          setIsBlockingEnabled(true);
+          setIsSelectionMode(false);
+        }
+      }
+    };
+    checkStatus();
+  }, []);
+  
+  const handleEnableBlocking = async () => {
+    if (Platform.OS !== "ios") return;
+    try {
+      await ScreenTime.requestAuthorization("individual");
+      setIsSelectionMode(true);
+    } catch (error) {
+      Alert.alert("Error", "Could not enable blocking. Please try again.");
+    }
+  };
+
+  const handleResetBlocking = async () => {
+    if (Platform.OS !== "ios") return;
+    await AsyncStorage.removeItem(SELECTION_STORAGE_KEY);
+    setIsBlockingEnabled(false);
+    Alert.alert("Reset Complete", "Please restart the app to re-enable app blocking.");
+  };
+
   const toggleBlock = (key: string) => {
     setBlocked((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -99,56 +145,83 @@ export default function DefendScreen() {
       setShowPornModal(true);
     }
   };
-
-  const handleDayToggle = (day: string) => {
-    setSchedule((prev) => ({
-      ...prev,
-      days: prev.days.includes(day) ? prev.days.filter((d) => d !== day) : [...prev.days, day],
-    }));
-  };
-
-  const handleTimeChange = (field: "start_time" | "end_time", value: string) => {
-    setSchedule((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const scheduleSummary = `${schedule.days.join(", ")} | ${schedule.start_time}–${schedule.end_time}`;
-
-  function toggleAllDayEveryDay(val: boolean) {
-    setAllDayEveryDay(val);
-    if (val) {
-      setSchedule({ days: [...DAYS], start_time: "12:00 PM", end_time: "11:59 PM" });
-    }
-  }
-
-  function getScheduleSummary() {
-    if (allDayEveryDay) return "Blocking all day, every day";
-    const start = schedule.start_time;
-    const end = schedule.end_time;
-    const days = schedule.days.length === 7 ? "Every day" : schedule.days.join(", ");
-    // Calculate duration
-    const [sh, sm, sampm] = start.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, "08", "00", "AM"];
-    const [eh, em, eampm] = end.match(/(\d{1,2}):(\d{2}) ?(AM|PM)/i) || [null, "08", "00", "AM"];
-    let sHour = parseInt(sh || "8", 10);
-    let eHour = parseInt(eh || "8", 10);
-    if (sampm === "PM" && sHour < 12) sHour += 12;
-    if (sampm === "AM" && sHour === 12) sHour = 0;
-    if (eampm === "PM" && eHour < 12) eHour += 12;
-    if (eampm === "AM" && eHour === 12) eHour = 0;
-    let duration = eHour * 60 + parseInt(em || "0", 10) - (sHour * 60 + parseInt(sm || "0", 10));
-    if (duration < 0) duration += 24 * 60;
-    const hours = Math.floor(duration / 60);
-    const mins = duration % 60;
-    return `Blocking ${days} from ${start} to ${end} (${hours}h ${mins}m)`;
-  }
-
+  
   const handleScheduleSaved = (savedSchedule: { days: string[]; start_time: string; end_time: string }) => {
     setSchedule(savedSchedule);
+  };
+
+  const handleEditSelection = () => {
+    const currentSelection = Object.fromEntries(
+      SOCIAL_APPS.map(app => [app.key, confirmedApps.includes(app.key)])
+    );
+    setPreSelected(currentSelection);
+    setIsSelectionMode(true);
+  };
+
+  const handlePreSelectToggle = (key: string) => {
+    setPreSelected((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleConfirmSelectionWithApple = async () => {
+    const selectedApps = Object.entries(preSelected)
+      .filter(([key, value]) => value && key !== "porn")
+      .map(([key]) => key);
+
+    const selectedAppNames = selectedApps.map(
+      (key) => SOCIAL_APPS.find((a) => a.key === key)?.name || key
+    );
+
+    if (selectedAppNames.length === 0) {
+      Alert.alert("No Apps Selected", "Please select at least one app to continue.");
+      return;
+    }
+
+    Alert.alert(
+      "Confirm with Apple",
+      `Apple's privacy rules require you to manually confirm your choices. Please find and select the following apps on the next screen:\n\n• ${selectedAppNames.join("\n• ")}\n\nPro Tip: the search bar on top works wonders`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Continue",
+          onPress: async () => {
+            try {
+              const { selection } = await ScreenTime.displayFamilyActivityPicker({
+                headerText: "Choose Apps to Block",
+              });
+
+              if (selection) {
+                await AsyncStorage.setItem(SELECTION_STORAGE_KEY, selection);
+                await AsyncStorage.setItem("UNBOUND_CONFIRMED_APPS", JSON.stringify(selectedApps));
+                setConfirmedApps(selectedApps);
+                setBlocked(preSelected);
+                setIsBlockingEnabled(true);
+                setIsSelectionMode(false);
+                Alert.alert("Setup Complete", "You can now block apps from the Defend screen.");
+              } else {
+                Alert.alert(
+                  "Setup Incomplete",
+                  "You didn't select any apps. Please try again to complete the setup."
+                );
+              }
+            } catch (error) {
+              Alert.alert("Error", "Could not complete confirmation. Please try again.");
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <Text style={styles.title}>Start Your Block</Text>
+
+        {Platform.OS === 'ios' && (
+            <TouchableOpacity style={[styles.actionButton, { marginBottom: SPACING.md, backgroundColor: '#A52A2A' }]} onPress={handleResetBlocking}>
+              <Text style={styles.actionButtonText}>Reset App Blocking (Dev)</Text>
+            </TouchableOpacity>
+        )}
 
         <View style={{ marginBottom: SPACING.sm }}>
           <View style={styles.stepPillHeader}>
@@ -158,70 +231,123 @@ export default function DefendScreen() {
             <Text style={styles.pillTitle}>Toggle to block or unblock</Text>
           </View>
         </View>
-        <View style={styles.sectionBox}>
-          <Text style={styles.infoText}>
-            This will block the actual app AND the website on your browser. You will be unable to uninstall Unbound
-            while the block is active. No workarounds, no funny business.
-          </Text>
-        </View>
 
-        {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
-          <View key={app.key} style={[styles.appRow, blocked[app.key] && styles.appRowActive]}>
-            <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
-            <View style={styles.appTextContainer}>
-              <Text style={[styles.appName, blocked[app.key] && styles.appNameActive]}>{app.name}</Text>
-              {"description" in app && app.description && (
-                <Text style={[styles.appDescription, blocked[app.key] && styles.appDescriptionActive]}>
-                  {app.description}
-                </Text>
-              )}
-            </View>
-            <Switch
-              value={blocked[app.key]}
-              onValueChange={() => toggleBlock(app.key)}
-              trackColor={{ false: COLORS.background, true: COLORS.success }}
-              thumbColor={COLORS.tabBarActive}
-              style={styles.switch}
-            />
-          </View>
-        ))}
-
-        {customSites.map((site) => (
-          <View key={site.key} style={[styles.appRow, blocked[site.key] && styles.appRowActive]}>
-            <Image source={APP_ICONS["add-circle"]} style={styles.appIcon} />
-            <View style={styles.appTextContainer}>
-              <Text style={[styles.appName, blocked[site.key] && styles.appNameActive]}>{site.name}</Text>
-              <Text style={[styles.appUrl, blocked[site.key] && styles.appUrlActive]}>{site.url}</Text>
-            </View>
-            <Switch
-              value={blocked[site.key]}
-              onValueChange={() => toggleBlock(site.key)}
-              trackColor={{ false: COLORS.background, true: COLORS.success }}
-              thumbColor={COLORS.tabBarActive}
-              style={styles.switch}
-            />
-          </View>
-        ))}
-
-        <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
-          <Image source={APP_ICONS.porn} style={styles.appIcon} />
-          <View style={styles.appTextContainer}>
-            <Text style={[styles.appName, blockPorn && styles.appNameActive]}>Porn</Text>
-            <TouchableOpacity onPress={() => setShowPornInfo((val) => !val)}>
-              <Text style={[styles.appDescription, blockPorn && styles.appDescriptionActive]}>
-                This enables comprehensive adult content filtering. NoFap engaged.
+        {isSelectionMode ? (
+          <>
+            <View style={styles.sectionBox}>
+              <Text style={styles.infoText}>
+                Select the apps and websites you want Unbound to be able to block. In the next step, Apple will require you to confirm your choices.
               </Text>
+            </View>
+            {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
+              <View key={app.key} style={[styles.appRow, preSelected[app.key] && styles.appRowActive]}>
+                <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
+                <View style={styles.appTextContainer}>
+                  <Text style={[styles.appName, preSelected[app.key] && styles.appNameActive]}>{app.name}</Text>
+                </View>
+                <Switch
+                  value={preSelected[app.key]}
+                  onValueChange={() => handlePreSelectToggle(app.key)}
+                  trackColor={{ false: COLORS.background, true: COLORS.success }}
+                  thumbColor={COLORS.tabBarActive}
+                  style={styles.switch}
+                />
+              </View>
+            ))}
+            <TouchableOpacity style={[styles.actionButton, { marginTop: SPACING.md }]} onPress={handleConfirmSelectionWithApple}>
+              <Text style={styles.actionButtonText}>Confirm Selection with Apple</Text>
+            </TouchableOpacity>
+            <Text style={{ color: COLORS.textSecondary, marginTop: 8, textAlign: 'center', fontSize: 14 }}>
+              Apple requires you to confirm your choices in the next step. Please select the same apps in the Apple popup.
+            </Text>
+          </>
+        ) :
+        (!isBlockingEnabled && Platform.OS === 'ios') ? (
+          <View style={styles.sectionBox}>
+            <Text style={styles.infoText}>
+              To block apps and websites, you must first grant Unbound access to Apple's Screen Time API.
+            </Text>
+            <TouchableOpacity style={[styles.actionButton, {marginTop: SPACING.md}]} onPress={handleEnableBlocking}>
+              <Text style={styles.actionButtonText}>Enable App Blocking</Text>
             </TouchableOpacity>
           </View>
-          <Switch
-            value={blockPorn}
-            onValueChange={handleTogglePorn}
-            trackColor={{ false: COLORS.background, true: COLORS.success }}
-            thumbColor={COLORS.tabBarActive}
-            style={styles.switch}
-          />
-        </View>
+        ) : (
+          <>
+            <View style={styles.sectionBox}>
+              <Text style={styles.infoText}>
+                This will block the actual app AND the website on your browser. You will be unable to uninstall Unbound
+                while the block is active. No workarounds, no funny business.
+              </Text>
+            </View>
+            
+            {isBlockingEnabled && !isSelectionMode && (
+              <TouchableOpacity onPress={handleEditSelection} style={styles.changeButtonContainer}>
+                <Text style={styles.editButtonText}>Change App Selection</Text>
+              </TouchableOpacity>
+            )}
 
+            {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
+              <View key={app.key} style={[styles.appRow, blocked[app.key] && styles.appRowActive]}>
+                <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
+                <View style={styles.appTextContainer}>
+                  <Text style={[styles.appName, blocked[app.key] && styles.appNameActive]}>{app.name}</Text>
+                  {"description" in app && app.description && (
+                    <Text style={[styles.appDescription, blocked[app.key] && styles.appDescriptionActive]}>
+                      {app.description}
+                    </Text>
+                  )}
+                </View>
+                <Switch
+                  value={blocked[app.key]}
+                  onValueChange={() => toggleBlock(app.key)}
+                  disabled={confirmedApps.length > 0 && !confirmedApps.includes(app.key)}
+                  trackColor={{ false: COLORS.background, true: COLORS.success }}
+                  thumbColor={COLORS.tabBarActive}
+                  style={styles.switch}
+                />
+              </View>
+            ))}
+            
+            {customSites.map((site) => (
+              <View key={site.key} style={[styles.appRow, blocked[site.key] && styles.appRowActive]}>
+                <Image source={APP_ICONS["add-circle"]} style={styles.appIcon} />
+                <View style={styles.appTextContainer}>
+                  <Text style={[styles.appName, blocked[site.key] && styles.appNameActive]}>{site.name}</Text>
+                  <Text style={[styles.appUrl, blocked[site.key] && styles.appUrlActive]}>{site.url}</Text>
+                </View>
+                <Switch
+                  value={blocked[site.key]}
+                  onValueChange={() => toggleBlock(site.key)}
+                  disabled={confirmedApps.length > 0 && !confirmedApps.includes(site.key)}
+                  trackColor={{ false: COLORS.background, true: COLORS.success }}
+                  thumbColor={COLORS.tabBarActive}
+                  style={styles.switch}
+                />
+              </View>
+            ))}
+
+            <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
+              <Image source={APP_ICONS.porn} style={styles.appIcon} />
+              <View style={styles.appTextContainer}>
+                <Text style={[styles.appName, blockPorn && styles.appNameActive]}>Porn</Text>
+                <TouchableOpacity onPress={() => setShowPornInfo((val) => !val)}>
+                  <Text style={[styles.appDescription, blockPorn && styles.appDescriptionActive]}>
+                    This enables comprehensive adult content filtering. NoFap engaged.
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <Switch
+                value={blockPorn}
+                onValueChange={handleTogglePorn}
+                disabled={confirmedApps.length > 0 && !confirmedApps.includes("porn")}
+                trackColor={{ false: COLORS.background, true: COLORS.success }}
+                thumbColor={COLORS.tabBarActive}
+                style={styles.switch}
+              />
+            </View>
+          </>
+        )}
+        
         <View style={[styles.sectionBox, { marginTop: SPACING.md }]}>
           <View style={styles.addCustomHeader}>
             <View style={styles.iconCircle}>
@@ -239,8 +365,13 @@ export default function DefendScreen() {
               value={customInput}
               onChangeText={setCustomInput}
               placeholderTextColor="#564110"
+              editable={isBlockingEnabled || Platform.OS !== 'ios'}
             />
-            <TouchableOpacity style={styles.addButton} onPress={handleAddCustomSite}>
+            <TouchableOpacity 
+              style={[styles.addButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+              onPress={handleAddCustomSite}
+              disabled={!isBlockingEnabled && Platform.OS === 'ios'}
+            >
               <Text style={styles.actionButtonText}>Add</Text>
             </TouchableOpacity>
           </View>
@@ -263,7 +394,11 @@ export default function DefendScreen() {
               <Text style={styles.scheduleName}>Set up your blocking schedule to automate your focus time</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.actionButton} onPress={() => setShowScheduleModal(true)}>
+          <TouchableOpacity 
+            style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+            onPress={() => setShowScheduleModal(true)}
+            disabled={!isBlockingEnabled && Platform.OS === 'ios'}
+          >
             <Text style={styles.actionButtonText}>Set Schedule</Text>
           </TouchableOpacity>
           {schedule.days.length > 0 && (
@@ -295,7 +430,11 @@ export default function DefendScreen() {
               <Text style={styles.scheduleName}>Defend Your Time</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.actionButton} onPress={() => setShowModal(true)}>
+          <TouchableOpacity 
+            style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+            onPress={() => setShowModal(true)}
+            disabled={!isBlockingEnabled && Platform.OS === 'ios'}
+          >
             <Text style={styles.actionButtonText}>Start Block</Text>
           </TouchableOpacity>
         </View>
@@ -314,7 +453,6 @@ export default function DefendScreen() {
 const styles = StyleSheet.create({
   bg: {
     flex: 1,
-    width: "100%",
   },
   container: {
     flex: 1,
@@ -368,6 +506,16 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-Bold",
     color: COLORS.textPrimary,
   },
+  editButtonText: {
+    fontFamily: "Vollkorn-Bold",
+    fontSize: 18,
+    color: COLORS.textPrimary,
+    textDecorationLine: 'underline',
+  },
+  changeButtonContainer: {
+    alignSelf: 'center',
+    marginBottom: SPACING.md,
+  },
   sectionBox: {
     backgroundColor: "#F9E7B0",
     borderRadius: SPACING.md,
@@ -380,49 +528,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
-  },
-  stepSectionBox: {
-    backgroundColor: "#F9E7B0",
-    borderRadius: SPACING.md,
-    borderWidth: 2.5,
-    borderColor: "#564110",
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  infoContainer: {
-    backgroundColor: "#F1D593",
-    borderRadius: SPACING.lg,
-    padding: SPACING.lg,
-    marginBottom: SPACING.xl,
-  },
-  infoHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.sm,
-  },
-  numberCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.textPrimary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: SPACING.sm,
-  },
-  numberText: {
-    color: "#FFF8F0",
-    fontSize: 16,
-    fontFamily: "Vollkorn-Bold",
-  },
-  infoTitle: {
-    fontSize: 20,
-    fontFamily: "Vollkorn-Bold",
-    color: COLORS.textPrimary,
   },
   infoText: {
     fontSize: 16,
@@ -438,9 +543,11 @@ const styles = StyleSheet.create({
     borderColor: COLORS.textPrimary,
     padding: SPACING.md,
     marginBottom: SPACING.sm,
+    backgroundColor: 'rgba(249, 231, 176, 0.5)'
   },
   appRowActive: {
     backgroundColor: "rgba(70, 52, 3, 0.57)",
+    borderColor: "rgba(70, 52, 3, 0.8)",
   },
   appIcon: {
     width: 32,
@@ -481,24 +588,6 @@ const styles = StyleSheet.create({
   },
   switch: {
     transform: [{ scale: 1.1 }],
-  },
-  sectionContainer: {
-    marginTop: SPACING.xl,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.sm,
-  },
-  sectionIcon: {
-    width: 32,
-    height: 32,
-    marginRight: SPACING.sm,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontFamily: "Vollkorn-Bold",
-    color: COLORS.textPrimary,
   },
   inputContainer: {
     flexDirection: "row",
@@ -551,89 +640,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "Vollkorn-Bold",
   },
-  daysRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.sm,
-    justifyContent: "center",
-  },
-  dayButton: {
-    width: 38,
-    height: 38,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#564110",
-    borderRadius: 8,
-    marginHorizontal: 2,
-    backgroundColor: "#FFF8F0",
-  },
-  dayButtonActive: {
-    backgroundColor: "#3D7A4C",
-    borderColor: "#3D7A4C",
-  },
-  dayButtonText: {
-    fontSize: 18,
-    fontFamily: "Vollkorn-Bold",
-    color: "#564110",
-  },
-  dayButtonTextActive: {
-    color: "#FFF8F0",
-  },
-  allDayRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.sm,
-    marginTop: 2,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderWidth: 2,
-    borderColor: "#564110",
-    borderRadius: 6,
-    marginRight: 10,
-    backgroundColor: "#FFF8F0",
-  },
-  checkboxActive: {
-    backgroundColor: "#3D7A4C",
-    borderColor: "#3D7A4C",
-  },
-  allDayText: {
-    fontSize: 16,
-    fontFamily: "Vollkorn-Bold",
-    color: "#564110",
-  },
-  timePickerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: SPACING.md,
-  },
-  timePickerBox: {
-    flex: 1,
-    backgroundColor: "#FFF8F0",
-    borderWidth: 3,
-    borderColor: "#564110",
-    borderRadius: 22,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    marginHorizontal: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timePickerText: {
-    fontSize: 22,
-    fontFamily: "Vollkorn-Bold",
-    color: "#564110",
-  },
-  scheduleSummary: {
-    fontSize: 16,
-    fontFamily: "Vollkorn-Regular",
-    color: COLORS.textPrimary,
-    marginTop: SPACING.sm,
-    textAlign: "center",
-  },
   addCustomHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -664,37 +670,9 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     marginTop: SPACING.sm,
   },
-  outlinedBox: {
-    borderWidth: 2,
-    borderColor: "#564110",
-    borderRadius: 24,
-    backgroundColor: "transparent",
-    padding: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  iconCircleLg: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#D6C08D",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: SPACING.lg,
-  },
-  scheduleTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.lg,
-  },
-  scheduleTitle: {
-    fontSize: 32,
-    fontFamily: "Vollkorn-Bold",
-    color: COLORS.textPrimary,
-    flex: 1,
-    flexWrap: "wrap",
-  },
   pornRow: {
     borderWidth: 4,
+    borderColor: 'rgba(139,0,0,0.5)',
   },
   schedulePreview: {
     flexDirection: "row",
@@ -726,5 +704,9 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-SemiBold",
     color: COLORS.textPrimary,
     lineHeight: 20,
+  },
+  disabledButton: {
+    backgroundColor: COLORS.textSecondary,
+    opacity: 0.5,
   },
 });

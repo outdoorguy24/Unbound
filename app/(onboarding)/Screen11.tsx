@@ -28,11 +28,11 @@ export default function Screen11({ onFinish }: { onFinish: () => void }) {
 
   return (
     <Animated.View style={[styles.container, { opacity }]}> 
-      <ImageBackground
-        source={require("../../assets/images/onboarding/fisherman.png")}
-        style={styles.background}
-        resizeMode="cover"
-      />
+    <ImageBackground
+      source={require("../../assets/images/onboarding/fisherman.png")}
+      style={styles.background}
+      resizeMode="cover"
+    />
     </Animated.View>
   );
 }

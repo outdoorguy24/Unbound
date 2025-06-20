@@ -134,18 +134,17 @@ class ScreenTimeManager: NSObject, UIAdaptivePresentationControllerDelegate {
                     ),
                     headerText: headerText,
                     onDismiss: {
-                        // Handle completion - return count information instead of token strings
-                        let selectionDict: [String: Any] = [
-                            "applicationTokens": self.currentSelection.applicationTokens.count,
-                            "categoryTokens": self.currentSelection.categoryTokens.count,
-                            "webDomainTokens": self.currentSelection.webDomainTokens.count,
-                            "hasSelection": !self.currentSelection.applicationTokens.isEmpty || 
-                                           !self.currentSelection.categoryTokens.isEmpty || 
-                                           !self.currentSelection.webDomainTokens.isEmpty
-                        ]
-                        
-                        print("[ScreenTimeManager] Activity selection updated: \(selectionDict)")
-                        resolve(selectionDict)
+                        // Encode the selection to a JSON string, then to Base64 to pass to JS
+                        do {
+                            let encoder = JSONEncoder()
+                            let data = try encoder.encode(self.currentSelection)
+                            let selectionString = data.base64EncodedString()
+                            print("[ScreenTimeManager] Activity selection encoded and returned.")
+                            resolve(["selection": selectionString])
+                        } catch {
+                            print("[ScreenTimeManager] Failed to encode selection: \(error.localizedDescription)")
+                            reject("ENCODING_ERROR", "Failed to encode selection", error)
+                        }
                         
                         // Dismiss the picker
                         DispatchQueue.main.async {
@@ -178,19 +177,33 @@ class ScreenTimeManager: NSObject, UIAdaptivePresentationControllerDelegate {
     }
     
     @objc
-    func setActivitySelection(_ selectionDict: NSDictionary,
+    func setActivitySelection(_ selectionString: String,
                             resolver resolve: @escaping RCTPromiseResolveBlock,
                             rejecter reject: @escaping RCTPromiseRejectBlock) {
         print("[ScreenTimeManager] setActivitySelection called")
         
         if #available(iOS 16.0, *) {
-            // Apply the selection to restrict access using the stored selection
-            store.shield.applications = currentSelection.applicationTokens.isEmpty ? nil : currentSelection.applicationTokens
-            store.shield.applicationCategories = currentSelection.categoryTokens.isEmpty ? nil : .specific(currentSelection.categoryTokens)
-            store.shield.webDomains = currentSelection.webDomainTokens.isEmpty ? nil : currentSelection.webDomainTokens
+            // Decode the selection from the Base64 string
+            guard let data = Data(base64Encoded: selectionString) else {
+                reject("DECODING_ERROR", "Invalid Base64 string for selection", nil)
+                return
+            }
             
-            print("[ScreenTimeManager] Activity selection applied successfully")
-            resolve(true)
+            do {
+                let decoder = JSONDecoder()
+                let activitySelection = try decoder.decode(FamilyActivitySelection.self, from: data)
+
+                // Apply the selection to restrict access
+                store.shield.applications = activitySelection.applicationTokens.isEmpty ? nil : activitySelection.applicationTokens
+                store.shield.applicationCategories = activitySelection.categoryTokens.isEmpty ? nil : .specific(activitySelection.categoryTokens)
+                store.shield.webDomains = activitySelection.webDomainTokens.isEmpty ? nil : activitySelection.webDomainTokens
+                
+                print("[ScreenTimeManager] Activity selection applied successfully")
+                resolve(true)
+            } catch {
+                print("[ScreenTimeManager] Failed to decode or apply selection: \(error.localizedDescription)")
+                reject("DECODING_ERROR", "Failed to decode or apply selection", error)
+            }
         } else {
             reject("UNSUPPORTED_VERSION", "iOS 16.0 or later is required", nil)
         }
@@ -233,19 +246,19 @@ class ScreenTimeManager: NSObject, UIAdaptivePresentationControllerDelegate {
     // MARK: - UIAdaptivePresentationControllerDelegate
     
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        // Handle picker dismissal - return count information instead of token strings
+        // Handle picker dismissal
         if let resolve = pickerResolve {
-            let selectionDict: [String: Any] = [
-                "applicationTokens": currentSelection.applicationTokens.count,
-                "categoryTokens": currentSelection.categoryTokens.count,
-                "webDomainTokens": currentSelection.webDomainTokens.count,
-                "hasSelection": !currentSelection.applicationTokens.isEmpty || 
-                               !currentSelection.categoryTokens.isEmpty || 
-                               !currentSelection.webDomainTokens.isEmpty
-            ]
-            
-            print("[ScreenTimeManager] Picker dismissed with selection: \(selectionDict)")
-            resolve(selectionDict)
+            do {
+                let encoder = JSONEncoder()
+                let data = try encoder.encode(self.currentSelection)
+                let selectionString = data.base64EncodedString()
+                print("[ScreenTimeManager] Picker dismissed, selection encoded and returned.")
+                resolve(["selection": selectionString])
+            } catch {
+                print("[ScreenTimeManager] Failed to encode selection on dismiss: \(error.localizedDescription)")
+                // Resolve with an empty selection if encoding fails
+                resolve(["selection": ""])
+            }
         }
         
         // Clear the stored callbacks
