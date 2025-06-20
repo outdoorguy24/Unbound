@@ -11,9 +11,8 @@ import {
   StyleSheet,
   Switch,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import DefendModal from "../components/DefendModal";
 import PornBlockModal from "../components/PornBlockModal";
@@ -28,6 +27,7 @@ const APP_ICONS = {
   twitter: require("../../assets/images/twitter.png"),
   youtube: require("../../assets/images/youtube.png"),
   discord: require("../../assets/images/discord.png"),
+  reddit: require("../../assets/images/reddit.png"),
   porn: require("../../assets/images/porn.png"),
   "add-circle": require("../../assets/images/add-circle.png"),
   "clock-circle": require("../../assets/images/clock-circle.png"),
@@ -41,6 +41,7 @@ const SOCIAL_APPS = [
   { key: "facebook", name: "Facebook", url: "facebook.com" },
   { key: "twitter", name: "X/Twitter", url: "twitter.com" },
   { key: "discord", name: "Discord", url: "discord.com" },
+  { key: "reddit", name: "Reddit", url: "reddit.com" },
   {
     key: "porn",
     name: "Porn",
@@ -62,8 +63,6 @@ export default function DefendScreen() {
     Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
   );
 
-  const [customSites, setCustomSites] = useState<{ key: string; name: string; url: string }[]>([]);
-  const [customInput, setCustomInput] = useState("");
   const [blockPorn, setBlockPorn] = useState(false);
   const [showPornInfo, setShowPornInfo] = useState(false);
   const [schedule, setSchedule] = useState<{ days: string[]; start_time: string; end_time: string }>({
@@ -121,21 +120,6 @@ export default function DefendScreen() {
 
   const toggleBlock = (key: string) => {
     setBlocked((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const handleAddCustomSite = () => {
-    const domain = customInput.trim().toLowerCase();
-    if (!isValidDomain(domain)) {
-      Alert.alert("Invalid domain", "Please enter a valid website domain (e.g., espn.com)");
-      return;
-    }
-    if (customSites.some((site) => site.url === domain) || SOCIAL_APPS.some((app) => app.url === domain)) {
-      Alert.alert("Duplicate", "This site is already in your block list.");
-      return;
-    }
-    setCustomSites((prev) => [...prev, { key: domain, name: domain, url: domain }]);
-    setBlocked((prev) => ({ ...prev, [domain]: true }));
-    setCustomInput("");
   };
 
   const handleTogglePorn = () => {
@@ -308,24 +292,6 @@ export default function DefendScreen() {
               </View>
             ))}
             
-            {customSites.map((site) => (
-              <View key={site.key} style={[styles.appRow, blocked[site.key] && styles.appRowActive]}>
-                <Image source={APP_ICONS["add-circle"]} style={styles.appIcon} />
-                <View style={styles.appTextContainer}>
-                  <Text style={[styles.appName, blocked[site.key] && styles.appNameActive]}>{site.name}</Text>
-                  <Text style={[styles.appUrl, blocked[site.key] && styles.appUrlActive]}>{site.url}</Text>
-                </View>
-                <Switch
-                  value={blocked[site.key]}
-                  onValueChange={() => toggleBlock(site.key)}
-                  disabled={confirmedApps.length > 0 && !confirmedApps.includes(site.key)}
-                  trackColor={{ false: COLORS.background, true: COLORS.success }}
-                  thumbColor={COLORS.tabBarActive}
-                  style={styles.switch}
-                />
-              </View>
-            ))}
-
             <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
               <Image source={APP_ICONS.porn} style={styles.appIcon} />
               <View style={styles.appTextContainer}>
@@ -348,35 +314,6 @@ export default function DefendScreen() {
           </>
         )}
         
-        <View style={[styles.sectionBox, { marginTop: SPACING.md }]}>
-          <View style={styles.addCustomHeader}>
-            <View style={styles.iconCircle}>
-              <Image source={APP_ICONS["add-circle"]} style={styles.iconImage} />
-            </View>
-            <View>
-              <Text style={styles.addCustomTitle}>Add Custom Website</Text>
-              <Text style={styles.addCustomSubtitle}>Enter any website you want to block</Text>
-            </View>
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="ex: espn.com"
-              value={customInput}
-              onChangeText={setCustomInput}
-              placeholderTextColor="#564110"
-              editable={isBlockingEnabled || Platform.OS !== 'ios'}
-            />
-            <TouchableOpacity 
-              style={[styles.addButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
-              onPress={handleAddCustomSite}
-              disabled={!isBlockingEnabled && Platform.OS === 'ios'}
-            >
-              <Text style={styles.actionButtonText}>Add</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         <View style={{ marginBottom: SPACING.sm }}>
           <View style={styles.stepPillHeader}>
             <View style={styles.pillNumber}>
