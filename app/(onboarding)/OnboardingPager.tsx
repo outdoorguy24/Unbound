@@ -45,20 +45,22 @@ export default function OnboardingPager() {
 
   // Handler for screens that require submit
   const getScreenProps = (screenIdx: number) => {
+    const props: any = {
+      isActive: page === screenIdx,
+    };
+
     // Screens 6, 7, 8, 9, 10 (indexes 5, 6, 7, 8, 9) require submit
-    // Note: Screen11 (index 10) is rendered separately as an overlay
     if ([5, 6, 7, 8, 9].includes(screenIdx)) {
-      return {
-        onSubmit: () => {
-          setCanSwipe(true);
-          goToNext();
-        },
-        disableSwipe: !canSwipe,
-        enableSwipe: () => setCanSwipe(true),
-        disableSwipeFn: () => setCanSwipe(false),
+      props.onSubmit = () => {
+        setCanSwipe(true);
+        goToNext();
       };
+      props.disableSwipe = !canSwipe;
+      props.enableSwipe = () => setCanSwipe(true);
+      props.disableSwipeFn = () => setCanSwipe(false);
     }
-    return {};
+    
+    return props;
   };
 
   // Render screens with props for submit screens

@@ -1,7 +1,40 @@
 import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { Animated, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
-export default function Screen4() {
+export default function Screen4({ isActive }: { isActive?: boolean }) {
+  const fadeAnims = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const runAnimation = () => {
+      // Reset animations before running
+      fadeAnims.forEach((anim) => anim.setValue(0));
+      const animations = fadeAnims.map((anim) => {
+        return Animated.timing(anim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        });
+      });
+
+      timeoutId = setTimeout(() => {
+        Animated.stagger(1500, animations).start();
+      }, 2000);
+    };
+
+    if (isActive) {
+      runAnimation();
+    }
+
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      fadeAnims.forEach((anim) => anim.stopAnimation());
+    };
+  }, [isActive, fadeAnims]);
+
   return (
     <ImageBackground
       source={require("../../assets/images/parchment-bg.png")}
@@ -18,9 +51,14 @@ export default function Screen4() {
           <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
         </View>
         <Text style={styles.body}>Society wants a bunch of{"\n"}screen-addicted consumers.</Text>
-        <Text style={styles.subBody}>
-          But you&apos;re here to:{"\n"}CREATE.{"\n"}EXPLORE.{"\n"}BUILD.
-        </Text>
+        <View>
+          <Text style={styles.subBody}>
+            But you&apos;re here to:
+          </Text>
+          <Animated.Text style={[styles.subBody, { opacity: fadeAnims[0] }]}>CREATE.</Animated.Text>
+          <Animated.Text style={[styles.subBody, { opacity: fadeAnims[1] }]}>EXPLORE.</Animated.Text>
+          <Animated.Text style={[styles.subBody, { opacity: fadeAnims[2] }]}>BUILD.</Animated.Text>
+        </View>
       </View>
     </ImageBackground>
   );
