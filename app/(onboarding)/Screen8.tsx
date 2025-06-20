@@ -4,10 +4,10 @@ import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react
 
 const heading = "What concerns you the most about too much phone use?";
 const options = [
-  "Easy to not prioritize in-person relationships",
-  "Wrecked attention span",
-  "Becoming weak & soft",
-  "Dying with regrets about not being present",
+  "Choosing the screen over friends, family, & hobbies",
+  "Brain feels fried and scattered",
+  "Turning into a lazy POS",
+  "Feeling like I'm wasting my life",
 ];
 
 export default function Screen8({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {

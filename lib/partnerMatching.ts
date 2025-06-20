@@ -14,9 +14,9 @@ interface PartnerMatchResult {
 export async function findOrCreatePartner(currentUserId: string): Promise<PartnerMatchResult> {
   try {
     // First check if user already has a partner
-    const existingPartner = await getPartnerIdForUser(currentUserId);
-    if (existingPartner) {
-      return { matched: true, partnerId: existingPartner };
+    const partnerId = await getPartnerIdForUser(currentUserId);
+    if (partnerId) {
+      return { matched: true, partnerId: partnerId };
     }
 
     // Get all available users with profiles
