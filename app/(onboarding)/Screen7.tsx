@@ -1,5 +1,6 @@
 import { COLORS, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { useEffect, useState } from "react";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useEffect } from "react";
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const heading = "When do you find yourself mindlessly scrolling?";
@@ -31,15 +32,17 @@ const OPTIONS = [
 ];
 
 export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const { scrollTimes, setScrollTimes } = useOnboarding();
 
   useEffect(() => {
-    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
-  }, [disableSwipeFn, selected]);
+    if (scrollTimes.length === 0 && disableSwipeFn) disableSwipeFn();
+  }, [disableSwipeFn, scrollTimes]);
 
   const toggleOption = (key: string) => {
-    setSelected((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    setScrollTimes(
+      scrollTimes.includes(key)
+        ? scrollTimes.filter((k) => k !== key)
+        : [...scrollTimes, key]
     );
   };
 
@@ -56,7 +59,7 @@ export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSw
             {OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.key}
-                style={[styles.option, selected.includes(option.key) && styles.optionSelected]}
+                style={[styles.option, scrollTimes.includes(option.key) && styles.optionSelected]}
                 onPress={() => toggleOption(option.key)}
                 activeOpacity={0.8}
               >
@@ -72,12 +75,12 @@ export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSw
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.nextBtn, selected.length === 0 && styles.nextBtnDisabled]}
+          style={[styles.nextBtn, scrollTimes.length === 0 && styles.nextBtnDisabled]}
           onPress={() => {
             if (enableSwipe) enableSwipe();
             if (onSubmit) onSubmit();
           }}
-          disabled={selected.length === 0}
+          disabled={scrollTimes.length === 0}
         >
           <Text style={styles.nextBtnText}>Next</Text>
         </TouchableOpacity>

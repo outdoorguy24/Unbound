@@ -1,5 +1,6 @@
 import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { useEffect, useState } from "react";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useEffect } from "react";
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const heading = "First, know your trap. What's stealing your time and focus?";
@@ -13,16 +14,16 @@ const OPTIONS = [
 ];
 
 export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const [selected, setSelected] = useState<string[]>([]);
+  const { traps, setTraps } = useOnboarding();
 
   useEffect(() => {
-    if (selected.length === 0 && disableSwipeFn) disableSwipeFn();
-    if (selected.length > 0 && enableSwipe) enableSwipe();
-  }, [disableSwipeFn, enableSwipe, selected]);
+    if (traps.length === 0 && disableSwipeFn) disableSwipeFn();
+    if (traps.length > 0 && enableSwipe) enableSwipe();
+  }, [disableSwipeFn, enableSwipe, traps]);
 
   const toggleOption = (key: string) => {
-    setSelected((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    setTraps(
+      traps.includes(key) ? traps.filter((k) => k !== key) : [...traps, key]
     );
   };
 
@@ -39,12 +40,12 @@ export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSw
             {OPTIONS.map((option) => (
               <TouchableOpacity
                 key={option.key}
-                style={[styles.option, selected.includes(option.key) && styles.optionSelected, SHADOWS.small]}
+                style={[styles.option, traps.includes(option.key) && styles.optionSelected, SHADOWS.small]}
                 onPress={() => toggleOption(option.key)}
                 activeOpacity={0.8}
               >
                 <Image source={option.image} style={styles.iconImage} />
-                <Text style={[styles.optionLabel, selected.includes(option.key) && styles.optionLabelSelected]}>
+                <Text style={[styles.optionLabel, traps.includes(option.key) && styles.optionLabelSelected]}>
                   {option.label}
                 </Text>
               </TouchableOpacity>
@@ -52,11 +53,11 @@ export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSw
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.button, selected.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
+          style={[styles.button, traps.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
           onPress={() => {
             if (onSubmit) onSubmit();
           }}
-          disabled={selected.length === 0}
+          disabled={traps.length === 0}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>

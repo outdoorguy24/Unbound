@@ -1,5 +1,6 @@
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
 import { saveUserProfile } from "@/lib/supabaseUserProfile";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -17,6 +18,7 @@ import {
 export default function ScreenProfileSetup() {
   const { user } = useAuth();
   const router = useRouter();
+  const { traps, scrollTimes, concerns } = useOnboarding();
   const [firstName, setFirstName] = useState("");
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +41,11 @@ export default function ScreenProfileSetup() {
     setLoading(true);
     setError(null);
     try {
-      await saveUserProfile(user.id, firstName.trim(), city.trim());
+      await saveUserProfile(user.id, firstName.trim(), city.trim(), {
+        traps,
+        scrollTimes,
+        concerns,
+      });
       router.replace("/(onboarding)/Screen13");
     } catch (e: any) {
       setError(e.message || "Failed to save profile");
