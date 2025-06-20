@@ -3,8 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
-import { useEffect, useState } from "react";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Easing, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
 // 1. Format minutes as "X hours, Y minutes"
 function formatTimeSaved(minutes: number): string {
@@ -38,6 +38,7 @@ export default function CampScreen() {
   const [partner, setPartner] = useState<any>(null);
   const [community, setCommunity] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     async function fetchData() {
@@ -137,11 +138,35 @@ export default function CampScreen() {
     fetchData();
   }, [contextUser]);
 
+  useEffect(() => {
+    const spin = () => {
+      spinValue.setValue(0);
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start(() => spin());
+    };
+
+    if (loading) {
+      spin();
+    }
+  }, [loading, spinValue]);
+
   if (loading) {
+    const spinAnimation = spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "360deg"],
+    });
     return (
       <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
         <View style={styles.centered}>
-          <Text style={styles.loadingText}>Loading your warrior status...</Text>
+          <Animated.Image
+            source={require("../../assets/images/onboarding/shield.png")}
+            style={[styles.loadingIcon, { transform: [{ rotate: spinAnimation }] }]}
+          />
+          <Text style={styles.loadingText}>Your freedom is loading...</Text>
         </View>
       </ImageBackground>
     );
@@ -342,8 +367,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#2C1A05",
     textAlign: "center",
-    marginTop: 32,
+    marginTop: 16,
     fontFamily: "Vollkorn-Bold",
-    width: "92%",
+  },
+  loadingIcon: {
+    width: 60,
+    height: 60,
+    resizeMode: "contain",
   },
 });
