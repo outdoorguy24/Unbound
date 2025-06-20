@@ -35,7 +35,7 @@ export default function PornBlockModal({ visible, onClose, variant = 1 }: PornBl
               <Text style={styles.text}>You chose this,{"\n"}now stick with it!</Text>
             )}
             <TouchableOpacity style={styles.button} onPress={onClose}>
-              <Text style={styles.buttonText}>Take me Back</Text>
+              <Text style={styles.buttonText}>Sir yes sir</Text>
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   },
   author: {
     fontFamily: "Vollkorn-SemiBold",
-    fontSize: 16,
+    fontSize: 22,
     color: "#564110",
     textAlign: "center",
     marginBottom: SPACING.xl,
