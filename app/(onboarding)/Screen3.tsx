@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.xxl,
+    paddingTop: SPACING.lg,
   },
   illustrationContainer: {
     width: "100%",

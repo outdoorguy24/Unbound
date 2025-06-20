@@ -50,10 +50,9 @@ export default function Screen4({ isActive }: { isActive?: boolean }) {
         <View style={styles.illustrationContainer}>
           <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
         </View>
-        <Text style={styles.body}>Society wants a bunch of{"\n"}screen-addicted consumers.</Text>
         <View>
-          <Text style={styles.subBody}>
-            But you&apos;re here to:
+          <Text style={styles.body}>
+            Society wants a bunch of{"\n"}screen-addicted consumers.{"\n"}But you&apos;re here to:
           </Text>
           <Animated.Text style={[styles.subBody, { opacity: fadeAnims[0] }]}>CREATE.</Animated.Text>
           <Animated.Text style={[styles.subBody, { opacity: fadeAnims[1] }]}>EXPLORE.</Animated.Text>
@@ -119,7 +118,7 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     color: COLORS.textPrimary,
     textAlign: "center",
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.sm,
     fontWeight: "bold",
   },
   subBody: {
