@@ -14,7 +14,7 @@ export default function Screen2() {
         </View>
         <Text style={styles.heading}>Technology has benefits,{"\n"}but it&apos;s stealing your life.</Text>
         <Text style={styles.subheading}>
-          You know what you should be doing, but the phone is always there with a quick hit.
+          You know what you should be doing,{"\n"}but the phone is always there,{"\n"}ready with a quick hit.
         </Text>
         <Text style={styles.body}>
           It creates a <Text style={styles.underline}>cycle</Text> of cheap dopamine, constant distractions, and a lack
@@ -58,15 +58,18 @@ const styles = StyleSheet.create({
     fontFamily: TYPOGRAPHY.heading.fontFamily,
     fontSize: 28,
     lineHeight: 36,
-    fontWeight: 900,
-    color: COLORS.textPrimary,
+    fontWeight: "900",
+    color: "#1A0E05",
     textAlign: "center",
     marginBottom: SPACING.md,
     marginTop: SPACING.md,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   subheading: {
     fontFamily: TYPOGRAPHY.subheading.fontFamily,
-    fontSize: 20,
+    fontSize: 18,
     lineHeight: 28,
     color: COLORS.textPrimary,
     textAlign: "center",

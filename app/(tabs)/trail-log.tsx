@@ -69,9 +69,9 @@ export default function TrailLogScreen() {
         <Text style={styles.header}>Trail Log</Text>
         <View style={styles.quoteBox}>
           <Text style={styles.quoteText}>
-            The edge... there is no honest way to explain it because the only thing that matters.
+            "I have a friend who's always in a hurry, he never gets anywhere."
           </Text>
-          <Text style={styles.quoteAuthor}>- Hunter S. Thompson</Text>
+          <Text style={styles.quoteAuthor}>- Edward Abbey</Text>
         </View>
 
         <View style={styles.statsGrid}>

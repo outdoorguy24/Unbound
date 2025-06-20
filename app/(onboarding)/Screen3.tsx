@@ -56,9 +56,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 36,
     fontWeight: "900",
-    color: COLORS.textPrimary,
+    color: "#1A0E05",
     textAlign: "center",
     marginBottom: SPACING.md,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   body: {
     fontFamily: TYPOGRAPHY.body.fontFamily,
