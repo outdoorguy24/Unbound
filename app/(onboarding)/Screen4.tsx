@@ -9,9 +9,11 @@ export default function Screen4() {
       resizeMode="cover"
     >
       <View style={styles.content}>
-        <Text style={styles.heading}>
-          Which is why this app{"\n"}is an act of <Text style={styles.underline}>rebellion.</Text>
-        </Text>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>
+            Which is why this app{"\n"}is an act of <Text style={styles.underline}>rebellion.</Text>
+          </Text>
+        </View>
         <View style={styles.illustrationContainer}>
           <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
         </View>
@@ -37,18 +39,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: LAYOUT.paddingHorizontal,
   },
+  headingContainer: {
+    backgroundColor: "#2C1A05",
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: "#E6D3A7",
+    width: '100%',
+    marginTop: SPACING.xl,
+  },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: "900",
-    color: "#1A0E05",
+    color: "#F3E2C7",
     textAlign: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.xl,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   underline: {
     textDecorationLine: "underline",

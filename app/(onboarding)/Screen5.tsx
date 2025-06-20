@@ -13,7 +13,9 @@ export default function Screen5() {
       resizeMode="cover"
     >
       <View style={styles.content}>
-        <Text style={styles.heading}>{heading}</Text>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>{heading}</Text>
+        </View>
         <View style={styles.illustrationContainer}>
           <Image source={require("../../assets/images/onboarding/hiker.png")} style={styles.illustration} />
         </View>
@@ -33,21 +35,28 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     paddingHorizontal: LAYOUT.paddingHorizontal,
+    paddingTop: SPACING.xxl + SPACING.lg,
+  },
+  headingContainer: {
+    backgroundColor: "#2C1A05",
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    marginBottom: SPACING.sm,
+    borderWidth: 1,
+    borderColor: "#E6D3A7",
+    width: '100%',
   },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
     fontSize: 32,
     lineHeight: 40,
     fontWeight: "900",
-    color: "#1A0E05",
+    color: "#F3E2C7",
     textAlign: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.xl,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    marginTop: SPACING.sm,
   },
   illustrationContainer: {
     width: "100%",
@@ -60,7 +69,7 @@ const styles = StyleSheet.create({
     aspectRatio: 1.2,
     height: undefined,
     resizeMode: "contain",
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   body: {
     fontFamily: TYPOGRAPHY.body.fontFamily,

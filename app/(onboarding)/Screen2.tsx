@@ -12,7 +12,9 @@ export default function Screen2() {
         <View style={styles.illustrationContainer}>
           <Image source={require("../../assets/images/onboarding/trap.png")} style={styles.illustration} />
         </View>
-        <Text style={styles.heading}>Technology has benefits,{"\n"}but it&apos;s stealing your life.</Text>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>Technology has benefits, but it's{"\n"}stealing your life.</Text>
+        </View>
         <Text style={styles.subheading}>
           You know what you should be doing,{"\n"}but the phone is always there,{"\n"}ready with a quick hit.
         </Text>
@@ -54,18 +56,23 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xl,
     marginTop: SPACING.xxl,
   },
+  headingContainer: {
+    backgroundColor: "#2C1A05",
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: "#E6D3A7",
+    width: '100%',
+  },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: "900",
-    color: "#1A0E05",
+    color: "#F3E2C7",
     textAlign: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.md,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   subheading: {
     fontFamily: TYPOGRAPHY.subheading.fontFamily,

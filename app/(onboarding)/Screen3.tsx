@@ -12,7 +12,9 @@ export default function Screen3() {
         <View style={styles.illustrationContainer}>
           <Image source={require("../../assets/images/onboarding/slotmachine.png")} style={styles.illustration} />
         </View>
-        <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
+        <View style={styles.headingContainer}>
+          <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
+        </View>
         <Text style={styles.body}>
           You&apos;re giving away your life one swipe at a time to billionaire tech overlords who don&apos;t care about
           your goals. We are the pawns in their battle to see who can extract our attention in the most addictive way
@@ -51,17 +53,23 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
     marginTop: SPACING.xl,
   },
+  headingContainer: {
+    backgroundColor: "#2C1A05",
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: 12,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: "#E6D3A7",
+    width: '100%',
+  },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
     fontSize: 28,
     lineHeight: 36,
     fontWeight: "900",
-    color: "#1A0E05",
+    color: "#F3E2C7",
     textAlign: "center",
-    marginBottom: SPACING.md,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   body: {
     fontFamily: TYPOGRAPHY.body.fontFamily,
