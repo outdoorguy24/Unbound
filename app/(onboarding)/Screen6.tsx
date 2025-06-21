@@ -8,7 +8,7 @@ const OPTIONS = [
   { key: "social", label: "Social Media", image: require("../../assets/images/onboarding/social.png") },
   { key: "porn", label: "Porn", image: require("../../assets/images/onboarding/porn.png") },
   { key: "youtube", label: "YouTube", image: require("../../assets/images/onboarding/youtube.png") },
-  { key: "news", label: "Reddit", image: require("../../assets/images/onboarding/reddit.png") },
+  { key: "news", label: "Reddit/News", image: require("../../assets/images/onboarding/reddit.png") },
   { key: "gaming", label: "Gaming", image: require("../../assets/images/onboarding/gaming.png") },
   { key: "all", label: "All of the Above", image: require("../../assets/images/onboarding/all.png") },
 ];
