@@ -4,6 +4,8 @@ import { resetUserPairing } from "@/lib/partnerMatching";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
+import { registerForPushNotificationsAsync } from "@/utils/notifications";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -38,10 +40,46 @@ export default function CampScreen() {
   const { user: contextUser } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [partner, setPartner] = useState<any>(null);
-  const [community, setCommunity] = useState<any>(null);
+  const [community, setCommunity] = useState<any>({ totalUsers: 0, totalTimeSaved: 0 });
   const [loading, setLoading] = useState(true);
   const spinValue = useRef(new Animated.Value(0)).current;
   const router = useRouter();
+
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      const NOTIFICATION_PERMISSION_REQUESTED_KEY = '@notification_permission_requested';
+      try {
+        const hasRequested = await AsyncStorage.getItem(NOTIFICATION_PERMISSION_REQUESTED_KEY);
+        if (hasRequested) {
+          return; // Don't ask again
+        }
+
+        // Mark as requested so we don't ask again
+        await AsyncStorage.setItem(NOTIFICATION_PERMISSION_REQUESTED_KEY, 'true');
+
+        const token = await registerForPushNotificationsAsync();
+        if (token && user?.id) {
+          console.log('Push notification token obtained on Camp screen:', token);
+          const { error } = await supabase
+            .from('user_profiles')
+            .update({ push_token: token })
+            .eq('user_id', user.id);
+
+          if (error) {
+            console.error('Error saving push token from Camp screen:', error);
+          } else {
+            console.log('Push token saved to database from Camp screen');
+          }
+        }
+      } catch (e) {
+        console.error('Failed to request notification permission:', e);
+      }
+    };
+
+    if (contextUser?.id) {
+      requestNotificationPermission();
+    }
+  }, [contextUser?.id]);
 
   const fetchData = async () => {
     setLoading(true);

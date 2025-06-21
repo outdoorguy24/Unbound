@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { sendTestNotification } from "@/utils/notifications";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
+import * as Notifications from 'expo-notifications';
 import { useRouter } from "expo-router";
 import * as StoreReview from 'expo-store-review';
 import React, { useEffect, useRef, useState } from "react";
@@ -145,6 +146,24 @@ export default function ProfileScreen() {
     }
     if (item.action === "weeklyNotifications") {
       const newValue = !weeklyNotificationsEnabled;
+
+      // If user is trying to ENABLE notifications, check for permission first
+      if (newValue === true) {
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Enable Notifications',
+            'To receive weekly summaries, please enable push notifications for Unbound in your phone\'s settings.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            ]
+          );
+          return; // Don't update the toggle state or database
+        }
+      }
+
+      // If we're here, either they are disabling notifications, or they have permission
       setWeeklyNotificationsEnabled(newValue);
       
       // Update in database

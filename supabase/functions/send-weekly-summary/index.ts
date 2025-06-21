@@ -45,8 +45,8 @@ serve(async (req) => {
       const message = {
         to: user.push_token,
         sound: 'default',
-        title: 'Your Weekly Summary is Ready! 📊',
-        body: `Hey ${user.first_name || 'there'}! Check out your progress this week.`,
+        title: 'Weekly Summary',
+        body: 'How much of your life did you get back this week?',
         data: { 
           screen: 'trail-log',
           type: 'weekly_summary'

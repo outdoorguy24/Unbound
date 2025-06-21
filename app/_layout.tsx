@@ -3,11 +3,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useProfileCheck } from "@/hooks/useProfileCheck";
 import { StripeProvider } from "@/lib/stripeProvider";
-import { supabase } from "@/lib/supabaseClient";
-import { addNotificationListeners, registerForPushNotificationsAsync } from "@/utils/notifications";
+import { addNotificationListeners } from "@/utils/notifications";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import "react-native-reanimated";
@@ -29,6 +28,7 @@ export default function RootLayout() {
     "Vollkorn-SemiBoldItalic": require("../assets/fonts/Vollkorn-SemiboldItalic.ttf"),
   });
   const [showSplash, setShowSplash] = useState(!splashShown);
+  const router = useRouter();
 
   const handleSplashFinish = () => {
     splashShown = true;
@@ -37,52 +37,22 @@ export default function RootLayout() {
 
   // Set up push notifications
   useEffect(() => {
-    const setupNotifications = async () => {
-      try {
-        // Register for push notifications
-        const token = await registerForPushNotificationsAsync();
-        console.log('Push notification token:', token);
-        
-        // Save token to database if user is logged in
-        if (token) {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { error } = await supabase
-              .from('user_profiles')
-              .update({ push_token: token })
-              .eq('user_id', user.id);
-            
-            if (error) {
-              console.error('Error saving push token:', error);
-            } else {
-              console.log('Push token saved to database');
-            }
-          }
+    // Only set up listeners here, not the registration prompt
+    const cleanup = addNotificationListeners(
+      (notification: any) => {
+        console.log('Notification received:', notification);
+      },
+      (response: any) => {
+        console.log('Notification tapped:', response);
+        const screen = response?.notification?.request?.content?.data?.screen;
+        if (screen === 'trail-log') {
+          router.push('/(tabs)/trail');
         }
-        
-        // Set up notification listeners
-        const cleanup = addNotificationListeners(
-          (notification: any) => {
-            console.log('Notification received:', notification);
-          },
-          (response: any) => {
-            console.log('Notification tapped:', response);
-            // Handle notification tap - navigate to trail log if it's a weekly summary
-            if (response?.notification?.request?.content?.data?.screen === 'trail-log') {
-              // Navigate to trail log screen
-              // This will be handled by the notification tap listener in the app
-            }
-          }
-        );
-        
-        return cleanup;
-      } catch (error) {
-        console.error('Error setting up notifications:', error);
       }
-    };
-    
-    setupNotifications();
-  }, []);
+    );
+
+    return cleanup;
+  }, [router]);
 
   return (
     <StripeProvider>
