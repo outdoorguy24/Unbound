@@ -213,53 +213,75 @@ export default function DefendScreen() {
   };
 
   const handleConfirmSelectionWithApple = async () => {
-    const selectedApps = Object.entries(preSelected)
-      .filter(([key, value]) => value && key !== "porn")
-      .map(([key]) => key);
-
-    const selectedAppNames = selectedApps.map(
-      (key) => SOCIAL_APPS.find((a) => a.key === key)?.name || key
+    // This is the new selection from the UI toggles
+    const newSelection = Object.keys(preSelected).filter(
+      (key) => preSelected[key] && key !== "porn"
     );
 
-    if (selectedAppNames.length === 0) {
-      Alert.alert("No Apps Selected", "Please select at least one app to continue.");
-      return;
-    }
+    // This is the previously saved selection
+    const previouslyConfirmed = confirmedApps.filter((key) => key !== "porn");
 
-    Alert.alert(
-      "Confirm with Apple",
-      `Apple's privacy rules require you to manually confirm your choices. Please find and select the following apps on the next screen:\n\n• ${selectedAppNames.join("\n• ")}\n\nPro Tip: the search bar on top works wonders`,
-      [
+    // Calculate the differences
+    const addedApps = newSelection.filter((key) => !previouslyConfirmed.includes(key));
+    const removedApps = previouslyConfirmed.filter((key) => !newSelection.includes(key));
+    
+    const getName = (key: string) => SOCIAL_APPS.find((a) => a.key === key)?.name || key;
+    const addedAppNames = addedApps.map(getName);
+    const removedAppNames = removedApps.map(getName);
+
+    // If there are no changes, do nothing.
+    if (addedApps.length === 0 && removedApps.length === 0) {
+      // We still need to open the picker in case they want to add/remove something manually
+      // but the pre-selection prompt isn't needed. Let's just open it.
+    } else {
+      // Construct a dynamic message for the user
+      let alertMessage =
+        "Apple's privacy rules require you to manually confirm your choices. On the next screen, please make the following changes:\n";
+
+      if (addedAppNames.length > 0) {
+        alertMessage += `\nAdd:\n• ${addedAppNames.join("\n• ")}`;
+      }
+      if (removedAppNames.length > 0) {
+        alertMessage += `\nRemove:\n• ${removedAppNames.join("\n• ")}`;
+      }
+      alertMessage += "\n\nPro Tip: the search bar on top works wonders";
+      
+      // Use this dynamic message in the alert
+      Alert.alert("Confirm Your Changes", alertMessage, [
         { text: "Cancel", style: "cancel" },
         {
           text: "Continue",
-          onPress: async () => {
-            try {
-              const { selection } = await ScreenTimeManager.displayFamilyActivityPicker({
-                headerText: "Choose Apps to Block",
-              });
-
-              if (selection) {
-                await AsyncStorage.setItem(SELECTION_STORAGE_KEY, selection);
-                await AsyncStorage.setItem("UNBOUND_CONFIRMED_APPS", JSON.stringify(selectedApps));
-                setConfirmedApps(selectedApps);
-                setBlocked(preSelected);
-                setIsBlockingEnabled(true);
-                setIsSelectionMode(false);
-                Alert.alert("Setup Complete", "You can now block apps from the Defend screen.");
-              } else {
-                Alert.alert(
-                  "Setup Incomplete",
-                  "You didn't select any apps. Please try again to complete the setup."
-                );
-              }
-            } catch (error) {
-              Alert.alert("Error", "Could not complete confirmation. Please try again.");
-            }
-          },
+          onPress: () => proceedWithApplePicker(newSelection),
         },
-      ]
-    );
+      ]);
+      return; // Stop here to avoid showing a second alert
+    }
+    
+    // If no changes, or for the original flow, proceed directly
+    proceedWithApplePicker(newSelection);
+  };
+
+  const proceedWithApplePicker = async (selectedApps: string[]) => {
+    try {
+      const { selection } = await ScreenTimeManager.displayFamilyActivityPicker({
+        headerText: "Choose Apps to Block",
+      });
+
+      if (selection) {
+        await AsyncStorage.setItem(SELECTION_STORAGE_KEY, selection);
+        await AsyncStorage.setItem("UNBOUND_CONFIRMED_APPS", JSON.stringify(selectedApps));
+        setConfirmedApps(selectedApps);
+        setBlocked(preSelected); // Sync the main toggle state
+        setIsBlockingEnabled(true);
+        setIsSelectionMode(false);
+        Alert.alert("Setup Complete", "You can now block apps from the Defend screen.");
+      } else {
+        Alert.alert("Setup Incomplete", "You didn't select any apps. Please try again to complete the setup.");
+      }
+    } catch (error) {
+      console.error("Error with Apple Picker:", error)
+      Alert.alert("Error", "Could not complete confirmation. Please try again.");
+    }
   };
 
   return (
