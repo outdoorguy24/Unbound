@@ -8,6 +8,8 @@ interface ScreenTimeManagerModule {
   displayFamilyActivityPicker(options: { headerText: string }): Promise<{ selection?: string }>;
   setActivitySelection(selectionString: string): Promise<boolean>;
   removeActivitySelection(): Promise<boolean>;
+  setAdultContentFilter(enabled: boolean): Promise<{ success: boolean; enabled: boolean }>;
+  getAdultContentFilterStatus(): Promise<{ enabled: boolean; error?: string }>;
 }
 
 if (!ScreenTimeManager) {

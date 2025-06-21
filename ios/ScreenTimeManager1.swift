@@ -92,6 +92,73 @@ class ScreenTimeManager: NSObject, UIAdaptivePresentationControllerDelegate {
         }
     }
     
+    // MARK: - Adult Content Filtering
+    
+@objc
+func setAdultContentFilter(_ enabled: Bool,
+                         resolver: @escaping RCTPromiseResolveBlock,
+                         rejecter reject: @escaping RCTPromiseRejectBlock) {
+    print("[ScreenTimeManager] setAdultContentFilter called with enabled: \(enabled)")
+    
+    if #available(iOS 16.0, *) {
+        do {
+            if enabled {
+                // Enable adult content filtering
+                store.webContent.blockedByFilter = .auto(except: Set<WebDomain>())
+                print("[ScreenTimeManager] Adult content filter enabled")
+            } else {
+                // Disable adult content filtering
+                store.webContent.blockedByFilter = .none
+                print("[ScreenTimeManager] Adult content filter disabled")
+            }
+            
+            // Return the current state
+            resolver([
+                "success": true,
+                "enabled": enabled
+            ])
+        } catch {
+            print("[ScreenTimeManager] Failed to set adult content filter: \(error.localizedDescription)")
+            reject("FILTER_ERROR", "Failed to set adult content filter", error)
+        }
+    } else {
+        reject("VERSION_ERROR", "Adult content filtering requires iOS 16.0 or later", nil)
+    }
+}
+    
+    @objc
+    func getAdultContentFilterStatus(_ resolve: @escaping RCTPromiseResolveBlock,
+                                   rejecter reject: @escaping RCTPromiseRejectBlock) {
+        print("[ScreenTimeManager] getAdultContentFilterStatus called")
+        
+        if #available(iOS 16.0, *) {
+            // Check if adult content filter is enabled
+            let isEnabled: Bool
+            
+            switch store.webContent.blockedByFilter {
+            case .auto:
+                isEnabled = true
+            case .none:
+                isEnabled = false
+            case .specific:
+                // If specific sites are blocked, we consider the filter as enabled
+                isEnabled = true
+            @unknown default:
+                isEnabled = false
+            }
+            
+            print("[ScreenTimeManager] Adult content filter status: \(isEnabled)")
+            resolve([
+                "enabled": isEnabled
+            ])
+        } else {
+            resolve([
+                "enabled": false,
+                "error": "iOS 16.0 or later is required"
+            ])
+        }
+    }
+    
     @objc
     func displayFamilyActivityPicker(_ options: NSDictionary,
                                    resolver resolve: @escaping RCTPromiseResolveBlock,

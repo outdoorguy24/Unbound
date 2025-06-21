@@ -1,3 +1,5 @@
+import ScreenTimeManager from '@/lib/ScreenTime';
+
 import { COLORS, SPACING } from "@/constants/theme";
 import ScreenTime from "@/lib/ScreenTime";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -85,6 +87,11 @@ export default function DefendScreen() {
     const checkStatus = async () => {
       const status = await ScreenTime.getAuthorizationStatus();
       if (status.isAuthorized) {
+        // Check adult content filter status
+        const filterStatus = await ScreenTimeManager.getAdultContentFilterStatus();
+        setBlockPorn(filterStatus.enabled);
+        
+        // Your existing code...
         const selection = await AsyncStorage.getItem(SELECTION_STORAGE_KEY);
         if (!selection) {
           setIsSelectionMode(true);
@@ -122,11 +129,58 @@ export default function DefendScreen() {
     setBlocked((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleTogglePorn = () => {
-    setBlockPorn((val) => !val);
-    if (!blockPorn) {
-      setPornModalVariant(2);
-      setShowPornModal(true);
+  const handleTogglePorn = async () => {
+    // First check if we have Screen Time authorization
+    const authStatus = await ScreenTimeManager.getAuthorizationStatus();
+    
+    if (!authStatus.isAuthorized) {
+      Alert.alert(
+        'Screen Time Required',
+        'Please enable Screen Time permissions to use adult content blocking.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Enable',
+            onPress: async () => {
+              try {
+                await ScreenTimeManager.requestAuthorization('individual');
+                // After authorization, try the toggle again
+                const newAuthStatus = await ScreenTimeManager.getAuthorizationStatus();
+                if (newAuthStatus.isAuthorized) {
+                  handleTogglePorn(); // Retry
+                }
+              } catch (error) {
+                Alert.alert('Error', 'Failed to enable Screen Time permissions');
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+  
+    // Toggle the adult content filter
+    try {
+      const newValue = !blockPorn;
+      const result = await ScreenTimeManager.setAdultContentFilter(newValue);
+      
+      if (result.success) {
+        setBlockPorn(newValue);
+        
+        if (newValue) {
+          // Show the porn modal when enabling
+          setPornModalVariant(2);
+          setShowPornModal(true);
+        } else {
+          Alert.alert(
+            'Adult Content Filter Disabled',
+            'Adult content filtering has been turned off.'
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling adult content filter:', error);
+      Alert.alert('Error', 'Failed to update adult content filter. Please try again.');
     }
   };
   
@@ -305,7 +359,7 @@ export default function DefendScreen() {
               <Switch
                 value={blockPorn}
                 onValueChange={handleTogglePorn}
-                disabled={confirmedApps.length > 0 && !confirmedApps.includes("porn")}
+                disabled={false}
                 trackColor={{ false: COLORS.background, true: COLORS.success }}
                 thumbColor={COLORS.tabBarActive}
                 style={styles.switch}

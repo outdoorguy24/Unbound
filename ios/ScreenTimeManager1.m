@@ -28,6 +28,14 @@ RCT_EXTERN_METHOD(setActivitySelection:(NSString *)selectionString
 RCT_EXTERN_METHOD(removeActivitySelection:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+                  // Adult Content Filter Methods
+RCT_EXTERN_METHOD(setAdultContentFilter:(BOOL)enabled
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getAdultContentFilterStatus:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 @end
 
 // // This is required for the module to be properly registered
