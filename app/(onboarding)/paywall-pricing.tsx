@@ -178,7 +178,7 @@ export default function PaywallPricing() {
     >
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <Text style={styles.title}>Get Unbound</Text>
+          <Text style={styles.title}>Be Unbound</Text>
           <View style={styles.features}>
             <View style={styles.featureRow}>
               <Image source={require("../../assets/images/onboarding/feature-1.png")} style={styles.featureIconImg} />
