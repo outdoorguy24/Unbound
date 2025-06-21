@@ -13,7 +13,7 @@ export default function Screen3() {
           <Image source={require("../../assets/images/onboarding/slotmachine.png")} style={styles.illustration} />
         </View>
         <View style={styles.headingContainer}>
-          <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
+        <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
         </View>
         <Text style={styles.body}>
           You&apos;re giving away your life one swipe at a time to billionaire tech overlords who don&apos;t care about

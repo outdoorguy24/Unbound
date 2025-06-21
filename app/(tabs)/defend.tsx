@@ -314,7 +314,7 @@ export default function DefendScreen() {
           </>
         )}
         
-        <View style={{ marginBottom: SPACING.sm }}>
+        <View style={{ marginBottom: SPACING.sm, marginTop: SPACING.md }}>
           <View style={styles.stepPillHeader}>
             <View style={styles.pillNumber}>
               <Text style={styles.pillNumberText}>2</Text>

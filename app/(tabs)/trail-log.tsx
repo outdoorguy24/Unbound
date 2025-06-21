@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getTrailLog } from "@/lib/trailLog";
 import { getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const MILESTONES = [10, 50, 100, 500, 1000]; // in days
 
@@ -65,7 +65,14 @@ export default function TrailLogScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
-      <View style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+        alwaysBounceVertical={true}
+        overScrollMode="always"
+      >
         <Text style={styles.header}>Trail Log</Text>
         <View style={styles.quoteBox}>
           <Text style={styles.quoteText}>
@@ -97,7 +104,7 @@ export default function TrailLogScreen() {
           <Text style={styles.milestoneValue}>{milestoneHours} Hours</Text>
           <Text style={styles.milestoneSub}>Time Saved Goal</Text>
         </View>
-      </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -110,9 +117,12 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  contentContainer: {
     margin: SPACING.md,
     padding: SPACING.md,
     alignItems: "center",
+    paddingBottom: SPACING.huge,
   },
   header: {
     fontSize: 32,

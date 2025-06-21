@@ -20,7 +20,7 @@ export default function Screen4({ isActive }: { isActive?: boolean }) {
       });
 
       timeoutId = setTimeout(() => {
-        Animated.stagger(1500, animations).start();
+        Animated.stagger(1000, animations).start();
       }, 1500);
     };
 
