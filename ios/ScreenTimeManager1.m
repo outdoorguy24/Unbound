@@ -36,6 +36,10 @@ RCT_EXTERN_METHOD(setAdultContentFilter:(BOOL)enabled
 RCT_EXTERN_METHOD(getAdultContentFilterStatus:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(setCurrentSelection:(NSString *)selectionString
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 @end
 
 // // This is required for the module to be properly registered

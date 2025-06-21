@@ -167,9 +167,6 @@ func setAdultContentFilter(_ enabled: Bool,
         
         if #available(iOS 16.0, *) {
             DispatchQueue.main.async {
-                // Reset current selection
-                self.currentSelection = FamilyActivitySelection()
-                
                 // Create a SwiftUI view with the picker
                 struct PickerView: View {
                     @Binding var selection: FamilyActivitySelection
@@ -260,6 +257,9 @@ func setAdultContentFilter(_ enabled: Bool,
                 let decoder = JSONDecoder()
                 let activitySelection = try decoder.decode(FamilyActivitySelection.self, from: data)
 
+                // Update the current selection
+                self.currentSelection = activitySelection
+
                 // Apply the selection to restrict access
                 store.shield.applications = activitySelection.applicationTokens.isEmpty ? nil : activitySelection.applicationTokens
                 store.shield.applicationCategories = activitySelection.categoryTokens.isEmpty ? nil : .specific(activitySelection.categoryTokens)
@@ -289,6 +289,32 @@ func setAdultContentFilter(_ enabled: Bool,
             
             print("[ScreenTimeManager] Activity selection removed successfully")
             resolve(true)
+        } else {
+            reject("UNSUPPORTED_VERSION", "iOS 16.0 or later is required", nil)
+        }
+    }
+    
+    @objc
+    func setCurrentSelection(_ selectionString: String,
+                           resolver resolve: @escaping RCTPromiseResolveBlock,
+                           rejecter reject: @escaping RCTPromiseRejectBlock) {
+        print("[ScreenTimeManager] setCurrentSelection called")
+        
+        if #available(iOS 16.0, *) {
+            guard let data = Data(base64Encoded: selectionString) else {
+                reject("DECODING_ERROR", "Invalid Base64 string for selection", nil)
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                self.currentSelection = try decoder.decode(FamilyActivitySelection.self, from: data)
+                print("[ScreenTimeManager] Current selection updated successfully")
+                resolve(true)
+            } catch {
+                print("[ScreenTimeManager] Failed to decode selection: \(error.localizedDescription)")
+                reject("DECODING_ERROR", "Failed to decode selection", error)
+            }
         } else {
             reject("UNSUPPORTED_VERSION", "iOS 16.0 or later is required", nil)
         }

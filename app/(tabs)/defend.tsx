@@ -1,7 +1,4 @@
-import ScreenTimeManager from '@/lib/ScreenTime';
-
 import { COLORS, SPACING } from "@/constants/theme";
-import ScreenTime from "@/lib/ScreenTime";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,6 +16,7 @@ import {
 import DefendModal from "../components/DefendModal";
 import PornBlockModal from "../components/PornBlockModal";
 import ScheduleModal from "../components/ScheduleModal";
+import ScreenTimeManager from '../services/ScreenTimeManager';
 
 const SELECTION_STORAGE_KEY = "UNBOUND_SELECTION_KEY";
 
@@ -85,7 +83,7 @@ export default function DefendScreen() {
   useEffect(() => {
     if (Platform.OS !== "ios") return;
     const checkStatus = async () => {
-      const status = await ScreenTime.getAuthorizationStatus();
+      const status = await ScreenTimeManager.getAuthorizationStatus();
       if (status.isAuthorized) {
         // Check adult content filter status
         const filterStatus = await ScreenTimeManager.getAdultContentFilterStatus();
@@ -111,7 +109,7 @@ export default function DefendScreen() {
   const handleEnableBlocking = async () => {
     if (Platform.OS !== "ios") return;
     try {
-      await ScreenTime.requestAuthorization("individual");
+      await ScreenTimeManager.requestAuthorization("individual");
       setIsSelectionMode(true);
     } catch (error) {
       Alert.alert("Error", "Could not enable blocking. Please try again.");
@@ -188,12 +186,26 @@ export default function DefendScreen() {
     setSchedule(savedSchedule);
   };
 
-  const handleEditSelection = () => {
-    const currentSelection = Object.fromEntries(
-      SOCIAL_APPS.map(app => [app.key, confirmedApps.includes(app.key)])
-    );
-    setPreSelected(currentSelection);
-    setIsSelectionMode(true);
+  const handleEditSelection = async () => {
+    try {
+      // Get the stored selection from AsyncStorage
+      const storedSelection = await AsyncStorage.getItem(SELECTION_STORAGE_KEY);
+      
+      if (storedSelection) {
+        // Set it as the current selection before showing the picker
+        await ScreenTimeManager.setCurrentSelection(storedSelection);
+      }
+      
+      // Pre-select the apps that were previously confirmed
+      const currentSelection = Object.fromEntries(
+        SOCIAL_APPS.map(app => [app.key, confirmedApps.includes(app.key)])
+      );
+      setPreSelected(currentSelection);
+      setIsSelectionMode(true);
+    } catch (error) {
+      console.error('Error in handleEditSelection:', error);
+      Alert.alert('Error', 'Failed to load previous selection. Please try again.');
+    }
   };
 
   const handlePreSelectToggle = (key: string) => {
@@ -223,7 +235,7 @@ export default function DefendScreen() {
           text: "Continue",
           onPress: async () => {
             try {
-              const { selection } = await ScreenTime.displayFamilyActivityPicker({
+              const { selection } = await ScreenTimeManager.displayFamilyActivityPicker({
                 headerText: "Choose Apps to Block",
               });
 
