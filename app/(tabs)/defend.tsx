@@ -353,8 +353,8 @@ export default function DefendScreen() {
             </View>
             
             {isBlockingEnabled && !isSelectionMode && (
-              <TouchableOpacity onPress={handleEditSelection} style={styles.changeButtonContainer}>
-                <Text style={styles.editButtonText}>Change App Selection</Text>
+              <TouchableOpacity onPress={handleEditSelection} style={styles.changeSelectionButton}>
+                <Text style={styles.actionButtonText}>Change App Selection</Text>
               </TouchableOpacity>
             )}
 
@@ -531,13 +531,11 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-Bold",
     color: COLORS.textPrimary,
   },
-  editButtonText: {
-    fontFamily: "Vollkorn-Bold",
-    fontSize: 18,
-    color: COLORS.textPrimary,
-    textDecorationLine: 'underline',
-  },
-  changeButtonContainer: {
+  changeSelectionButton: {
+    backgroundColor: "#3D7A4C",
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.sm,
     alignSelf: 'center',
     marginBottom: SPACING.md,
   },
