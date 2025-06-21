@@ -1,17 +1,18 @@
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function SignupScreen() {
@@ -37,8 +38,48 @@ export default function SignupScreen() {
   const handleSignup = async () => {
     setIsLoading(true);
     setError(null);
-    // TODO: Implement manual signup
-    setTimeout(() => setIsLoading(false), 1000);
+    
+    // Validate email
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Validate password
+    if (!password || password.length < 4) {
+      setError('Password must be at least 4 characters long');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
+      
+      if (error) {
+        if (error.message.includes('already registered')) {
+          setError('An account with this email already exists. Please login instead.');
+        } else {
+          setError(error.message || 'Signup failed. Please try again.');
+        }
+        // Reset fields on error
+        setEmail('');
+        setPassword('');
+      } else {
+        // Signup successful - user will be automatically logged in
+        // The AuthContext will handle the redirect to onboarding
+      }
+    } catch (err: any) {
+      setError('Network error. Please check your connection and try again.');
+      // Reset fields on error
+      setEmail('');
+      setPassword('');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

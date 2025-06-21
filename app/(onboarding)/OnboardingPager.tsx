@@ -89,7 +89,7 @@ export default function OnboardingPager() {
         ref={pagerRef}
         style={{ flex: 1 }}
         initialPage={0}
-        scrollEnabled={![5, 6, 7, 8].includes(page) || canSwipe}
+        scrollEnabled={![5, 6, 7, 8].includes(page) ? true : canSwipe}
         onPageSelected={(e) => {
           const newPage = e.nativeEvent.position;
           setPage(newPage);

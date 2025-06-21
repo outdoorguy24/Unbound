@@ -39,6 +39,11 @@ const COMMUNITY = [
     icon: <Feather name="send" size={24} color="#564110" style={{ marginRight: 16 }} />,
     action: "refer",
   },
+  {
+    label: "Test Notification (Dev)",
+    icon: <Feather name="bell" size={24} color="#564110" style={{ marginRight: 16 }} />,
+    action: "testNotification",
+  },
 ];
 
 export default function ProfileScreen() {
@@ -100,6 +105,15 @@ export default function ProfileScreen() {
         }
       } catch (error) {
         console.error("Error opening settings:", error);
+      }
+    }
+    if (item.action === "testNotification") {
+      try {
+        await sendTestNotification();
+        Alert.alert("Test Notification", "Local notification sent! Check if you received it.");
+      } catch (error) {
+        console.error("Error sending test notification:", error);
+        Alert.alert("Error", "Failed to send test notification.");
       }
     }
   };

@@ -3,11 +3,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useProfileCheck } from "@/hooks/useProfileCheck";
 import { StripeProvider } from "@/lib/stripeProvider";
+import { addNotificationListeners, registerForPushNotificationsAsync } from "@/utils/notifications";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 
 // Module-level variable to persist splash state across remounts
@@ -32,6 +33,34 @@ export default function RootLayout() {
     splashShown = true;
     setShowSplash(false);
   };
+
+  // Set up push notifications
+  useEffect(() => {
+    const setupNotifications = async () => {
+      try {
+        // Register for push notifications
+        const token = await registerForPushNotificationsAsync();
+        console.log('Push notification token:', token);
+        
+        // Set up notification listeners
+        const cleanup = addNotificationListeners(
+          (notification: any) => {
+            console.log('Notification received:', notification);
+          },
+          (response: any) => {
+            console.log('Notification tapped:', response);
+            // Handle notification tap - could navigate to specific screen
+          }
+        );
+        
+        return cleanup;
+      } catch (error) {
+        console.error('Error setting up notifications:', error);
+      }
+    };
+    
+    setupNotifications();
+  }, []);
 
   return (
     <StripeProvider>

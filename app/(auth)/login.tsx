@@ -1,17 +1,18 @@
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -37,8 +38,77 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     setIsLoading(true);
     setError(null);
-    // TODO: Implement manual login
-    setTimeout(() => setIsLoading(false), 1000);
+    
+    // Validate email
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Validate password
+    if (!password) {
+      setError('Please enter your password');
+      setIsLoading(false);
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+      
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(error.message || 'Login failed. Please try again.');
+        }
+        // Reset fields on error
+        setEmail('');
+        setPassword('');
+      } else {
+        // Login successful - AuthContext will handle the redirect
+      }
+    } catch (err: any) {
+      setError('Network error. Please check your connection and try again.');
+      // Reset fields on error
+      setEmail('');
+      setPassword('');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email || !email.includes('@')) {
+      setError('Please enter your email address first');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Sending password reset email to:', email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      
+      if (error) {
+        console.error('Password reset error:', error);
+        setError(error.message || 'Failed to send reset email. Please try again.');
+      } else {
+        console.log('Password reset email sent successfully');
+        setError('Password reset email sent! Check your inbox (and spam folder).');
+        setEmail('');
+        setPassword('');
+      }
+    } catch (err: any) {
+      console.error('Password reset exception:', err);
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -83,6 +153,9 @@ export default function LoginScreen() {
               />
             </TouchableOpacity>
           </View>
+          <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordLink}>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.createBtn} onPress={handleLogin} disabled={isLoading}>
           {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.createBtnText}>Login</Text>}
@@ -238,5 +311,16 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: 0,
     marginBottom: SPACING.xl,
+  },
+  forgotPasswordLink: {
+    alignSelf: "flex-end",
+    marginTop: 8,
+  },
+  forgotPasswordText: {
+    color: "#265C28",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "Vollkorn-Bold",
+    textDecorationLine: "underline",
   },
 });

@@ -4,6 +4,7 @@ import { resetUserPairing } from "@/lib/partnerMatching";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -40,6 +41,7 @@ export default function CampScreen() {
   const [community, setCommunity] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const spinValue = useRef(new Animated.Value(0)).current;
+  const router = useRouter();
 
   const fetchData = async () => {
     setLoading(true);
@@ -160,8 +162,9 @@ export default function CampScreen() {
     if (!user?.userId) return;
     const success = await resetUserPairing(user.userId);
     if (success) {
-      Alert.alert("Pairing Reset", "Your pairing status has been reset. Please restart the app to find a new partner.");
-      await fetchData(); // Refresh data
+      Alert.alert("Pairing Reset", "Your pairing status has been reset. Finding you a new partner...");
+      // Redirect to partner matching screen
+      router.replace("/(onboarding)/Screen13");
     } else {
       Alert.alert("Error", "Could not reset pairing. Please try again.");
     }
