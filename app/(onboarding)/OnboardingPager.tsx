@@ -52,8 +52,8 @@ export default function OnboardingPager() {
     // Screens 6, 7, 8, 9, 10 (indexes 5, 6, 7, 8, 9) require submit
     if ([5, 6, 7, 8, 9].includes(screenIdx)) {
       props.onSubmit = () => {
-        setCanSwipe(true);
-        goToNext();
+          setCanSwipe(true);
+          goToNext();
       };
       props.disableSwipe = !canSwipe;
       props.enableSwipe = () => setCanSwipe(true);
@@ -74,9 +74,9 @@ export default function OnboardingPager() {
       // Regular screens get props based on whether they need submit
       const props = getScreenProps(idx);
       return (
-        <View key={idx} style={{ flex: 1 }}>
+      <View key={idx} style={{ flex: 1 }}>
           <Screen {...props} />
-        </View>
+      </View>
       );
     });
 

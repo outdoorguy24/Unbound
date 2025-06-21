@@ -13,62 +13,33 @@ interface PartnerMatchResult {
  */
 export async function findOrCreatePartner(currentUserId: string): Promise<PartnerMatchResult> {
   try {
-    // First check if user already has a partner
-    const partnerId = await getPartnerIdForUser(currentUserId);
-    if (partnerId) {
-      return { matched: true, partnerId: partnerId };
+    // First, check if the user already has a partner.
+    const existingPartnerId = await getPartnerIdForUser(currentUserId);
+    if (existingPartnerId) {
+      return { matched: true, partnerId: existingPartnerId };
     }
 
-    // Get all available users with profiles
-    const { data: allUsers, error: usersError } = await supabase
-      .from('user_profiles')
-      .select('user_id')
-      .neq('user_id', currentUserId);
-
-    if (usersError) {
-      console.error('Error getting users:', usersError);
-      return { matched: false, error: 'Failed to get users' };
-    }
-
-    // Get all existing pairs
-    const { data: pairs, error: pairsError } = await supabase
-      .from('accountability_pairs')
-      .select('user_id, partner_id');
-
-    if (pairsError) {
-      console.error('Error getting pairs:', pairsError);
-      return { matched: false, error: 'Failed to get pairs' };
-    }
-
-    // Create set of paired users
-    const pairedUsers = new Set();
-    pairs?.forEach(pair => {
-      pairedUsers.add(pair.user_id);
-      pairedUsers.add(pair.partner_id);
+    // Call the atomic database function to find/create a pair.
+    const { data, error } = await supabase.rpc('match_and_create_pair', {
+      current_user_id: currentUserId
     });
 
-    // Find first available user who isn't paired
-    const availableUser = allUsers?.find(user => !pairedUsers.has(user.user_id));
-
-    // No available users found
-    if (!availableUser) {
-      return { matched: false };
+    if (error) {
+      console.error('Error calling match_and_create_pair:', error);
+      return { matched: false, error: 'Failed to execute matching function' };
+    }
+    
+    // The RPC returns an array of rows, we expect only one.
+    const result = data[0];
+    if (!result) {
+      return { matched: false, error: 'Invalid response from matching function' };
     }
 
-    // Create partnership
-    const { error: insertError } = await supabase
-      .from('accountability_pairs')
-      .insert({
-        user_id: currentUserId,
-        partner_id: availableUser.user_id
-      });
-
-    if (insertError) {
-      console.error('Error creating partnership:', insertError);
-      return { matched: false, error: 'Failed to create partnership' };
-    }
-
-    return { matched: true, partnerId: availableUser.user_id };
+    return {
+      matched: result.matched,
+      partnerId: result.partner_id,
+    };
+    
   } catch (error) {
     console.error('Unexpected error in findOrCreatePartner:', error);
     return { matched: false, error: 'Unexpected error occurred' };
@@ -123,6 +94,37 @@ export async function removePartnership(userId: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Unexpected error in removePartnership:', error);
+    return false;
+  }
+}
+
+/**
+ * Fully resets a user's pairing status by removing them from any existing
+ * pairs and from the search pool.
+ * @param userId The ID of the user to reset.
+ * @returns True if the reset was successful, false otherwise.
+ */
+export async function resetUserPairing(userId: string): Promise<boolean> {
+  try {
+    // Both operations are wrapped in a Promise.all to run concurrently
+    const [pairResult, poolResult] = await Promise.all([
+      supabase.from('accountability_pairs').delete().or(`user_id.eq.${userId},partner_id.eq.${userId}`),
+      supabase.from('partner_search_pool').delete().eq('user_id', userId)
+    ]);
+
+    if (pairResult.error) {
+      console.error('Error removing partnership during reset:', pairResult.error);
+      throw pairResult.error;
+    }
+
+    if (poolResult.error) {
+      console.error('Error removing from search pool during reset:', poolResult.error);
+      throw poolResult.error;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Unexpected error in resetUserPairing:', error);
     return false;
   }
 } 

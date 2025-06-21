@@ -5,8 +5,13 @@ create table if not exists public.accountability_pairs (
   partner_id uuid references auth.users on delete cascade,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  unique(user_id, partner_id)
+  unique(user_id, partner_id),
+  constraint check_different_users check (user_id <> partner_id)
 );
+
+-- Add a unique index to prevent duplicate pairs regardless of order
+create unique index if not exists idx_unique_accountability_pair
+  on public.accountability_pairs (least(user_id, partner_id), greatest(user_id, partner_id));
 
 -- Set up Row Level Security (RLS)
 alter table public.accountability_pairs enable row level security;

@@ -1,10 +1,11 @@
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { resetUserPairing } from "@/lib/partnerMatching";
 import { supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 // 1. Format minutes as "X hours, Y minutes"
 function formatTimeSaved(minutes: number): string {
@@ -40,10 +41,9 @@ export default function CampScreen() {
   const [loading, setLoading] = useState(true);
   const spinValue = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      try {
+  const fetchData = async () => {
+    setLoading(true);
+    try {
       // Get current user
       const { data: authData } = await supabase.auth.getUser();
       const supaUser = authData?.user;
@@ -78,63 +78,65 @@ export default function CampScreen() {
       // Get user profile
       const userProfile = await getUserProfile(supaUser.id);
 
-        // Get real streak data
-        const streakData = await getStreak(supaUser.id);
-        const streakDays = streakData.current_streak || 0;
+      // Get real streak data
+      const streakData = await getStreak(supaUser.id);
+      const streakDays = streakData.current_streak || 0;
 
-        // Calculate time saved this week (from Monday to Sunday)
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
-        startOfWeek.setHours(0, 0, 0, 0);
-        
-        const timeSavedThisWeek = await getTotalBlockedTime(supaUser.id, startOfWeek, now) || 0;
+      // Calculate time saved this week (from Monday to Sunday)
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
+      startOfWeek.setHours(0, 0, 0, 0);
+      
+      const timeSavedThisWeek = await getTotalBlockedTime(supaUser.id, startOfWeek, now) || 0;
 
       setUser({
         userId: supaUser.id,
         firstName: userProfile?.first_name || "Warrior",
         streakDays,
-          timeSavedThisWeek,
+        timeSavedThisWeek,
       });
 
-        // Get real partner data
-        const partnerData = await getPartnerData(supaUser.id);
-        
-        if (partnerData) {
-          setPartner({
-            name: partnerData.name,
-            city: partnerData.city,
-            streakDays: partnerData.streakDays,
-            status: getPartnerStatus(partnerData.streakDays),
-          });
-        } else {
-          setPartner(null);
-        }
-
-        // Get real community stats
-        const communityStats = await getCommunityStats();
-        setCommunity(communityStats);
-
-      } catch (error) {
-        console.error("🏕️ Camp: Error fetching data:", error);
-        // Set fallback data on error
-        const { data: authData } = await supabase.auth.getUser();
-        const supaUser = authData?.user;
-        setUser({
-          userId: supaUser?.id || contextUser?.id,
-          firstName: "Warrior",
-          streakDays: 1,
-          timeSavedThisWeek: 0,
+      // Get real partner data
+      const partnerData = await getPartnerData(supaUser.id);
+      
+      if (partnerData) {
+        setPartner({
+          name: partnerData.name,
+          city: partnerData.city,
+          streakDays: partnerData.streakDays,
+          status: getPartnerStatus(partnerData.streakDays),
         });
+      } else {
         setPartner(null);
-      setCommunity({
-          totalUsers: 1000,
-          totalTimeSaved: 50000,
-      });
-      } finally {
-      setLoading(false);
       }
+
+      // Get real community stats
+      const communityStats = await getCommunityStats();
+      setCommunity(communityStats);
+
+    } catch (error) {
+      console.error("🏕️ Camp: Error fetching data:", error);
+      // Set fallback data on error
+      const { data: authData } = await supabase.auth.getUser();
+      const supaUser = authData?.user;
+      setUser({
+        userId: supaUser?.id || contextUser?.id,
+        firstName: "Warrior",
+        streakDays: 1,
+        timeSavedThisWeek: 0,
+      });
+      setPartner(null);
+      setCommunity({
+        totalUsers: 1000,
+        totalTimeSaved: 50000,
+      });
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchData();
   }, [contextUser]);
 
@@ -153,6 +155,17 @@ export default function CampScreen() {
       spin();
     }
   }, [loading, spinValue]);
+
+  const handleReset = async () => {
+    if (!user?.userId) return;
+    const success = await resetUserPairing(user.userId);
+    if (success) {
+      Alert.alert("Pairing Reset", "Your pairing status has been reset. Please restart the app to find a new partner.");
+      await fetchData(); // Refresh data
+    } else {
+      Alert.alert("Error", "Could not reset pairing. Please try again.");
+    }
+  };
 
   if (loading) {
     const spinAnimation = spinValue.interpolate({
@@ -234,6 +247,12 @@ export default function CampScreen() {
         </View>
           <Text style={[styles.communityTime, styles.sectionTitle]}>{formatTimeSaved(community.totalTimeSaved)}</Text>
         </View>
+
+        {__DEV__ && (
+          <TouchableOpacity style={styles.devButton} onPress={handleReset}>
+            <Text style={styles.devButtonText}>Reset Pairing (Dev)</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </ImageBackground>
   );
@@ -378,5 +397,17 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     resizeMode: "contain",
+  },
+  devButton: {
+    backgroundColor: "#A52A2A",
+    padding: SPACING.md,
+    borderRadius: SPACING.sm,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.lg,
+  },
+  devButtonText: {
+    color: "white",
+    textAlign: "center",
+    fontFamily: "Vollkorn-Bold",
   },
 });
