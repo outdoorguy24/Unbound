@@ -1,9 +1,12 @@
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
+import { sendTestNotification } from "@/utils/notifications";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Alert, Animated, ImageBackground, Linking, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TouchableOpacity } from "react-native";
+import * as StoreReview from 'expo-store-review';
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Animated, ImageBackground, Linking, Platform, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import FounderModal from "../components/FounderModal";
 
 const ACCOUNT = [
@@ -18,9 +21,9 @@ const ACCOUNT = [
     action: "privacy",
   },
   {
-    label: "Notifications",
-    icon: <Feather name="bell" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    action: "notifications",
+    label: "Weekly Summary Notifications",
+    icon: <Feather name="bar-chart-2" size={24} color="#564110" style={{ marginRight: 16 }} />,
+    action: "weeklyNotifications",
   },
 ];
 const COMMUNITY = [
@@ -48,10 +51,34 @@ const COMMUNITY = [
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [founderModalVisible, setFounderModalVisible] = useState(false);
+  const [weeklyNotificationsEnabled, setWeeklyNotificationsEnabled] = useState(true);
   const pressTimer = useRef<NodeJS.Timeout>();
   const animatedValue = useRef(new Animated.Value(1)).current;
+
+  // Load user's notification preferences
+  useEffect(() => {
+    const loadNotificationPreferences = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('notification_preferences')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (!error && data?.notification_preferences) {
+          setWeeklyNotificationsEnabled(data.notification_preferences.weekly_summary ?? true);
+        }
+      } catch (error) {
+        console.error('Error loading notification preferences:', error);
+      }
+    };
+    
+    loadNotificationPreferences();
+  }, [user?.id]);
 
   const handlePressIn = () => {
     Animated.timing(animatedValue, {
@@ -116,17 +143,64 @@ export default function ProfileScreen() {
         Alert.alert("Error", "Failed to send test notification.");
       }
     }
+    if (item.action === "weeklyNotifications") {
+      const newValue = !weeklyNotificationsEnabled;
+      setWeeklyNotificationsEnabled(newValue);
+      
+      // Update in database
+      if (user?.id) {
+        supabase
+          .from('user_profiles')
+          .update({ 
+            notification_preferences: { weekly_summary: newValue }
+          })
+          .eq('user_id', user.id)
+          .then(({ error }) => {
+            if (error) {
+              console.error('Error updating notification preferences:', error);
+              Alert.alert('Error', 'Failed to update notification preferences');
+              setWeeklyNotificationsEnabled(!newValue); // Revert on error
+            } else {
+              Alert.alert(
+                'Updated', 
+                `Weekly summary notifications ${newValue ? 'enabled' : 'disabled'}`
+              );
+            }
+          });
+      }
+    }
   };
 
   const handleCommunityPress = async (item: typeof COMMUNITY[0]) => {
-    if (item.action === "refer") {
-      Share.share({
-        message: "Try Unbound! Reclaim your time: https://yourapp.com/referral",
-      });
-      return;
-    }
     if (item.route) {
       router.push(item.route);
+    }
+    if (item.action === "review") {
+      try {
+        if (await StoreReview.hasAction()) {
+          await StoreReview.requestReview();
+        }
+      } catch (error) {
+        console.error("Error requesting review:", error);
+      }
+    }
+    if (item.action === "refer") {
+      try {
+        await Share.share({
+          message: "Check out Unbound, the app that helps you reclaim your focus: https://www.unboundapp.live/",
+        });
+      } catch (error) {
+        console.error("Error sharing:", error);
+      }
+    }
+    if (item.action === "testNotification") {
+      try {
+        await sendTestNotification();
+        Alert.alert("Test Notification", "Local notification sent! Check if you received it.");
+      } catch (error) {
+        console.error("Error sending test notification:", error);
+        Alert.alert("Error", "Failed to send test notification.");
+      }
     }
   };
 
@@ -135,45 +209,37 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.header}>Profile</Text>
         <Text style={styles.sectionTitle}>Community</Text>
-        {COMMUNITY.map((item) => {
-          if (item.action === "refer") {
-            return (
-              <Pressable
-                key={item.label}
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                onPress={() => handleCommunityPress(item)}
-              >
-                <Animated.View style={[styles.menuCard, { opacity: animatedValue }]}>
-                  {item.icon}
-                  <Text style={styles.menuLabel}>{item.label}</Text>
-                  <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-                </Animated.View>
-              </Pressable>
-            );
-          }
-          return (
-            <TouchableOpacity
-              key={item.label}
-              style={styles.menuCard}
-              onPress={() => handleCommunityPress(item)}
-            >
-              {item.icon}
-              <Text style={styles.menuLabel}>{item.label}</Text>
-              <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-            </TouchableOpacity>
-          );
-        })}
+        {COMMUNITY.map((item) => (
+          <TouchableOpacity 
+            key={item.label} 
+            style={styles.menuCard} 
+            onPress={() => handleCommunityPress(item)}
+          >
+            {item.icon}
+            <Text style={styles.menuLabel}>{item.label}</Text>
+            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+          </TouchableOpacity>
+        ))}
         <Text style={styles.sectionTitle}>Account</Text>
         {ACCOUNT.map((item) => (
           <TouchableOpacity 
             key={item.label} 
             style={styles.menuCard} 
             onPress={() => handleAccountPress(item)}
+            activeOpacity={item.action === "weeklyNotifications" ? 1 : 0.2}
           >
-            {item.icon}
-            <Text style={styles.menuLabel}>{item.label}</Text>
-            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+              {item.icon}
+              <Text style={styles.menuLabel}>{item.label}</Text>
+            </View>
+            
+            {item.action === "weeklyNotifications" ? (
+              <View style={[styles.toggle, weeklyNotificationsEnabled && styles.toggleActive]}>
+                <Animated.View style={[styles.toggleThumb, weeklyNotificationsEnabled && styles.toggleThumbActive]} />
+              </View>
+            ) : (
+              <Feather name="chevron-right" size={22} color="#564110" />
+            )}
           </TouchableOpacity>
         ))}
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
@@ -216,6 +282,7 @@ const styles = StyleSheet.create({
   menuCard: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: "#F9E7B0",
     borderRadius: SPACING.md,
     borderWidth: 1.5,
@@ -235,6 +302,7 @@ const styles = StyleSheet.create({
     fontFamily: "Vollkorn-SemiBold",
     color: "#2C1A05",
     marginLeft: 8,
+    flexShrink: 1,
   },
   logoutButton: {
     backgroundColor: "#4B3415",
@@ -248,5 +316,33 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontFamily: "Vollkorn-SemiBold",
     fontSize: 18,
+  },
+  toggle: {
+    width: 50,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1.5,
+    borderColor: "#564110",
+    backgroundColor: "#E6D3A7",
+    justifyContent: "center",
+    padding: 2,
+  },
+  toggleActive: {
+    backgroundColor: "#265C28",
+    borderColor: "#265C28",
+  },
+  toggleThumb: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  toggleThumbActive: {
+    transform: [{ translateX: 20 }],
   },
 });

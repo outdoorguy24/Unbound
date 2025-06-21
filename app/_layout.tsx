@@ -3,6 +3,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useProfileCheck } from "@/hooks/useProfileCheck";
 import { StripeProvider } from "@/lib/stripeProvider";
+import { supabase } from "@/lib/supabaseClient";
 import { addNotificationListeners, registerForPushNotificationsAsync } from "@/utils/notifications";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
@@ -42,6 +43,23 @@ export default function RootLayout() {
         const token = await registerForPushNotificationsAsync();
         console.log('Push notification token:', token);
         
+        // Save token to database if user is logged in
+        if (token) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { error } = await supabase
+              .from('user_profiles')
+              .update({ push_token: token })
+              .eq('user_id', user.id);
+            
+            if (error) {
+              console.error('Error saving push token:', error);
+            } else {
+              console.log('Push token saved to database');
+            }
+          }
+        }
+        
         // Set up notification listeners
         const cleanup = addNotificationListeners(
           (notification: any) => {
@@ -49,7 +67,11 @@ export default function RootLayout() {
           },
           (response: any) => {
             console.log('Notification tapped:', response);
-            // Handle notification tap - could navigate to specific screen
+            // Handle notification tap - navigate to trail log if it's a weekly summary
+            if (response?.notification?.request?.content?.data?.screen === 'trail-log') {
+              // Navigate to trail log screen
+              // This will be handled by the notification tap listener in the app
+            }
           }
         );
         
