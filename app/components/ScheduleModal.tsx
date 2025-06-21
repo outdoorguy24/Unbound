@@ -15,7 +15,7 @@ import {
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1);
-const MINUTES = Array.from({ length: 60 }, (_, i) => i);
+const MINUTES = [0, 15, 30, 45];
 const AMPM = ["AM", "PM"];
 
 interface ScheduleModalProps {
@@ -88,41 +88,43 @@ export default function ScheduleModal({ visible, onClose, onScheduleSaved }: Sch
     );
   };
 
-  const TimePickerWheel = ({ 
-    value, 
-    onValueChange, 
-    data, 
-    width = "30%" 
-  }: { 
-    value: number; 
-    onValueChange: (value: number) => void; 
-    data: number[]; 
+  const TimePickerWheel = ({
+    value,
+    onValueChange,
+    data,
+    width = "30%",
+  }: {
+    value: number;
+    onValueChange: (value: number) => void;
+    data: number[];
     width?: string | number;
   }) => {
     const scrollViewRef = React.useRef<ScrollView>(null);
     const itemHeight = 40;
 
-    // Set initial scroll position to the selected value
     React.useEffect(() => {
-      const index = data.indexOf(value);
-      if (index !== -1 && scrollViewRef.current) {
-        setTimeout(() => {
-          scrollViewRef.current?.scrollTo({
-            y: index * itemHeight,
-            animated: false
-          });
-        }, 100);
+      const index = data.findIndex((d) => d === value);
+      if (index !== -1) {
+        // Use timeout to ensure the scroll happens after the modal is fully visible
+        setTimeout(
+          () =>
+            scrollViewRef.current?.scrollTo({
+              y: index * itemHeight,
+              animated: true,
+            }),
+          100
+        );
       }
-    }, []);
+    }, [value]); // Rerun when value changes to handle both tap and initial set
 
     return (
       <ScrollView
         ref={scrollViewRef}
-        style={[styles.timeWheel, { width }]}
+        style={[styles.timeWheel, { width: width as any }]}
         showsVerticalScrollIndicator={false}
         snapToInterval={itemHeight}
         decelerationRate="fast"
-        contentContainerStyle={{ paddingVertical: itemHeight * 2 }}
+        contentContainerStyle={{ paddingVertical: itemHeight }}
       >
         {data.map((item) => (
           <TouchableOpacity
@@ -147,28 +149,29 @@ export default function ScheduleModal({ visible, onClose, onScheduleSaved }: Sch
     );
   };
 
-  const AMPMWheel = ({ 
-    value, 
-    onValueChange 
-  }: { 
-    value: string; 
-    onValueChange: (value: string) => void; 
+  const AMPMWheel = ({
+    value,
+    onValueChange,
+  }: {
+    value: string;
+    onValueChange: (value: string) => void;
   }) => {
     const scrollViewRef = React.useRef<ScrollView>(null);
     const itemHeight = 40;
 
-    // Set initial scroll position to the selected value
     React.useEffect(() => {
-      const index = AMPM.indexOf(value);
-      if (index !== -1 && scrollViewRef.current) {
-        setTimeout(() => {
-          scrollViewRef.current?.scrollTo({
-            y: index * itemHeight,
-            animated: false
-          });
-        }, 100);
+      const index = AMPM.findIndex((d) => d === value);
+      if (index !== -1) {
+        setTimeout(
+          () =>
+            scrollViewRef.current?.scrollTo({
+              y: index * itemHeight,
+              animated: true,
+            }),
+          100
+        );
       }
-    }, []);
+    }, [value]);
 
     return (
       <ScrollView
@@ -177,7 +180,7 @@ export default function ScheduleModal({ visible, onClose, onScheduleSaved }: Sch
         showsVerticalScrollIndicator={false}
         snapToInterval={itemHeight}
         decelerationRate="fast"
-        contentContainerStyle={{ paddingVertical: itemHeight * 2 }}
+        contentContainerStyle={{ paddingVertical: itemHeight }}
       >
         {AMPM.map((item) => (
           <TouchableOpacity
