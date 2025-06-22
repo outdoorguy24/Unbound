@@ -252,7 +252,7 @@ export default function CampScreen() {
         <Text style={styles.heroName}>{user.firstName}</Text>
         <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
 
-        <View style={styles.sectionBox}>
+        <View style={[styles.sectionBox, { alignItems: 'center' }]}>
           <View style={[styles.rowCenter, styles.centeredRow]}>
             <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
             <Text style={styles.sectionTitle}>Time reclaimed this week</Text>
@@ -395,6 +395,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2C1A05",
     fontFamily: "Vollkorn-Bold",
+    textAlign: 'center',
   },
   timeCompare: {
     fontSize: 16,
