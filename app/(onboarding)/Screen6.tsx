@@ -1,6 +1,6 @@
 import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const heading = "First, know your trap. What's stealing your time and focus?";
@@ -15,10 +15,15 @@ const OPTIONS = [
 
 export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
   const { traps, setTraps } = useOnboarding();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (traps.length === 0 && disableSwipeFn) disableSwipeFn();
-    if (traps.length > 0 && enableSwipe) enableSwipe();
+    if (traps.length === 0 && disableSwipeFn) {
+      disableSwipeFn();
+    }
+    if (traps.length > 0 && enableSwipe) {
+      enableSwipe();
+    }
   }, [disableSwipeFn, enableSwipe, traps]);
 
   const toggleOption = (key: string) => {
@@ -53,11 +58,15 @@ export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSw
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.button, traps.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
+          style={[styles.button, (traps.length === 0 || isSubmitting) && styles.buttonDisabled, SHADOWS.medium]}
           onPress={() => {
-            if (onSubmit) onSubmit();
+            if (onSubmit) {
+              setIsSubmitting(true);
+              disableSwipeFn();
+              onSubmit();
+            }
           }}
-          disabled={traps.length === 0}
+          disabled={traps.length === 0 || isSubmitting}
         >
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>

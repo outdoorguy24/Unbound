@@ -59,13 +59,14 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     position: "absolute",
-    bottom: height * 0.2,
+    bottom: height * 0.24,
     width: "100%",
     alignItems: "center",
   },
   slogan: {
-    color: "#BE6108",
-    fontSize: 32,
+    color: "#F3B74C",
+    fontSize: 28,
+    lineHeight: 36,
     fontWeight: "bold",
     textAlign: "center",
     fontFamily: "Vollkorn-Bold",
