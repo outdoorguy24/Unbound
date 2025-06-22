@@ -9,7 +9,26 @@ interface PornBlockModalProps {
 }
 
 export default function PornBlockModal({ visible, onClose, variant = 1 }: PornBlockModalProps) {
-  const isVariant2 = variant === 2;
+  if (variant === 2) {
+    return (
+      <Modal visible={visible} transparent animationType="fade">
+        <View style={styles.overlay}>
+          <ImageBackground
+            source={require("../../assets/images/ancestor-quote.jpeg")}
+            style={styles.variant2Container}
+            imageStyle={{ borderRadius: SPACING.xl }}
+            resizeMode="cover"
+          >
+            <TouchableOpacity style={styles.variant2Button} onPress={onClose}>
+              <Text style={styles.buttonText}>Sir yes sir</Text>
+            </TouchableOpacity>
+          </ImageBackground>
+        </View>
+      </Modal>
+    );
+  }
+
+  // Original modal for variant 1
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
@@ -20,20 +39,11 @@ export default function PornBlockModal({ visible, onClose, variant = 1 }: PornBl
         >
           <View style={styles.card}>
             <Image
-              source={
-                isVariant2 ? require("../../assets/images/block-2.png") : require("../../assets/images/block-1.png")
-              }
+              source={require("../../assets/images/block-1.png")}
               style={styles.illustration}
               resizeMode="contain"
             />
-            {isVariant2 ? (
-              <>
-                <Text style={styles.text}>Keep that thing in your pants and get outside!</Text>
-                <Text style={styles.author}>- Your ancestors</Text>
-              </>
-            ) : (
-              <Text style={styles.text}>You chose this,{"\n"}now stick with it!</Text>
-            )}
+            <Text style={styles.text}>You chose this,{"\n"}now stick with it!</Text>
             <TouchableOpacity style={styles.button} onPress={onClose}>
               <Text style={styles.buttonText}>Sir yes sir</Text>
             </TouchableOpacity>
@@ -67,6 +77,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: "rgba(0,0,0,0.00)",
   },
+  fullImage: {
+    width: '100%',
+    height: 300,
+    marginBottom: SPACING.lg,
+  },
   illustration: {
     width: 180,
     height: 180,
@@ -89,6 +104,21 @@ const styles = StyleSheet.create({
     color: "#F9E7B0",
     fontFamily: "Vollkorn-Bold",
     fontSize: 18,
+  },
+  variant2Container: {
+    width: 320,
+    height: 420,
+    justifyContent: "flex-end",
+    alignItems: "center",
+    paddingBottom: 50,
+  },
+  variant2Button: {
+    backgroundColor: "#3D7A4C",
+    borderRadius: SPACING.sm,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderWidth: 4,
+    borderColor: "#F3E2C7",
   },
   author: {
     fontFamily: "Vollkorn-SemiBold",
