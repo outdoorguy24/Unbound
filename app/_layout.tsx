@@ -1,4 +1,5 @@
 import SplashScreen from "@/components/SplashScreen";
+import { COLORS } from "@/constants/theme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useProfileCheck } from "@/hooks/useProfileCheck";
@@ -77,22 +78,32 @@ function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: a
       screenOptions={{
         headerShown: false,
         headerStyle: {
-          backgroundColor: colorScheme === "dark" ? "#000" : "#fff",
+          backgroundColor: '#F5F1E6',
         },
-        headerTintColor: colorScheme === "dark" ? "#fff" : "#000",
+        headerTintColor: COLORS.textPrimary,
+        headerTitleStyle: {
+          fontFamily: 'Vollkorn-Bold',
+        },
       }}
     >
       {!user ? (
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        <Stack.Screen name="(onboarding)" />
       ) : !profile ? (
-        <Stack.Screen name="(onboarding)/ScreenProfileSetup" options={{ headerShown: false }} />
+        <Stack.Screen name="(onboarding)/ScreenProfileSetup" />
       ) : (
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" />
       )}
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="defend-modal" options={{ presentation: "modal", headerShown: false }} />
+      <Stack.Screen 
+        name="messages/[partnerId]" 
+        options={{ 
+          headerShown: true,
+          presentation: 'card',
+        }} 
+      />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="defend-modal" options={{ presentation: "modal" }} />
       <Stack.Screen name="founder" options={{ title: "Talk with the Founder", headerShown: true }} />
-      <Stack.Screen name="+not-found" options={{ headerShown: true }} />
+      <Stack.Screen name="+not-found" options={{ headerShown: true }}/>
     </Stack>
   );
 }

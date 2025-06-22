@@ -6,7 +6,7 @@ import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { getCommunityStats, getPartnerData, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import { registerForPushNotificationsAsync } from "@/utils/notifications";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -142,9 +142,7 @@ export default function CampScreen() {
       
       if (partnerData) {
         setPartner({
-          name: partnerData.name,
-          city: partnerData.city,
-          streakDays: partnerData.streakDays,
+          ...partnerData,
           status: getPartnerStatus(partnerData.streakDays),
         });
       } else {
@@ -255,11 +253,11 @@ export default function CampScreen() {
         <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
 
         <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>Time reclaimed this week</Text>
           <View style={[styles.rowCenter, styles.centeredRow]}>
             <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
-          <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
+            <Text style={styles.sectionTitle}>Time reclaimed this week</Text>
           </View>
+          <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
           <Text style={styles.timeCompare}>{getTimeComparison(user.timeSavedThisWeek)}</Text>
         </View>
 
@@ -271,11 +269,18 @@ export default function CampScreen() {
           <View style={[styles.rowCenter, styles.centeredRow]}>
             <Text style={styles.partnerHighlight}>
               {partner
-                ? `${partner.name} from ${partner.city} - Day ${partner.streakDays}`
+                ? `${partner.name} from ${partner.city || 'Unknown'} - Day ${partner.streakDays}`
                 : "Your partner is setting up their profile"}
               </Text>
           </View>
           {partner && <Text style={[styles.partnerStatus, styles.sectionTitle]}>{partner.status}</Text>}
+          {partner && (
+            <Link href={`/messages/${partner.id}`} asChild>
+              <TouchableOpacity style={styles.chatButton}>
+                <Text style={styles.chatButtonText}>Start Chat</Text>
+              </TouchableOpacity>
+            </Link>
+          )}
         </View>
 
         <View style={styles.sectionBox}>
@@ -451,4 +456,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Vollkorn-Bold",
   },
+  chatButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.sm,
+    marginTop: SPACING.md,
+    alignSelf: 'center',
+  },
+  chatButtonText: {
+    color: 'white',
+    fontFamily: 'Vollkorn-Bold',
+    fontSize: 16,
+  }
 });

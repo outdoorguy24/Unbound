@@ -8,9 +8,9 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: COLORS.tabBarActive,
         tabBarInactiveTintColor: COLORS.tabBarInactive,
-        headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: Platform.select({
           ios: {
@@ -34,7 +34,6 @@ export default function TabLayout() {
         name="camp"
         options={{
           title: "Home",
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Image
               source={require("../../assets/images/home.png")}
@@ -51,7 +50,6 @@ export default function TabLayout() {
         name="defend"
         options={{
           title: "Defend",
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Image
               source={require("../../assets/images/defend.png")}
@@ -68,7 +66,6 @@ export default function TabLayout() {
         name="trail-log"
         options={{
           title: "Trail Log",
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Image
               source={require("../../assets/images/traillog.png")}
@@ -85,7 +82,6 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Image
               source={require("../../assets/images/profile.png")}
