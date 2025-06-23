@@ -86,5 +86,7 @@
 	<false/>
 	<key>GIDClientID</key>
 	<string>792843045396-1ka15a0p6vmdru86cbrt0ermvate0epn.apps.googleusercontent.com</string>
+	<key>NSFamilyControlsUsageDescription</key>
+	<string>Unbound uses Screen Time controls to help you block distracting apps &amp; get your life back.</string>
 </dict>
 </plist>

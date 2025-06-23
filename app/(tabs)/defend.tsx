@@ -116,13 +116,6 @@ export default function DefendScreen() {
     }
   };
 
-  const handleResetBlocking = async () => {
-    if (Platform.OS !== "ios") return;
-    await AsyncStorage.removeItem(SELECTION_STORAGE_KEY);
-    setIsBlockingEnabled(false);
-    Alert.alert("Reset Complete", "Please restart the app to re-enable app blocking.");
-  };
-
   const toggleBlock = (key: string) => {
     setBlocked((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -288,12 +281,6 @@ export default function DefendScreen() {
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <Text style={styles.title}>Start Your Block</Text>
-
-        {Platform.OS === 'ios' && (
-            <TouchableOpacity style={[styles.actionButton, { marginBottom: SPACING.md, backgroundColor: '#A52A2A' }]} onPress={handleResetBlocking}>
-              <Text style={styles.actionButtonText}>Reset App Blocking (Dev)</Text>
-            </TouchableOpacity>
-        )}
 
         <View style={{ marginBottom: SPACING.sm }}>
           <View style={styles.stepPillHeader}>

@@ -88,28 +88,6 @@ export default function CampScreen() {
       const { data: authData } = await supabase.auth.getUser();
       const supaUser = authData?.user;
 
-      // DEV MODE: If no supaUser but contextUser exists, use contextUser and fake data
-      if (__DEV__ && !supaUser && contextUser) {
-        setUser({
-          userId: contextUser.id,
-          firstName: contextUser.name || "Dev",
-          streakDays: 7,
-          timeSavedThisWeek: 123,
-        });
-        setPartner({
-          name: "Partner",
-          city: "Pairtown",
-          streakDays: 5,
-          status: "Getting started",
-        });
-        setCommunity({
-          totalUsers: 1234,
-          totalTimeSaved: 56789,
-        });
-        setLoading(false);
-        return;
-      }
-
       if (!supaUser) {
         setLoading(false);
         return;
@@ -284,21 +262,9 @@ export default function CampScreen() {
         </View>
 
         <View style={styles.sectionBox}>
-          <View style={[styles.rowCenter, styles.centeredRow]}>
-            <Image source={require("../../assets/images/axe.png")} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>This week&apos;s warriors</Text>
-          </View>
-          <View style={[styles.rowCenter, styles.centeredRow]}>
-          <Text style={styles.communityStats}>You and {community.totalUsers.toLocaleString()} others reclaimed</Text>
+          <Text style={styles.sectionTitle}>COMMUNITY</Text>
+          <Text style={styles.timeCompare}>{community.totalUsers.toLocaleString()} warriors have saved {formatTimeSaved(community.totalTimeSaved)}</Text>
         </View>
-          <Text style={[styles.communityTime, styles.sectionTitle]}>{formatTimeSaved(community.totalTimeSaved)}</Text>
-        </View>
-
-        {__DEV__ && (
-          <TouchableOpacity style={styles.devButton} onPress={handleReset}>
-            <Text style={styles.devButtonText}>Reset Pairing (Dev)</Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
     </ImageBackground>
   );
@@ -418,21 +384,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
     width: "100%",
   },
-  communityStats: {
-    fontSize: 16,
-    color: "#2C1A05",
-    fontFamily: "Vollkorn-SemiBold",
-    marginRight: 4,
-    textAlign: "center",
-  },
-  communityTime: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1B5E20",
-    fontFamily: "Vollkorn-Bold",
-    marginTop: 2,
-    width: "100%",
-  },
   loadingText: {
     fontSize: 18,
     color: "#2C1A05",
@@ -469,5 +420,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontFamily: 'Vollkorn-Bold',
     fontSize: 16,
-  }
+  },
 });

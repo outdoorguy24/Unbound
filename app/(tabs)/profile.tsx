@@ -43,11 +43,6 @@ const COMMUNITY = [
     icon: <Feather name="send" size={24} color="#564110" style={{ marginRight: 16 }} />,
     action: "refer",
   },
-  {
-    label: "Test Notification (Dev)",
-    icon: <Feather name="bell" size={24} color="#564110" style={{ marginRight: 16 }} />,
-    action: "testNotification",
-  },
 ];
 
 export default function ProfileScreen() {

@@ -66,6 +66,13 @@ class ScreenTimeManagerService {
     }
     return NativeScreenTimeManager.setCurrentSelection(selection);
   }
+
+  async setAppDeletionProtection(enabled: boolean) {
+    if (!this.isAvailable()) {
+      throw new Error('ScreenTimeManager is not available on this platform');
+    }
+    return NativeScreenTimeManager.setAppDeletionProtection(enabled);
+  }
 }
 
-export default new ScreenTimeManagerService(); 
+export default new ScreenTimeManagerService();
