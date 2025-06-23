@@ -13,7 +13,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import ConfirmChangesModal from "../components/ConfirmChangesModal";
+import ConfirmBattlePlanModal from "../components/ConfirmBattlePlanModal";
 import DefendModal from "../components/DefendModal";
 import PornBlockModal from "../components/PornBlockModal";
 import ScheduleModal from "../components/ScheduleModal";
@@ -76,14 +76,12 @@ export default function DefendScreen() {
   const [pornModalVariant, setPornModalVariant] = useState<1 | 2>(1);
   const [isBlockingEnabled, setIsBlockingEnabled] = useState(false);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [preSelected, setPreSelected] = useState<{ [key: string]: boolean }>(
     Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
   );
   const [confirmedApps, setConfirmedApps] = useState<string[]>([]);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [appsToAdd, setAppsToAdd] = useState<string[]>([]);
-  const [appsToRemove, setAppsToRemove] = useState<string[]>([]);
-  const [pendingSelection, setPendingSelection] = useState<string[]>([]);
+  const [modalData, setModalData] = useState<{ visible: boolean; addedApps: string[]; removedApps: string[]; selectionToConfirm: string[] }>({ visible: false, addedApps: [], removedApps: [], selectionToConfirm: [] });
 
   useEffect(() => {
     if (Platform.OS !== "ios") return;
@@ -99,12 +97,14 @@ export default function DefendScreen() {
         if (!selection) {
           setIsSelectionMode(true);
           setIsBlockingEnabled(false);
+          setIsEditMode(true);
         } else {
           // Load confirmed apps from storage if needed
           const apps = await AsyncStorage.getItem("UNBOUND_CONFIRMED_APPS");
           setConfirmedApps(apps ? JSON.parse(apps) : []);
           setIsBlockingEnabled(true);
           setIsSelectionMode(false);
+          setIsEditMode(false);
         }
       }
     };
@@ -122,6 +122,7 @@ export default function DefendScreen() {
   };
 
   const toggleBlock = (key: string) => {
+    if (!isEditMode) return; // Only allow toggling in edit mode
     setBlocked((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -200,6 +201,7 @@ export default function DefendScreen() {
       );
       setPreSelected(currentSelection);
       setIsSelectionMode(true);
+      setIsEditMode(true);
     } catch (error) {
       console.error('Error in handleEditSelection:', error);
       Alert.alert('Error', 'Failed to load previous selection. Please try again.');
@@ -233,14 +235,36 @@ export default function DefendScreen() {
       // but the pre-selection prompt isn't needed. Let's just open it.
       proceedWithApplePicker(newSelection);
     } else {
-      setAppsToAdd(addedAppNames);
-      setAppsToRemove(removedAppNames);
-      setPendingSelection(newSelection);
-      setShowConfirmModal(true);
+      setModalData({
+        visible: true,
+        addedApps: addedAppNames,
+        removedApps: removedAppNames,
+        selectionToConfirm: newSelection,
+      });
     }
   };
 
+  const handleModalConfirm = () => {
+    // Capture the selection before any state changes
+    const selectionToApply = [...modalData.selectionToConfirm]; // Create a copy of the array
+    
+    // Close the modal
+    setModalData(prev => ({ ...prev, visible: false }));
+    
+    // Use a longer delay to ensure modal is fully gone
+    setTimeout(() => {
+      // Double-check the selection exists and has items
+      if (selectionToApply && selectionToApply.length >= 0) {
+        proceedWithApplePicker(selectionToApply);
+      } else {
+        console.error("No selection to apply");
+        Alert.alert("Error", "No apps selected. Please try again.");
+      }
+    }, 600); // Increased delay to 600ms
+  };
+
   const proceedWithApplePicker = async (selectedApps: string[]) => {
+    if (Platform.OS !== "ios") return;
     try {
       const { selection } = await ScreenTimeManager.displayFamilyActivityPicker({
         headerText: "Choose Apps to Block",
@@ -253,6 +277,7 @@ export default function DefendScreen() {
         setBlocked(preSelected); // Sync the main toggle state
         setIsBlockingEnabled(true);
         setIsSelectionMode(false);
+        setIsEditMode(false); // Enter locked state
         Alert.alert("Setup Complete", "You can now block apps from the Defend screen.");
       } else {
         Alert.alert("Setup Incomplete", "You didn't select any apps. Please try again to complete the setup.");
@@ -345,7 +370,7 @@ export default function DefendScreen() {
                 <Switch
                   value={blocked[app.key]}
                   onValueChange={() => toggleBlock(app.key)}
-                  disabled={confirmedApps.length > 0 && !confirmedApps.includes(app.key)}
+                  disabled={!isEditMode}
                   trackColor={{ false: COLORS.background, true: COLORS.success }}
                   thumbColor={COLORS.tabBarActive}
                   style={styles.switch}
@@ -444,15 +469,12 @@ export default function DefendScreen() {
         onClose={() => setShowScheduleModal(false)} 
         onScheduleSaved={handleScheduleSaved}
       />
-      <ConfirmChangesModal
-        visible={showConfirmModal}
-        onClose={() => setShowConfirmModal(false)}
-        onConfirm={() => {
-          setShowConfirmModal(false);
-          proceedWithApplePicker(pendingSelection);
-        }}
-        addedApps={appsToAdd}
-        removedApps={appsToRemove}
+      <ConfirmBattlePlanModal
+        visible={modalData.visible}
+        onClose={() => setModalData(prev => ({ ...prev, visible: false }))}
+        onConfirm={handleModalConfirm}
+        addedApps={modalData.addedApps}
+        removedApps={modalData.removedApps}
       />
     </ImageBackground>
   );

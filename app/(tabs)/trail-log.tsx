@@ -43,7 +43,7 @@ export default function TrailLogScreen() {
       } catch (error) {
         console.error("Error fetching trail log data:", error);
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     }
     fetchData();

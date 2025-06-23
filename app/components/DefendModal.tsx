@@ -38,7 +38,7 @@ export default function DefendModal({ onClose, schedule }: DefendModalProps) {
           <Text style={styles.body}>
             This is an act of rebellion.{"\n"}
             You&rsquo;re done being the product.{"\n"}
-            Done trading your dreams for dopamine hits. Done with algorithms deciding what you want. Your future self
+            Done trading your dreams for dopamine hits & algorithms deciding what you want. Your future self
             thanks you.
           </Text>
           
