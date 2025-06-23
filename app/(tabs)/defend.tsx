@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import ConfirmChangesModal from "../components/ConfirmChangesModal";
 import DefendModal from "../components/DefendModal";
 import PornBlockModal from "../components/PornBlockModal";
 import ScheduleModal from "../components/ScheduleModal";
@@ -79,6 +80,10 @@ export default function DefendScreen() {
     Object.fromEntries(SOCIAL_APPS.map((app) => [app.key, false]))
   );
   const [confirmedApps, setConfirmedApps] = useState<string[]>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [appsToAdd, setAppsToAdd] = useState<string[]>([]);
+  const [appsToRemove, setAppsToRemove] = useState<string[]>([]);
+  const [pendingSelection, setPendingSelection] = useState<string[]>([]);
 
   useEffect(() => {
     if (Platform.OS !== "ios") return;
@@ -226,32 +231,13 @@ export default function DefendScreen() {
     if (addedApps.length === 0 && removedApps.length === 0) {
       // We still need to open the picker in case they want to add/remove something manually
       // but the pre-selection prompt isn't needed. Let's just open it.
+      proceedWithApplePicker(newSelection);
     } else {
-      // Construct a dynamic message for the user
-      let alertMessage =
-        "Apple's privacy rules require you to manually confirm your choices. On the next screen, please make the following changes:\n";
-
-      if (addedAppNames.length > 0) {
-        alertMessage += `\nAdd:\n• ${addedAppNames.join("\n• ")}`;
-      }
-      if (removedAppNames.length > 0) {
-        alertMessage += `\nRemove:\n• ${removedAppNames.join("\n• ")}`;
-      }
-      alertMessage += "\n\nPro Tip: the search bar on top works wonders";
-      
-      // Use this dynamic message in the alert
-      Alert.alert("Confirm Your Changes", alertMessage, [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Continue",
-          onPress: () => proceedWithApplePicker(newSelection),
-        },
-      ]);
-      return; // Stop here to avoid showing a second alert
+      setAppsToAdd(addedAppNames);
+      setAppsToRemove(removedAppNames);
+      setPendingSelection(newSelection);
+      setShowConfirmModal(true);
     }
-    
-    // If no changes, or for the original flow, proceed directly
-    proceedWithApplePicker(newSelection);
   };
 
   const proceedWithApplePicker = async (selectedApps: string[]) => {
@@ -457,6 +443,16 @@ export default function DefendScreen() {
         visible={showScheduleModal} 
         onClose={() => setShowScheduleModal(false)} 
         onScheduleSaved={handleScheduleSaved}
+      />
+      <ConfirmChangesModal
+        visible={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={() => {
+          setShowConfirmModal(false);
+          proceedWithApplePicker(pendingSelection);
+        }}
+        addedApps={appsToAdd}
+        removedApps={appsToRemove}
       />
     </ImageBackground>
   );
