@@ -3,7 +3,7 @@ import { Animated, Dimensions, ImageBackground, StyleSheet } from "react-native"
 
 const { width, height } = Dimensions.get("window");
 
-export default function Screen11({ onFinish }: { onFinish: () => void }) {
+export default function Screen11({ onFinish, onFadeOutStart }: { onFinish: () => void, onFadeOutStart?: () => void }) {
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -13,18 +13,23 @@ export default function Screen11({ onFinish }: { onFinish: () => void }) {
       duration: 1800,
       useNativeDriver: true,
     }).start(() => {
-      // Stay for 2 seconds, then fade out
+      // Stay for 2 seconds, then prepare for fade out
       setTimeout(() => {
-        Animated.timing(opacity, {
-          toValue: 0,
-          duration: 1200,
-          useNativeDriver: true,
-        }).start(() => {
-          if (onFinish) onFinish();
-        });
+        // Jump pager FIRST
+        if (onFadeOutStart) onFadeOutStart();
+        // THEN start fade out after a tiny delay
+        setTimeout(() => {
+          Animated.timing(opacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }).start(() => {
+            if (onFinish) onFinish();
+          });
+        }, 100);
       }, 2000);
     });
-  }, [onFinish, opacity]);
+  }, [onFinish, onFadeOutStart, opacity]);
 
   return (
     <Animated.View style={[styles.container, { opacity }]}> 
