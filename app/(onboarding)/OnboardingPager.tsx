@@ -110,8 +110,8 @@ export default function OnboardingPager() {
       );
     });
 
-  // Progress bar width (10 segments, 10% per screen)
-  const progress = (page + 1) / 10;
+  // Progress bar width (11 segments, 10% per screen, ends on Screen10)
+  const progress = page > 0 ? page / 10 : 0; // 0% on ParadoxScreen, 100% on Screen10
 
   // Determine scrollEnabled
   const isSwipeDisabled = page === 0 || page === 10 || page === 12 || ([6, 7, 8, 9, 10].includes(page) && !canSwipe);
@@ -145,8 +145,8 @@ export default function OnboardingPager() {
         />
       )}
 
-      {/* Progress bar only on screens 0-9 (1-10) */}
-      {page <= 9 && (
+      {/* Progress bar only on screens 1-10 (1-11) */}
+      {page >= 1 && page <= 10 && (
         <View style={styles.progressBarContainer}>
           <View style={styles.progressBarBg}>
             <Animated.View style={[styles.progressBarFill, { width: `${progress * 100}%` }]} />

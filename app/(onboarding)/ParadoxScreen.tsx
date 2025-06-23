@@ -10,7 +10,7 @@ export default function ParadoxScreen({ isActive, onSubmit }: { isActive?: boole
     >
       <View style={styles.content}>
         <View style={styles.headingContainer}>
-          <Text style={styles.heading}>Wait...let&apos;s talk{"\n"}about this</Text>
+          <Text style={styles.heading}>Well this is awkward</Text>
         </View>
         <View style={styles.bodyContainer}>
           <Text style={styles.body}><Text style={styles.bold}>You&apos;re using an app...</Text>{"\n"}to stop using apps.{"\n\n"}
@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
   },
   caption: {
     fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 16,
-    color: COLORS.textSecondary,
+    fontSize: 20,
+    color: COLORS.textPrimary,
     textAlign: "center",
     marginTop: SPACING.sm,
     marginBottom: SPACING.md,
