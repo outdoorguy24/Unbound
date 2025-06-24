@@ -1,3 +1,4 @@
+import AchievementLevel from "@/components/AchievementLevel";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { resetUserPairing } from "@/lib/partnerMatching";
@@ -108,11 +109,17 @@ export default function CampScreen() {
       
       const timeSavedThisWeek = await getTotalBlockedTime(supaUser.id, startOfWeek, now) || 0;
 
+      // Calculate all-time total blocked time (in minutes)
+      const allTimeStart = new Date(2000, 0, 1); // Arbitrary far past date
+      const totalBlockedMinutes = await getTotalBlockedTime(supaUser.id, allTimeStart, now) || 0;
+      const totalBlockedHours = Math.floor(totalBlockedMinutes / 60);
+
       setUser({
         userId: supaUser.id,
         firstName: userProfile?.first_name || "Warrior",
         streakDays,
         timeSavedThisWeek,
+        totalBlockedHours,
       });
 
       // Get real partner data
@@ -141,6 +148,7 @@ export default function CampScreen() {
         firstName: "Warrior",
         streakDays: 1,
         timeSavedThisWeek: 0,
+        totalBlockedHours: 0,
       });
       setPartner(null);
       setCommunity({
@@ -229,6 +237,8 @@ export default function CampScreen() {
         <Image source={require("../../assets/images/camp-avatar.png")} style={styles.avatar} />
         <Text style={styles.heroName}>{user.firstName}</Text>
         <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
+
+        <AchievementLevel totalHoursSaved={user.totalBlockedHours} />
 
         <View style={[styles.sectionBox, { alignItems: 'center' }]}>
           <View style={[styles.rowCenter, styles.centeredRow]}>

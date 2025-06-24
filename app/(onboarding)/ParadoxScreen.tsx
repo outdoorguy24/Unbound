@@ -17,7 +17,7 @@ export default function ParadoxScreen({ isActive, onSubmit }: { isActive?: boole
             <Text style={styles.bold}>You&apos;re staring at a screen...</Text>{"\n"}to avoid staring at screens.{"\n\n"}
             <Text style={styles.bold}>You downloaded more technology...</Text>{"\n"}to escape technology.
           </Text>
-          <Text style={styles.caption}>Yes, we definitely see the irony.</Text>
+          <Text style={styles.caption}>Yes, we see the irony.</Text>
           <Text style={styles.caption}>But sometimes you need to{"\n"}fight fire with fire.</Text>
         </View>
         <TouchableOpacity
