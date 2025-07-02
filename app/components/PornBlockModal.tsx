@@ -62,7 +62,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   bg: {
-    width: 360,
+    width: '90%',
+    maxWidth: 360,
     borderRadius: SPACING.xl,
     overflow: "hidden",
   },

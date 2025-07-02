@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, SPACING } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
@@ -290,192 +291,194 @@ export default function DefendScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.title}>Start Your Block</Text>
+      <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+          <Text style={styles.title} numberOfLines={1}>Start Your Block</Text>
 
-        <View style={{ marginBottom: SPACING.sm }}>
-          <View style={styles.stepPillHeader}>
-            <View style={styles.pillNumber}>
-              <Text style={styles.pillNumberText}>1</Text>
-            </View>
-            <Text style={styles.pillTitle}>Toggle to block or unblock</Text>
-          </View>
-        </View>
-
-        {isSelectionMode ? (
-          <>
-            <View style={styles.sectionBox}>
-              <Text style={styles.infoText}>
-                Select the apps and websites you want Unbound to be able to block. In the next step, Apple will require you to confirm your choices.
-              </Text>
-            </View>
-            {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
-              <View key={app.key} style={[styles.appRow, preSelected[app.key] && styles.appRowActive]}>
-                <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
-                <View style={styles.appTextContainer}>
-                  <Text style={[styles.appName, preSelected[app.key] && styles.appNameActive]}>{app.name}</Text>
-                </View>
-                <Switch
-                  value={preSelected[app.key]}
-                  onValueChange={() => handlePreSelectToggle(app.key)}
-                  trackColor={{ false: COLORS.background, true: COLORS.success }}
-                  thumbColor={COLORS.tabBarActive}
-                  style={styles.switch}
-                />
+          <View style={{ marginBottom: SPACING.sm }}>
+            <View style={styles.stepPillHeader}>
+              <View style={styles.pillNumber}>
+                <Text style={styles.pillNumberText} numberOfLines={1}>1</Text>
               </View>
-            ))}
-            <TouchableOpacity style={[styles.actionButton, { marginTop: SPACING.md }]} onPress={handleConfirmSelectionWithApple}>
-              <Text style={styles.actionButtonText}>Confirm Selection with Apple</Text>
-            </TouchableOpacity>
-            <Text style={{ color: COLORS.textSecondary, marginTop: 8, textAlign: 'center', fontSize: 14 }}>
-              Apple requires you to confirm your choices in the next step. Please select the same apps in the Apple popup.
-            </Text>
-          </>
-        ) :
-        (!isBlockingEnabled && Platform.OS === 'ios') ? (
-          <View style={styles.sectionBox}>
-            <Text style={styles.infoText}>
-              To block apps and websites, you must first grant Unbound access to Apple's Screen Time API.
-            </Text>
-            <TouchableOpacity style={[styles.actionButton, {marginTop: SPACING.md}]} onPress={handleEnableBlocking}>
-              <Text style={styles.actionButtonText}>Enable App Blocking</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            <View style={styles.sectionBox}>
-              <Text style={styles.infoText}>
-                This will block the actual app AND the website on your browser. You will be unable to uninstall Unbound
-                while the block is active. No workarounds, no funny business.
-              </Text>
+              <Text style={styles.pillTitle} numberOfLines={1}>Toggle to block or unblock</Text>
             </View>
-            
-            {isBlockingEnabled && !isSelectionMode && (
-              <TouchableOpacity onPress={handleEditSelection} style={styles.changeSelectionButton}>
-                <Text style={styles.actionButtonText}>Change App Selection</Text>
+          </View>
+
+          {isSelectionMode ? (
+            <>
+              <View style={styles.sectionBox}>
+                <Text style={styles.infoText} numberOfLines={4}>
+                  Select the apps and websites you want Unbound to be able to block. In the next step, Apple will require you to confirm your choices.
+                </Text>
+              </View>
+              {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
+                <View key={app.key} style={[styles.appRow, preSelected[app.key] && styles.appRowActive]}>
+                  <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
+                  <View style={styles.appTextContainer}>
+                    <Text style={[styles.appName, preSelected[app.key] && styles.appNameActive]} numberOfLines={1}>{app.name}</Text>
+                  </View>
+                  <Switch
+                    value={preSelected[app.key]}
+                    onValueChange={() => handlePreSelectToggle(app.key)}
+                    trackColor={{ false: COLORS.background, true: COLORS.success }}
+                    thumbColor={COLORS.tabBarActive}
+                    style={styles.switch}
+                  />
+                </View>
+              ))}
+              <TouchableOpacity style={[styles.actionButton, { marginTop: SPACING.md }]} onPress={handleConfirmSelectionWithApple}>
+                <Text style={styles.actionButtonText} numberOfLines={1}>Confirm Selection with Apple</Text>
               </TouchableOpacity>
-            )}
+              <Text style={{ color: COLORS.textSecondary, marginTop: 8, textAlign: 'center', fontSize: 14 }} numberOfLines={3}>
+                Apple requires you to confirm your choices in the next step. Please select the same apps in the Apple popup.
+              </Text>
+            </>
+          ) :
+          (!isBlockingEnabled && Platform.OS === 'ios') ? (
+            <View style={styles.sectionBox}>
+              <Text style={styles.infoText} numberOfLines={3}>
+                To block apps and websites, you must first grant Unbound access to Apple's Screen Time API.
+              </Text>
+              <TouchableOpacity style={[styles.actionButton, {marginTop: SPACING.md}]} onPress={handleEnableBlocking}>
+                <Text style={styles.actionButtonText} numberOfLines={1}>Enable App Blocking</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <View style={styles.sectionBox}>
+                <Text style={styles.infoText} numberOfLines={4}>
+                  This will block the actual app AND the website on your browser. You will be unable to uninstall Unbound
+                  while the block is active. No workarounds, no funny business.
+                </Text>
+              </View>
+              
+              {isBlockingEnabled && !isSelectionMode && (
+                <TouchableOpacity onPress={handleEditSelection} style={styles.changeSelectionButton}>
+                  <Text style={styles.actionButtonText} numberOfLines={1}>Change App Selection</Text>
+                </TouchableOpacity>
+              )}
 
-            {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
-              <View key={app.key} style={[styles.appRow, blocked[app.key] && styles.appRowActive]}>
-                <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
+              {SOCIAL_APPS.filter((app) => app.key !== "porn").map((app) => (
+                <View key={app.key} style={[styles.appRow, blocked[app.key] && styles.appRowActive]}>
+                  <Image source={APP_ICONS[app.key as keyof typeof APP_ICONS]} style={styles.appIcon} />
+                  <View style={styles.appTextContainer}>
+                    <Text style={[styles.appName, blocked[app.key] && styles.appNameActive]} numberOfLines={1}>{app.name}</Text>
+                    {"description" in app && app.description && (
+                      <Text style={[styles.appDescription, blocked[app.key] && styles.appDescriptionActive]} numberOfLines={2}>
+                        {app.description}
+                      </Text>
+                    )}
+                  </View>
+                  <Switch
+                    value={blocked[app.key]}
+                    onValueChange={() => toggleBlock(app.key)}
+                    disabled={!isEditMode}
+                    trackColor={{ false: COLORS.background, true: COLORS.success }}
+                    thumbColor={COLORS.tabBarActive}
+                    style={styles.switch}
+                  />
+                </View>
+              ))}
+              
+              <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
+                <Image source={APP_ICONS.porn} style={styles.appIcon} />
                 <View style={styles.appTextContainer}>
-                  <Text style={[styles.appName, blocked[app.key] && styles.appNameActive]}>{app.name}</Text>
-                  {"description" in app && app.description && (
-                    <Text style={[styles.appDescription, blocked[app.key] && styles.appDescriptionActive]}>
-                      {app.description}
+                  <Text style={[styles.appName, blockPorn && styles.appNameActive]} numberOfLines={1}>Porn</Text>
+                  <TouchableOpacity onPress={() => setShowPornInfo((val) => !val)}>
+                    <Text style={[styles.appDescription, blockPorn && styles.appDescriptionActive]} numberOfLines={2}>
+                      This enables comprehensive adult content filtering. NoFap engaged.
                     </Text>
-                  )}
+                  </TouchableOpacity>
                 </View>
                 <Switch
-                  value={blocked[app.key]}
-                  onValueChange={() => toggleBlock(app.key)}
-                  disabled={!isEditMode}
+                  value={blockPorn}
+                  onValueChange={handleTogglePorn}
+                  disabled={false}
                   trackColor={{ false: COLORS.background, true: COLORS.success }}
                   thumbColor={COLORS.tabBarActive}
                   style={styles.switch}
                 />
               </View>
-            ))}
-            
-            <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
-              <Image source={APP_ICONS.porn} style={styles.appIcon} />
-              <View style={styles.appTextContainer}>
-                <Text style={[styles.appName, blockPorn && styles.appNameActive]}>Porn</Text>
-                <TouchableOpacity onPress={() => setShowPornInfo((val) => !val)}>
-                  <Text style={[styles.appDescription, blockPorn && styles.appDescriptionActive]}>
-                    This enables comprehensive adult content filtering. NoFap engaged.
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <Switch
-                value={blockPorn}
-                onValueChange={handleTogglePorn}
-                disabled={false}
-                trackColor={{ false: COLORS.background, true: COLORS.success }}
-                thumbColor={COLORS.tabBarActive}
-                style={styles.switch}
-              />
-            </View>
-          </>
-        )}
-        
-        <View style={{ marginBottom: SPACING.sm, marginTop: SPACING.md }}>
-          <View style={styles.stepPillHeader}>
-            <View style={styles.pillNumber}>
-              <Text style={styles.pillNumberText}>2</Text>
-            </View>
-            <Text style={styles.pillTitle}>Set Your Schedule</Text>
-          </View>
-        </View>
-        <View style={styles.sectionBox}>
-          <View style={styles.scheduleBox}>
-            <View style={styles.iconCircle}>
-              <Image source={require("../../assets/images/onboarding/compass.png")} style={styles.iconImage} />
-            </View>
-            <View style={styles.scheduleTextContainer}>
-              <Text style={styles.scheduleName}>Set up your blocking schedule to automate your focus time</Text>
-            </View>
-          </View>
-          <TouchableOpacity 
-            style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
-            onPress={() => setShowScheduleModal(true)}
-            disabled={!isBlockingEnabled && Platform.OS === 'ios'}
-          >
-            <Text style={styles.actionButtonText}>Set Schedule</Text>
-          </TouchableOpacity>
-          {schedule.days.length > 0 && (
-            <View style={styles.schedulePreview}>
-              <View style={styles.schedulePreviewIcon}>
-                <Image source={APP_ICONS["clock-circle"]} style={styles.schedulePreviewIconImage} />
-              </View>
-              <Text style={styles.schedulePreviewText}>
-                Current schedule: {schedule.days.length === 7 ? "Every day" : schedule.days.join(", ")} | {schedule.start_time.replace(":00", "")} - {schedule.end_time.replace(":00", "")}
-              </Text>
-            </View>
+            </>
           )}
-        </View>
+          
+          <View style={{ marginBottom: SPACING.sm, marginTop: SPACING.md }}>
+            <View style={styles.stepPillHeader}>
+              <View style={styles.pillNumber}>
+                <Text style={styles.pillNumberText} numberOfLines={1}>2</Text>
+              </View>
+              <Text style={styles.pillTitle} numberOfLines={1}>Set Your Schedule</Text>
+            </View>
+          </View>
+          <View style={styles.sectionBox}>
+            <View style={styles.scheduleBox}>
+              <View style={styles.iconCircle}>
+                <Image source={require("../../assets/images/onboarding/compass.png")} style={styles.iconImage} />
+              </View>
+              <View style={styles.scheduleTextContainer}>
+                <Text style={styles.scheduleName} numberOfLines={2}>Set up your blocking schedule to automate your focus time</Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+              onPress={() => setShowScheduleModal(true)}
+              disabled={!isBlockingEnabled && Platform.OS === 'ios'}
+            >
+              <Text style={styles.actionButtonText} numberOfLines={1}>Set Schedule</Text>
+            </TouchableOpacity>
+            {schedule.days.length > 0 && (
+              <View style={styles.schedulePreview}>
+                <View style={styles.schedulePreviewIcon}>
+                  <Image source={APP_ICONS["clock-circle"]} style={styles.schedulePreviewIconImage} />
+                </View>
+                <Text style={styles.schedulePreviewText} numberOfLines={2}>
+                  Current schedule: {schedule.days.length === 7 ? "Every day" : schedule.days.join(", ")} | {schedule.start_time.replace(":00", "")} - {schedule.end_time.replace(":00", "")}
+                </Text>
+              </View>
+            )}
+          </View>
 
-        <View style={{ marginBottom: SPACING.sm }}>
-          <View style={styles.stepPillHeader}>
-            <View style={styles.pillNumber}>
-              <Text style={styles.pillNumberText}>3</Text>
-            </View>
-            <Text style={styles.pillTitle}>Start Your Block</Text>
-          </View>
-        </View>
-        <View style={styles.sectionBox}>
-          <View style={styles.scheduleBox}>
-            <View style={styles.iconCircle}>
-              <Image source={require("../../assets/images/onboarding/shield.png")} style={styles.iconImage} />
-            </View>
-            <View style={styles.scheduleTextContainer}>
-              <Text style={styles.scheduleName}>Defend Your Time</Text>
+          <View style={{ marginBottom: SPACING.sm }}>
+            <View style={styles.stepPillHeader}>
+              <View style={styles.pillNumber}>
+                <Text style={styles.pillNumberText} numberOfLines={1}>3</Text>
+              </View>
+              <Text style={styles.pillTitle} numberOfLines={1}>Start Your Block</Text>
             </View>
           </View>
-          <TouchableOpacity 
-            style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
-            onPress={() => setShowModal(true)}
-            disabled={!isBlockingEnabled && Platform.OS === 'ios'}
-          >
-            <Text style={styles.actionButtonText}>Start Block</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-      {showModal && <DefendModal onClose={() => setShowModal(false)} schedule={schedule} />}
-      <PornBlockModal visible={showPornModal} onClose={() => setShowPornModal(false)} variant={pornModalVariant} />
-      <ScheduleModal 
-        visible={showScheduleModal} 
-        onClose={() => setShowScheduleModal(false)} 
-        onScheduleSaved={handleScheduleSaved}
-      />
-      <ConfirmBattlePlanModal
-        visible={modalData.visible}
-        onClose={() => setModalData(prev => ({ ...prev, visible: false }))}
-        onConfirm={handleModalConfirm}
-        addedApps={modalData.addedApps}
-        removedApps={modalData.removedApps}
-      />
+          <View style={styles.sectionBox}>
+            <View style={styles.scheduleBox}>
+              <View style={styles.iconCircle}>
+                <Image source={require("../../assets/images/onboarding/shield.png")} style={styles.iconImage} />
+              </View>
+              <View style={styles.scheduleTextContainer}>
+                <Text style={styles.scheduleName} numberOfLines={1}>Defend Your Time</Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+              onPress={() => setShowModal(true)}
+              disabled={!isBlockingEnabled && Platform.OS === 'ios'}
+            >
+              <Text style={styles.actionButtonText} numberOfLines={1}>Start Block</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+        {showModal && <DefendModal onClose={() => setShowModal(false)} schedule={schedule} />}
+        <PornBlockModal visible={showPornModal} onClose={() => setShowPornModal(false)} variant={pornModalVariant} />
+        <ScheduleModal 
+          visible={showScheduleModal} 
+          onClose={() => setShowScheduleModal(false)} 
+          onScheduleSaved={handleScheduleSaved}
+        />
+        <ConfirmBattlePlanModal
+          visible={modalData.visible}
+          onClose={() => setModalData(prev => ({ ...prev, visible: false }))}
+          onConfirm={handleModalConfirm}
+          addedApps={modalData.addedApps}
+          removedApps={modalData.removedApps}
+        />
+      </ScreenContainer>
     </ImageBackground>
   );
 }

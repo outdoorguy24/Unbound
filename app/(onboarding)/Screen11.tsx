@@ -18,14 +18,14 @@ export default function Screen11({ onFinish, onFadeOutStart }: { onFinish: () =>
         // Jump pager FIRST
         if (onFadeOutStart) onFadeOutStart();
         // THEN start fade out after a tiny delay
-        setTimeout(() => {
-          Animated.timing(opacity, {
-            toValue: 0,
+      setTimeout(() => {
+        Animated.timing(opacity, {
+          toValue: 0,
             duration: 300,
-            useNativeDriver: true,
-          }).start(() => {
-            if (onFinish) onFinish();
-          });
+          useNativeDriver: true,
+        }).start(() => {
+          if (onFinish) onFinish();
+        });
         }, 100);
       }, 2000);
     });

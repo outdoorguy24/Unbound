@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -8,35 +9,37 @@ export default function Screen10({ onSubmit }: { onSubmit?: () => void }) {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.title}>
-            Accountability & community{"\n"}are <Text style={styles.underline}>powerful</Text>...
-          </Text>
-          <View style={styles.card}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatarWrapper}>
-                <Image source={require('../../assets/images/onboarding/avatarguy1.png')} style={styles.avatar} />
-              </View>
-              <Text style={styles.plusSign}>+</Text>
-              <View style={styles.avatarWrapper}>
-                <Image source={require('../../assets/images/onboarding/dudewithglasses.png')} style={styles.avatar} />
-              </View>
-            </View>
-            <Text style={styles.subtitle}>
-              So you&apos;ll also be paired{"\n"}with another guy to see{"\n"}each others&apos; progress.
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <Text style={styles.title}>
+              Accountability & community{"\n"}are <Text style={styles.underline}>powerful</Text>...
             </Text>
+            <View style={styles.card}>
+              <View style={styles.avatarContainer}>
+                <View style={styles.avatarWrapper}>
+                  <Image source={require('../../assets/images/onboarding/avatarguy1.png')} style={styles.avatar} />
+                </View>
+                <Text style={styles.plusSign}>+</Text>
+                <View style={styles.avatarWrapper}>
+                  <Image source={require('../../assets/images/onboarding/dudewithglasses.png')} style={styles.avatar} />
+                </View>
+              </View>
+              <Text style={styles.subtitle}>
+                So you&apos;ll also be paired{"\n"}with another guy to see{"\n"}each others&apos; progress.
+              </Text>
+            </View>
           </View>
+          <TouchableOpacity
+            style={[styles.button, SHADOWS.medium]}
+            onPress={() => {
+              if (onSubmit) onSubmit();
+            }}
+          >
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.button, SHADOWS.medium]}
-          onPress={() => {
-            if (onSubmit) onSubmit();
-          }}
-        >
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -44,6 +47,11 @@ export default function Screen10({ onSubmit }: { onSubmit?: () => void }) {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+  },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   container: {
     flex: 1,

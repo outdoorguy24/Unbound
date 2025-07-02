@@ -382,7 +382,7 @@
 				CODE_SIGN_ENTITLEMENTS = Unbound/Unbound.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 72DC653W7Q;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -391,6 +391,7 @@
 				);
 				INFOPLIST_FILE = Unbound/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Unbound;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -423,10 +424,11 @@
 				CODE_SIGN_ENTITLEMENTS = Unbound/Unbound.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = 72DC653W7Q;
 				INFOPLIST_FILE = Unbound/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Unbound;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

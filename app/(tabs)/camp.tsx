@@ -1,4 +1,5 @@
 import AchievementLevel from "@/components/AchievementLevel";
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { resetUserPairing } from "@/lib/partnerMatching";
@@ -9,7 +10,7 @@ import { registerForPushNotificationsAsync } from "@/utils/notifications";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
-import { Alert, Animated, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, AppState, Easing, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 // 1. Format minutes as "X hours, Y minutes"
 function formatTimeSaved(minutes: number): string {
@@ -164,6 +165,18 @@ export default function CampScreen() {
     fetchData();
   }, [contextUser]);
 
+  // Add AppState listener to refresh data on resume
+  useEffect(() => {
+    const appState = { current: AppState.currentState };
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        fetchData();
+      }
+      appState.current = nextAppState;
+    });
+    return () => subscription.remove();
+  }, []);
+
   useEffect(() => {
     const spin = () => {
       spinValue.setValue(0);
@@ -199,13 +212,15 @@ export default function CampScreen() {
     });
     return (
       <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
-        <View style={styles.centered}>
-          <Animated.Image
-            source={require("../../assets/images/onboarding/shield.png")}
-            style={[styles.loadingIcon, { transform: [{ rotate: spinAnimation }] }]}
-          />
-          <Text style={styles.loadingText}>Your freedom is loading...</Text>
-        </View>
+        <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+          <View style={styles.centered}>
+            <Animated.Image
+              source={require("../../assets/images/onboarding/shield.png")}
+              style={[styles.loadingIcon, { transform: [{ rotate: spinAnimation }] }]}
+            />
+            <Text style={styles.loadingText} numberOfLines={1}>Your freedom is loading...</Text>
+          </View>
+        </ScreenContainer>
       </ImageBackground>
     );
   }
@@ -214,68 +229,72 @@ export default function CampScreen() {
   if (!user) {
     return (
       <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
-        <View style={styles.centered}>
-          <Text style={styles.freeMind}>WARRIOR</Text>
-          <Text style={styles.heroName}>GUEST</Text>
-          <Text style={styles.heroSubtitle}>Day 1 of your liberation</Text>
-          <View style={styles.sectionBox}>
-            <Text style={styles.sectionTitle}>WELCOME TO UNBOUND</Text>
-            <Text style={styles.timeCompare}>Your journey begins now.</Text>
+        <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+          <View style={styles.centered}>
+            <Text style={styles.freeMind} numberOfLines={1}>WARRIOR</Text>
+            <Text style={styles.heroName} numberOfLines={1}>GUEST</Text>
+            <Text style={styles.heroSubtitle} numberOfLines={1}>Day 1 of your liberation</Text>
+            <View style={styles.sectionBox}>
+              <Text style={styles.sectionTitle} numberOfLines={1}>WELCOME TO UNBOUND</Text>
+              <Text style={styles.timeCompare} numberOfLines={2}>Your journey begins now.</Text>
+            </View>
           </View>
-        </View>
+        </ScreenContainer>
       </ImageBackground>
     );
   }
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
-      <ScrollView
-        alwaysBounceVertical={true}
-        contentContainerStyle={styles.centered}
-        showsVerticalScrollIndicator={false}
-      >
-        <Image source={require("../../assets/images/camp-avatar.png")} style={styles.avatar} />
-        <Text style={styles.heroName}>{user.firstName}</Text>
-        <Text style={styles.heroSubtitle}>Day {user.streakDays} of your liberation</Text>
+      <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+        <ScrollView
+          alwaysBounceVertical={true}
+          contentContainerStyle={styles.centered}
+          showsVerticalScrollIndicator={false}
+        >
+          <Image source={require("../../assets/images/camp-avatar.png")} style={styles.avatar} />
+          <Text style={styles.heroName} numberOfLines={1}>{user.firstName}</Text>
+          <Text style={styles.heroSubtitle} numberOfLines={1}>Day {user.streakDays} of your liberation</Text>
 
-        <AchievementLevel totalHoursSaved={user.totalBlockedHours} />
+          <AchievementLevel totalHoursSaved={user.totalBlockedHours} />
 
-        <View style={[styles.sectionBox, { alignItems: 'center' }]}>
-          <View style={[styles.rowCenter, styles.centeredRow]}>
-            <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Time reclaimed this week</Text>
+          <View style={[styles.sectionBox, { alignItems: 'center' }]}>
+            <View style={[styles.rowCenter, styles.centeredRow]}>
+              <Image source={require("../../assets/images/clock.png")} style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle} numberOfLines={1}>Time reclaimed this week</Text>
+            </View>
+            <Text style={styles.timeSaved} numberOfLines={1}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
+            <Text style={styles.timeCompare} numberOfLines={2}>{getTimeComparison(user.timeSavedThisWeek)}</Text>
           </View>
-          <Text style={styles.timeSaved}>{formatTimeSaved(user.timeSavedThisWeek)}</Text>
-          <Text style={styles.timeCompare}>{getTimeComparison(user.timeSavedThisWeek)}</Text>
-        </View>
 
-        <View style={styles.sectionBox}>
-          <View style={[styles.rowCenter, styles.centeredRow]}>
-            <Image source={require("../../assets/images/handshake.png")} style={styles.sectionIcon} />
-            <Text style={styles.sectionTitle}>Your accountability partner</Text>
-          </View>
-          <View style={[styles.rowCenter, styles.centeredRow]}>
-            <Text style={styles.partnerHighlight}>
-              {partner
-                ? `${partner.name} from ${partner.city || 'Unknown'} - Day ${partner.streakDays}`
-                : "Your partner is setting up their profile"}
+          <View style={styles.sectionBox}>
+            <View style={[styles.rowCenter, styles.centeredRow]}>
+              <Image source={require("../../assets/images/handshake.png")} style={styles.sectionIcon} />
+              <Text style={styles.sectionTitle} numberOfLines={1}>Your accountability partner</Text>
+            </View>
+            <View style={[styles.rowCenter, styles.centeredRow]}>
+              <Text style={styles.partnerHighlight} numberOfLines={1}>
+                {partner
+                  ? `${partner.name} from ${partner.city || 'Unknown'} - Day ${partner.streakDays}`
+                  : "Your partner is setting up their profile"}
               </Text>
+            </View>
+            {partner && <Text style={[styles.partnerStatus, styles.sectionTitle]} numberOfLines={1}>{partner.status}</Text>}
+            {partner && (
+              <Link href={`/messages/${partner.id}`} asChild>
+                <TouchableOpacity style={styles.chatButton}>
+                  <Text style={styles.chatButtonText} numberOfLines={1}>Start Chat</Text>
+                </TouchableOpacity>
+              </Link>
+            )}
           </View>
-          {partner && <Text style={[styles.partnerStatus, styles.sectionTitle]}>{partner.status}</Text>}
-          {partner && (
-            <Link href={`/messages/${partner.id}`} asChild>
-              <TouchableOpacity style={styles.chatButton}>
-                <Text style={styles.chatButtonText}>Start Chat</Text>
-              </TouchableOpacity>
-            </Link>
-          )}
-        </View>
 
-        <View style={styles.sectionBox}>
-          <Text style={styles.sectionTitle}>COMMUNITY</Text>
-          <Text style={styles.timeCompare}>{community.totalUsers.toLocaleString()} warriors have saved {formatTimeSaved(community.totalTimeSaved)}</Text>
-        </View>
-      </ScrollView>
+          <View style={styles.sectionBox}>
+            <Text style={styles.sectionTitle} numberOfLines={1}>COMMUNITY</Text>
+            <Text style={styles.timeCompare} numberOfLines={2}>{community.totalUsers.toLocaleString()} warriors have saved {formatTimeSaved(community.totalTimeSaved)}</Text>
+          </View>
+        </ScrollView>
+      </ScreenContainer>
     </ImageBackground>
   );
 }

@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import React, { useEffect, useRef } from "react";
 import { Animated, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
@@ -41,24 +42,26 @@ export default function Screen4({ isActive }: { isActive?: boolean }) {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <View style={styles.headingContainer}>
-        <Text style={styles.heading}>
-          Which is why this app{"\n"}is an act of <Text style={styles.underline}>rebellion.</Text>
-        </Text>
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.content}>
+          <View style={styles.headingContainer}>
+          <Text style={styles.heading}>
+            Which is why this app{"\n"}is an act of <Text style={styles.underline}>rebellion.</Text>
+          </Text>
+          </View>
+          <View style={styles.illustrationContainer}>
+            <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
+          </View>
+          <View>
+            <Text style={styles.body}>
+              Society wants a bunch of{"\n"}screen-addicted consumers.{"\n"}But you&apos;re here to:
+          </Text>
+            <Animated.Text style={[styles.subBody, { opacity: fadeAnims[0] }]}>CREATE.</Animated.Text>
+            <Animated.Text style={[styles.subBody, { opacity: fadeAnims[1] }]}>EXPLORE.</Animated.Text>
+            <Animated.Text style={[styles.subBody, { opacity: fadeAnims[2] }]}>BUILD.</Animated.Text>
+          </View>
         </View>
-        <View style={styles.illustrationContainer}>
-          <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
-        </View>
-        <View>
-          <Text style={styles.body}>
-            Society wants a bunch of{"\n"}screen-addicted consumers.{"\n"}But you&apos;re here to:
-        </Text>
-          <Animated.Text style={[styles.subBody, { opacity: fadeAnims[0] }]}>CREATE.</Animated.Text>
-          <Animated.Text style={[styles.subBody, { opacity: fadeAnims[1] }]}>EXPLORE.</Animated.Text>
-          <Animated.Text style={[styles.subBody, { opacity: fadeAnims[2] }]}>BUILD.</Animated.Text>
-        </View>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -69,6 +72,11 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
+  },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   content: {
     flex: 1,
@@ -85,7 +93,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E6D3A7",
     width: '100%',
-    marginTop: SPACING.xl,
+    marginTop: SPACING.xl * 0.25 * 0.35,
   },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,
@@ -103,7 +111,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     marginBottom: SPACING.md / 4,
-    marginTop: SPACING.xl,
+    marginTop: SPACING.xl * 0.25,
   },
   illustration: {
     width: "100%",

@@ -1,4 +1,4 @@
-import { Image, ImageBackground, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 interface DefendModalProps {
   onClose: () => void;
@@ -29,31 +29,33 @@ export default function DefendModal({ onClose, schedule }: DefendModalProps) {
         style={styles.bg}
         imageStyle={styles.bgImage}
       >
-        <View style={styles.container}>
-          <Pressable style={styles.closeButton} onPress={onClose}>
-            <Image source={require("../../assets/images/remove-circle.png")} style={styles.closeIcon} />
-          </Pressable>
-          <Text style={styles.title}>WARNING</Text>
-          <Image source={require("../../assets/images/double-arrow.png")} style={styles.arrow} />
-          <Text style={styles.body}>
-            This is an act of rebellion.{"\n"}
-            You&rsquo;re done being the product.{"\n"}
-            Done trading your dreams for dopamine hits & algorithms deciding what you want. Your future self
-            thanks you.
-          </Text>
-          
-          <View style={styles.scheduleInfo}>
-            <Text style={styles.scheduleLabel}>Your Schedule:</Text>
-            <Text style={styles.scheduleText}>{getScheduleDisplay()}</Text>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} scrollEnabled={true}>
+          <View style={styles.container}>
+            <Pressable style={styles.closeButton} onPress={onClose}>
+              <Image source={require("../../assets/images/remove-circle.png")} style={styles.closeIcon} />
+            </Pressable>
+            <Text style={styles.title}>WARNING</Text>
+            <Image source={require("../../assets/images/double-arrow.png")} style={styles.arrow} />
+            <Text style={styles.body}>
+              This is an act of rebellion.{"\n"}
+              You&rsquo;re done being the product.{"\n"}
+              Done trading your dreams for dopamine hits & algorithms deciding what you want. Your future self
+              thanks you.
+            </Text>
+            
+            <View style={styles.scheduleInfo}>
+              <Text style={styles.scheduleLabel}>Your Schedule:</Text>
+              <Text style={styles.scheduleText}>{getScheduleDisplay()}</Text>
+            </View>
+            
+            <Pressable style={styles.defendButton} onPress={handleStartBlock}>
+              <Text style={styles.defendButtonText}>START THE BLOCK</Text>
+            </Pressable>
+            <Text style={styles.fyi}>
+              FYI: once you start the block, there is NO way to end it until it&rsquo;s over. O ya, you heard that right.
+            </Text>
           </View>
-          
-          <Pressable style={styles.defendButton} onPress={handleStartBlock}>
-            <Text style={styles.defendButtonText}>START THE BLOCK</Text>
-          </Pressable>
-          <Text style={styles.fyi}>
-            FYI: once you start the block, there is NO way to end it until it&rsquo;s over. O ya, you heard that right.
-          </Text>
-        </View>
+        </ScrollView>
       </ImageBackground>
     </View>
   );
@@ -80,12 +82,21 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     resizeMode: "cover",
   },
+  scrollView: {
+    flexGrow: 1,
+    width: '100%',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   container: {
     padding: 28,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 28,
     backgroundColor: "rgba(0,0,0,0.00)",
+    minHeight: 600,
+    maxHeight: '80%',
   },
   closeButton: {
     position: "absolute",

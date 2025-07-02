@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -54,30 +55,32 @@ export default function Screen8({ onSubmit, disableSwipe, enableSwipe, disableSw
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.heading}>{heading}</Text>
-          <View style={styles.optionsContainer}>
-            {options.map((option) => (
-              <TouchableOpacity
-                key={option}
-                style={[styles.option, concerns.includes(option) && styles.optionSelected, SHADOWS.small]}
-                onPress={() => toggleOption(option)}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.optionText, concerns.includes(option) && styles.optionTextSelected]}>{option}</Text>
-              </TouchableOpacity>
-            ))}
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <Text style={styles.heading}>{heading}</Text>
+            <View style={styles.optionsContainer}>
+              {options.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[styles.option, concerns.includes(option) && styles.optionSelected, SHADOWS.small]}
+                  onPress={() => toggleOption(option)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.optionText, concerns.includes(option) && styles.optionTextSelected]}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
+          <TouchableOpacity
+            style={[styles.button, concerns.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
+            onPress={handleSubmit}
+            disabled={concerns.length === 0}
+          >
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.button, concerns.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
-          onPress={handleSubmit}
-          disabled={concerns.length === 0}
-        >
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -89,6 +92,11 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
+  },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   content: {
     flex: 1,

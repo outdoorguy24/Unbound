@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -10,7 +11,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Animated, ImageBackground, Linking, Platform, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import FounderModal from "../components/FounderModal";
 
-const ACCOUNT = [
+type AccountItem = {
+  label: string;
+  icon: React.ReactNode;
+  action?: string;
+  route?: string;
+};
+const ACCOUNT: AccountItem[] = [
   {
     label: "Terms of Use",
     icon: <Feather name="file-text" size={24} color="#564110" style={{ marginRight: 16 }} />,
@@ -27,7 +34,14 @@ const ACCOUNT = [
     action: "weeklyNotifications",
   },
 ];
-const COMMUNITY = [
+
+type CommunityItem = {
+  label: string;
+  icon: React.ReactNode;
+  action?: string;
+  route?: string;
+};
+const COMMUNITY: CommunityItem[] = [
   {
     label: "Talk with the Founder",
     icon: <MaterialIcons name="message" size={24} color="#564110" style={{ marginRight: 16 }} />,
@@ -50,7 +64,7 @@ export default function ProfileScreen() {
   const { logout, user } = useAuth();
   const [founderModalVisible, setFounderModalVisible] = useState(false);
   const [weeklyNotificationsEnabled, setWeeklyNotificationsEnabled] = useState(true);
-  const pressTimer = useRef<NodeJS.Timeout>();
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
   const animatedValue = useRef(new Animated.Value(1)).current;
 
   // Load user's notification preferences
@@ -102,7 +116,7 @@ export default function ProfileScreen() {
   };
 
   const handleAccountPress = async (item: typeof ACCOUNT[0]) => {
-    if (item.route) {
+    if (item?.route) {
       router.push(item.route);
     }
     if (item.action === "terms") {
@@ -186,7 +200,7 @@ export default function ProfileScreen() {
   };
 
   const handleCommunityPress = async (item: typeof COMMUNITY[0]) => {
-    if (item.route) {
+    if (item?.route) {
       router.push(item.route);
     }
     if (item.action === "review") {
@@ -220,47 +234,51 @@ export default function ProfileScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.header}>Profile</Text>
-        <Text style={styles.sectionTitle}>Community</Text>
-        {COMMUNITY.map((item) => (
-          <TouchableOpacity 
-            key={item.label} 
-            style={styles.menuCard} 
-            onPress={() => handleCommunityPress(item)}
-          >
-            {item.icon}
-            <Text style={styles.menuLabel}>{item.label}</Text>
-            <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
-          </TouchableOpacity>
-        ))}
-        <Text style={styles.sectionTitle}>Account</Text>
-        {ACCOUNT.map((item) => (
-          <TouchableOpacity 
-            key={item.label} 
-            style={styles.menuCard} 
-            onPress={() => handleAccountPress(item)}
-            activeOpacity={item.action === "weeklyNotifications" ? 1 : 0.2}
-          >
-            <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+      <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <Text style={styles.header} numberOfLines={1}>Profile</Text>
+          <Text style={styles.sectionTitle} numberOfLines={1}>Community</Text>
+          {COMMUNITY.map((item) => (
+            <TouchableOpacity
+              key={item.label}
+              style={styles.menuCard}
+              onPress={() => handleCommunityPress(item)}
+              onPressIn={item.action === "refer" ? handlePressIn : undefined}
+              onPressOut={item.action === "refer" ? handlePressOut : undefined}
+            >
               {item.icon}
-              <Text style={styles.menuLabel}>{item.label}</Text>
-            </View>
-            
-            {item.action === "weeklyNotifications" ? (
-              <View style={[styles.toggle, weeklyNotificationsEnabled && styles.toggleActive]}>
-                <Animated.View style={[styles.toggleThumb, weeklyNotificationsEnabled && styles.toggleThumbActive]} />
+              <Text style={styles.menuLabel} numberOfLines={1}>{item.label}</Text>
+              <Feather name="chevron-right" size={22} color="#564110" style={{ marginLeft: "auto" }} />
+            </TouchableOpacity>
+          ))}
+          <Text style={styles.sectionTitle} numberOfLines={1}>Account</Text>
+          {ACCOUNT.map((item) => (
+            <TouchableOpacity 
+              key={item.label} 
+              style={styles.menuCard} 
+              onPress={() => handleAccountPress(item)}
+              activeOpacity={item.action === "weeklyNotifications" ? 1 : 0.2}
+            >
+              <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+                {item.icon}
+                <Text style={styles.menuLabel} numberOfLines={1}>{item.label}</Text>
               </View>
-            ) : (
-              <Feather name="chevron-right" size={22} color="#564110" />
-            )}
+              
+              {item.action === "weeklyNotifications" ? (
+                <View style={[styles.toggle, weeklyNotificationsEnabled && styles.toggleActive]}>
+                  <Animated.View style={[styles.toggleThumb, weeklyNotificationsEnabled && styles.toggleThumbActive]} />
+                </View>
+              ) : (
+                <Feather name="chevron-right" size={22} color="#564110" />
+              )}
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+            <Text style={styles.logoutText} numberOfLines={1}>Log Out</Text>
           </TouchableOpacity>
-        ))}
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
-      </ScrollView>
-      <FounderModal visible={founderModalVisible} onClose={() => setFounderModalVisible(false)} />
+        </ScrollView>
+        <FounderModal visible={founderModalVisible} onClose={() => setFounderModalVisible(false)} />
+      </ScreenContainer>
     </ImageBackground>
   );
 }

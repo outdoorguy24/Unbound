@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { SHADOWS, SPACING } from "@/constants/theme";
 import React from "react";
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -36,48 +37,50 @@ export default function Screen9({ onSubmit }: any) {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <View style={styles.content}>
-          {/* Step Indicator */}
-          <View style={styles.stepIndicatorContainer}>
-            {steps.map((step, index) => (
-              <React.Fragment key={step.key}>
-                <View style={[styles.stepDot, index === 0 && styles.stepDotActive]}>
-                  <Text style={[styles.stepDotText, index === 0 && styles.stepDotTextActive]}>{step.key}</Text>
-                </View>
-                {index < steps.length - 1 && <View style={styles.stepLine} />}
-              </React.Fragment>
-            ))}
-          </View>
-          
-          <Text style={styles.heading}>Here&apos;s how{"\n"}Unbound works:</Text>
-          <View style={styles.stepsContainer}>
-            {steps.map((step, index) => (
-              <View key={step.key} style={styles.stepRow}>
-                <View style={styles.stepNumberContainer}>
-                  <Text style={styles.stepNumber}>{step.key}</Text>
-                </View>
-                <View style={styles.stepContent}>
-                  <Image source={step.icon} style={styles.stepIcon} />
-                  <View style={styles.stepTextWrap}>
-                    <Text style={styles.stepTitle}>{step.title}</Text>
-                    <Text style={styles.stepDesc}>{step.desc}</Text>
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            {/* Step Indicator */}
+            <View style={styles.stepIndicatorContainer}>
+              {steps.map((step, index) => (
+                <React.Fragment key={step.key}>
+                  <View style={[styles.stepDot, index === 0 && styles.stepDotActive]}>
+                    <Text style={[styles.stepDotText, index === 0 && styles.stepDotTextActive]}>{step.key}</Text>
                   </View>
+                  {index < steps.length - 1 && <View style={styles.stepLine} />}
+                </React.Fragment>
+              ))}
+            </View>
+            
+            <Text style={styles.heading}>Here&apos;s how{"\n"}Unbound works:</Text>
+            <View style={styles.stepsContainer}>
+              {steps.map((step, index) => (
+                <View key={step.key} style={styles.stepRow}>
+                  <View style={styles.stepNumberContainer}>
+                    <Text style={styles.stepNumber}>{step.key}</Text>
+                  </View>
+                  <View style={styles.stepContent}>
+                    <Image source={step.icon} style={styles.stepIcon} />
+                    <View style={styles.stepTextWrap}>
+                      <Text style={styles.stepTitle}>{step.title}</Text>
+                      <Text style={styles.stepDesc}>{step.desc}</Text>
+                    </View>
+                  </View>
+                  {index < steps.length - 1 && <View style={styles.connector} />}
                 </View>
-                {index < steps.length - 1 && <View style={styles.connector} />}
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
+          <TouchableOpacity
+            style={[styles.button, SHADOWS.medium]}
+            onPress={() => {
+              if (onSubmit) onSubmit();
+            }}
+          >
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.button, SHADOWS.medium]}
-          onPress={() => {
-            if (onSubmit) onSubmit();
-          }}
-        >
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -90,6 +93,11 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
+  },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   content: {
     flex: 1,

@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { useAuth } from "@/contexts/AuthContext";
 import { findOrCreatePartner } from "@/lib/partnerMatching";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
@@ -78,49 +79,56 @@ export default function Screen13() {
       style={{ flex: 1, width: "100%", height: "100%" }}
       resizeMode="cover"
     >
-      <View style={styles.centered}>
-        <Text style={styles.bigTitle}>FINDING YOUR ACCOUNTABILITY{"\n"}PARTNER</Text>
-        <View style={styles.messageBox}>
-          <Text style={styles.messageText}>
-            Connecting you with{"\n"}another guy who chooses{"\n"}growth over comfort.
-          </Text>
-        </View>
-        {timeoutReached ? (
-          <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
-        ) : searching ? (
-          <>
-            <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
-          </>
-        ) : matched && partnerProfile ? (
-          <>
-            <Text style={styles.success}>
-              You&apos;ve been paired with{" "}
-              <Text style={styles.partnerName}>
-                {partnerProfile.first_name} from {partnerProfile.city}
-              </Text>
-              !
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.centered}>
+          <Text style={styles.bigTitle}>FINDING YOUR ACCOUNTABILITY{"\n"}PARTNER</Text>
+          <View style={styles.messageBox}>
+            <Text style={styles.messageText}>
+              Connecting you with{"\n"}another guy who chooses{"\n"}growth over comfort.
             </Text>
-            <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
-          </>
-        ) : (
-          <>
-            <Text style={styles.noMatch}>You&apos;re first in line - your partner will join soon!</Text>
-            <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
-          </>
-        )}
-        <View style={styles.dotsRow}>{dots}</View>
-      </View>
+          </View>
+          {timeoutReached ? (
+            <Text style={styles.noMatch}>No partner found, continuing to the app...</Text>
+          ) : searching ? (
+            <>
+              <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
+            </>
+          ) : matched && partnerProfile ? (
+            <>
+              <Text style={styles.success}>
+                You&apos;ve been paired with{" "}
+                <Text style={styles.partnerName}>
+                  {partnerProfile.first_name} from {partnerProfile.city}
+                </Text>
+                !
+              </Text>
+              <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
+            </>
+          ) : (
+            <>
+              <Text style={styles.noMatch}>You&apos;re first in line - your partner will join soon!</Text>
+              <Image source={require("../../assets/images/onboarding/partner.png")} style={styles.partnerImg} />
+            </>
+          )}
+          <View style={styles.dotsRow}>{dots}</View>
+        </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   centered: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 6,
   },
   bigTitle: {
     fontSize: 32,

@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
@@ -12,15 +13,17 @@ export default function Screen5() {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <View style={styles.headingContainer}>
-          <Text style={styles.heading}>{heading}</Text>
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.content}>
+          <View style={styles.headingContainer}>
+            <Text style={styles.heading}>{heading}</Text>
+          </View>
+          <View style={styles.illustrationContainer}>
+            <Image source={require("../../assets/images/onboarding/hiker.png")} style={styles.illustration} />
+          </View>
+          <Text style={styles.body}>{body}</Text>
         </View>
-        <View style={styles.illustrationContainer}>
-          <Image source={require("../../assets/images/onboarding/hiker.png")} style={styles.illustration} />
-        </View>
-        <Text style={styles.body}>{body}</Text>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -32,12 +35,17 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.xxl + SPACING.lg,
+    paddingTop: (SPACING.xxl + SPACING.lg) * 0.25,
   },
   headingContainer: {
     backgroundColor: "#2C1A05",

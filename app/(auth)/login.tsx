@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -113,64 +114,64 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
-      <View style={styles.container}>
-        <Text style={styles.heading}>Login</Text>
-        <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleLogin} disabled={isLoading}>
-          <Image source={require("../../assets/images/google.png")} style={styles.googleIcon} />
-          <Text style={styles.googleBtnText}>Continue with Google</Text>
-        </TouchableOpacity>
-        <Text style={styles.divider}>or manually</Text>
-        {error && <Text style={styles.error}>{error}</Text>}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email Address</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Email Address"
-            placeholderTextColor="#7A5A2F"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-        </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordInputWrap}>
+      <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+        <View style={styles.container}>
+          <Text style={styles.heading} numberOfLines={1}>Login</Text>
+          <TouchableOpacity style={styles.googleBtn} onPress={handleGoogleLogin} disabled={isLoading}>
+            <Image source={require("../../assets/images/google.png")} style={styles.googleIcon} />
+            <Text style={styles.googleBtnText} numberOfLines={1}>Continue with Google</Text>
+          </TouchableOpacity>
+          <Text style={styles.divider} numberOfLines={1}>or manually</Text>
+          {error && <Text style={styles.error} numberOfLines={2}>{error}</Text>}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label} numberOfLines={1}>Email Address</Text>
             <TextInput
-              style={[styles.input, { paddingRight: 40 }]}
-              placeholder="Password"
+              style={styles.input}
+              placeholder="Email Address"
               placeholderTextColor="#7A5A2F"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
+              value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
+              keyboardType="email-address"
             />
-            <TouchableOpacity onPress={() => setShowPassword((v) => !v)} style={styles.eyeBtnAbsolute}>
-              <MaterialCommunityIcons
-                name={showPassword ? "eye-off-outline" : "eye-outline"}
-                size={24}
-                color="#7A5A2F"
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label} numberOfLines={1}>Password</Text>
+            <View style={styles.passwordInputWrap}>
+              <TextInput
+                style={[styles.input, { paddingRight: 40 }]}
+                placeholder="Password"
+                placeholderTextColor="#7A5A2F"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
               />
+              <TouchableOpacity onPress={() => setShowPassword((v) => !v)} style={styles.eyeBtnAbsolute}>
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={24}
+                  color="#7A5A2F"
+                />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordLink}>
+              <Text style={styles.forgotPasswordText} numberOfLines={1}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordLink}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+          <TouchableOpacity style={styles.createBtn} onPress={handleLogin} disabled={isLoading}>
+            {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.createBtnText} numberOfLines={1}>Login</Text>}
           </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.createBtn} onPress={handleLogin} disabled={isLoading}>
-          {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.createBtnText}>Login</Text>}
-        </TouchableOpacity>
-        <Text style={styles.loginRow}>
-          Don&apos;t have an account ?{" "}
-          <Text style={styles.loginLink} onPress={() => router.push("/(auth)/signup")}>
-            Create Now
+          <Text style={styles.loginRow} numberOfLines={2}>
+            Don&apos;t have an account ?{" "}
+            <Text style={styles.loginLink} numberOfLines={1} onPress={() => router.push("/(auth)/signup")}>Create Now</Text>
           </Text>
-        </Text>
-        <View style={{ flex: 1 }} />
-        <View style={styles.mountainWrap}>
-          <Image source={require("../../assets/images/mountain.png")} style={styles.mountain} />
+          <View style={{ flex: 1 }} />
+          <View style={styles.mountainWrap}>
+            <Image source={require("../../assets/images/mountain.png")} style={styles.mountain} />
+          </View>
         </View>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }

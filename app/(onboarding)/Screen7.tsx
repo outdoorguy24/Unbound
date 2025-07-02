@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useEffect } from "react";
@@ -52,39 +53,41 @@ export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSw
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.heading}>{heading}</Text>
-          <View style={styles.optionsContainer}>
-            {OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.key}
-                style={[styles.option, scrollTimes.includes(option.key) && styles.optionSelected]}
-                onPress={() => toggleOption(option.key)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.iconWrap}>
-                  <Image source={option.image} style={styles.iconImage} />
-                </View>
-                <View style={styles.labelDescWrap}>
-                  <Text style={styles.optionLabel}>{option.label}</Text>
-                  <Text style={styles.optionDesc}>{option.desc}</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <Text style={styles.heading}>{heading}</Text>
+            <View style={styles.optionsContainer}>
+              {OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[styles.option, scrollTimes.includes(option.key) && styles.optionSelected]}
+                  onPress={() => toggleOption(option.key)}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.iconWrap}>
+                    <Image source={option.image} style={styles.iconImage} />
+                  </View>
+                  <View style={styles.labelDescWrap}>
+                    <Text style={styles.optionLabel}>{option.label}</Text>
+                    <Text style={styles.optionDesc}>{option.desc}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
+          <TouchableOpacity
+            style={[styles.nextBtn, scrollTimes.length === 0 && styles.nextBtnDisabled]}
+            onPress={() => {
+              if (enableSwipe) enableSwipe();
+              if (onSubmit) onSubmit();
+            }}
+            disabled={scrollTimes.length === 0}
+          >
+            <Text style={styles.nextBtnText}>Next</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.nextBtn, scrollTimes.length === 0 && styles.nextBtnDisabled]}
-          onPress={() => {
-            if (enableSwipe) enableSwipe();
-            if (onSubmit) onSubmit();
-          }}
-          disabled={scrollTimes.length === 0}
-        >
-          <Text style={styles.nextBtnText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -97,11 +100,16 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   content: {
     flex: 1,
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingTop: 48,
+    paddingTop: 18,
   },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,

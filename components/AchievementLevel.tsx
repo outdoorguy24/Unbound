@@ -49,6 +49,7 @@ export default function AchievementLevel({ totalHoursSaved }: AchievementLevelPr
               <Text
                 style={[
                   styles.levelName,
+                  level.name === 'Commander' && styles.commanderLabel,
                   idx === currentLevelIdx && styles.levelNameActive,
                 ]}
                 numberOfLines={1}
@@ -58,7 +59,7 @@ export default function AchievementLevel({ totalHoursSaved }: AchievementLevelPr
               </Text>
               <View style={styles.segmentBox}> 
                 {/* Current pill is solid green, all others are white */}
-                {idx === currentLevelIdx && <View style={[styles.segmentFill, { backgroundColor: COLORS.success, width: '100%' }]} />}
+                {idx === currentLevelIdx && <View style={[styles.segmentFill, { backgroundColor: '#3C6845', width: '100%' }]} />}
                 {idx !== currentLevelIdx && <View style={[styles.segmentFill, { backgroundColor: '#fff', width: '100%' }]} />}
                 <View style={styles.segmentOutline} />
               </View>
@@ -124,6 +125,9 @@ const styles = StyleSheet.create({
   levelNameActive: {
     textDecorationLine: 'underline',
   },
+  commanderLabel: {
+    marginLeft: -4,
+  },
   segmentBox: {
     height: 18,
     backgroundColor: '#E6D3A7',
@@ -163,7 +167,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 10,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderBottomColor: COLORS.success,
+    borderBottomColor: '#3C6845',
     marginTop: 0,
   },
   nextLevelText: {

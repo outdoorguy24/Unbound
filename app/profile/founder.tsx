@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { SPACING } from "@/constants/theme";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -95,42 +96,44 @@ export default function FounderScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
-      <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <View style={styles.backCircle}>
-            <Feather name="arrow-left" size={22} color="#F9E7B0" />
-          </View>
-        </TouchableOpacity>
-        <Text style={styles.header}>Talk with the Founder</Text>
-      </View>
-      <View style={styles.content}>
-        <Image source={require("../../assets/images/founder.png")} style={styles.founderImg} />
-        <Text style={styles.intro}>
-          I&rsquo;m <Text style={styles.name}>Alex</Text>, the founder of Unbound.
-        </Text>
-        <Text style={styles.body}>
-          This picture makes my beard and hairline look way better than it is, but I&rsquo;ll take it. I built Unbound
-          because with a young family and plenty of goals, I was done watching my time disappear into a screen.
-          I&rsquo;m glad you&rsquo;re here & would love to hear from you.
-        </Text>
-        <View style={styles.messageBox}>
-          <Text style={styles.messageText}>
-            Feel free to <Text style={styles.messageHighlight}>send me your best joke</Text>, suggest a feature, or give
-            feedback.
-          </Text>
+      <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+            <View style={styles.backCircle}>
+              <Feather name="arrow-left" size={22} color="#F9E7B0" />
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.header} numberOfLines={1}>Talk with the Founder</Text>
         </View>
-        <TouchableOpacity style={styles.actionBtn} onPress={handleSendText}>
-          <Image source={require("../../assets/images/message.png")} style={styles.actionIcon} />
-          <Text style={styles.actionBtnText}>Send a Text</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionBtn, { marginTop: 18 }]}
-          onPress={handleEmail}
-        >
-          <Image source={require("../../assets/images/email.png")} style={styles.actionIcon} />
-          <Text style={styles.actionBtnText}>Email Me</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.content}>
+          <Image source={require("../../assets/images/founder.png")} style={styles.founderImg} />
+          <Text style={styles.intro} numberOfLines={2}>
+            I&rsquo;m <Text style={styles.name}>Alex</Text>, the founder of Unbound.
+          </Text>
+          <Text style={styles.body} numberOfLines={6}>
+            This picture makes my beard and hairline look way better than it is, but I&rsquo;ll take it. I built Unbound
+            because with a young family and plenty of goals, I was done watching my time disappear into a screen.
+            I&rsquo;m glad you&rsquo;re here & would love to hear from you.
+          </Text>
+          <View style={styles.messageBox}>
+            <Text style={styles.messageText} numberOfLines={3}>
+              Feel free to <Text style={styles.messageHighlight}>send me your best joke</Text>, suggest a feature, or give
+              feedback.
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.actionBtn} onPress={handleSendText}>
+            <Image source={require("../../assets/images/message.png")} style={styles.actionIcon} />
+            <Text style={styles.actionBtnText} numberOfLines={1}>Send a Text</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionBtn, { marginTop: 18 }]}
+            onPress={handleEmail}
+          >
+            <Image source={require("../../assets/images/email.png")} style={styles.actionIcon} />
+            <Text style={styles.actionBtnText} numberOfLines={1}>Email Me</Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }

@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
@@ -8,19 +9,21 @@ export default function Screen3() {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <View style={styles.illustrationContainer}>
-          <Image source={require("../../assets/images/onboarding/slotmachine.png")} style={styles.illustration} />
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.content}>
+          <View style={styles.illustrationContainer}>
+            <Image source={require("../../assets/images/onboarding/slotmachine.png")} style={styles.illustration} />
+          </View>
+          <View style={styles.headingContainer}>
+            <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
+          </View>
+          <Text style={styles.body}>
+            You&apos;re giving away your life one swipe at a time to billionaire tech overlords who don&apos;t care about
+            your goals. We are the pawns in their battle to see who can extract our attention in the most addictive way
+            for <Text style={styles.underline}>profit</Text>.
+          </Text>
         </View>
-        <View style={styles.headingContainer}>
-        <Text style={styles.heading}>Every minute on your phone is a minute{"\n"}you&apos;ll never get back.</Text>
-        </View>
-        <Text style={styles.body}>
-          You&apos;re giving away your life one swipe at a time to billionaire tech overlords who don&apos;t care about
-          your goals. We are the pawns in their battle to see who can extract our attention in the most addictive way
-          for <Text style={styles.underline}>profit</Text>.
-        </Text>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -32,18 +35,24 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.lg,
+    paddingTop: SPACING.md * 0.5,
+    paddingBottom: SPACING.xl,
   },
   illustrationContainer: {
     width: "100%",
     alignItems: "center",
     marginBottom: SPACING.md,
-    marginTop: SPACING.xl,
+    marginTop: SPACING.md,
   },
   illustration: {
     width: "100%",

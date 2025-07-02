@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
@@ -56,51 +57,53 @@ export default function ScreenProfileSetup() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg} resizeMode="cover">
-      <View style={styles.container}>
-        <Text style={styles.heading}>SMART MOVE.</Text>
-        <Text style={styles.description}>
-          Welcome to the crew. Please give{`\n`}us a little info about you so we{`\n`}can match you with an{`\n`}
-          accountability partner.
-        </Text>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>First Name *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="First Name"
-            value={firstName}
-            onChangeText={setFirstName}
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={32}
-            placeholderTextColor="#7A5A2F"
-          />
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.container}>
+          <Text style={styles.heading}>SMART MOVE.</Text>
+          <Text style={styles.description}>
+            Welcome to the crew. Please give{`\n`}us a little info about you so we{`\n`}can match you with an{`\n`}
+            accountability partner.
+          </Text>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>First Name *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="First Name"
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+              autoCorrect={false}
+              maxLength={32}
+              placeholderTextColor="#7A5A2F"
+            />
+          </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>City *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="City"
+              value={city}
+              onChangeText={setCity}
+              autoCapitalize="words"
+              autoCorrect={false}
+              maxLength={32}
+              placeholderTextColor="#7A5A2F"
+            />
+          </View>
+          {error && <Text style={styles.error}>{error}</Text>}
+          <TouchableOpacity
+            style={[styles.button, !canSubmit && styles.buttonDisabled]}
+            onPress={handleSubmit}
+            disabled={!canSubmit || loading}
+          >
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Submit</Text>}
+          </TouchableOpacity>
+          <View style={{ flex: 1 }} />
+          <View style={styles.fireWrap}>
+            <Image source={require("../../assets/images/fire.png")} style={styles.fire} />
+          </View>
         </View>
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>City *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="City"
-            value={city}
-            onChangeText={setCity}
-            autoCapitalize="words"
-            autoCorrect={false}
-            maxLength={32}
-            placeholderTextColor="#7A5A2F"
-          />
-        </View>
-        {error && <Text style={styles.error}>{error}</Text>}
-        <TouchableOpacity
-          style={[styles.button, !canSubmit && styles.buttonDisabled]}
-          onPress={handleSubmit}
-          disabled={!canSubmit || loading}
-        >
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Submit</Text>}
-        </TouchableOpacity>
-        <View style={{ flex: 1 }} />
-        <View style={styles.fireWrap}>
-          <Image source={require("../../assets/images/fire.png")} style={styles.fire} />
-        </View>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -111,10 +114,15 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 48,
+    paddingTop: 14.4,
     alignItems: "center",
   },
   heading: {

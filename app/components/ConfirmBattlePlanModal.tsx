@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginHorizontal: SPACING.lg,
     alignItems: "center",
-    width: "90%",
+    width: '90%',
     maxWidth: 400,
     borderWidth: 1.5,
     borderColor: "#E6D3A7",

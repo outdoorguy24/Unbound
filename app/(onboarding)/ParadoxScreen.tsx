@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -8,25 +9,27 @@ export default function ParadoxScreen({ isActive, onSubmit }: { isActive?: boole
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <View style={styles.headingContainer}>
-          <Text style={styles.heading}>Well this is awkward</Text>
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.content}>
+          <View style={styles.headingContainer}>
+            <Text style={styles.heading} numberOfLines={1}>Well this is awkward</Text>
+          </View>
+          <View style={styles.bodyContainer}>
+            <Text style={styles.body} numberOfLines={8}><Text style={styles.bold}>You&apos;re using an app...</Text>{"\n"}to stop using apps.{"\n\n"}
+              <Text style={styles.bold}>You&apos;re staring at a screen...</Text>{"\n"}to avoid staring at screens.{"\n\n"}
+              <Text style={styles.bold}>You downloaded more technology...</Text>{"\n"}to escape technology.
+            </Text>
+            <Text style={styles.caption} numberOfLines={1}>Yes, we see the irony.</Text>
+            <Text style={styles.caption} numberOfLines={2}>But sometimes you need to{"\n"}fight fire with fire.</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.greenButton}
+            onPress={onSubmit}
+          >
+            <Text style={styles.greenButtonText} numberOfLines={1}>Embrace the Paradox</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.bodyContainer}>
-          <Text style={styles.body}><Text style={styles.bold}>You&apos;re using an app...</Text>{"\n"}to stop using apps.{"\n\n"}
-            <Text style={styles.bold}>You&apos;re staring at a screen...</Text>{"\n"}to avoid staring at screens.{"\n\n"}
-            <Text style={styles.bold}>You downloaded more technology...</Text>{"\n"}to escape technology.
-          </Text>
-          <Text style={styles.caption}>Yes, we see the irony.</Text>
-          <Text style={styles.caption}>But sometimes you need to{"\n"}fight fire with fire.</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.greenButton}
-          onPress={onSubmit}
-        >
-          <Text style={styles.greenButtonText}>Embrace the Paradox</Text>
-        </TouchableOpacity>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -34,6 +37,11 @@ export default function ParadoxScreen({ isActive, onSubmit }: { isActive?: boole
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+  },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
   content: {
     flex: 1,

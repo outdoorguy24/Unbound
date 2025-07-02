@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useEffect, useState } from "react";
@@ -38,39 +39,41 @@ export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSw
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.heading}>{heading}</Text>
-          <View style={styles.grid}>
-            {OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.key}
-                style={[styles.option, traps.includes(option.key) && styles.optionSelected, SHADOWS.small]}
-                onPress={() => toggleOption(option.key)}
-                activeOpacity={0.8}
-              >
-                <Image source={option.image} style={styles.iconImage} />
-                <Text style={[styles.optionLabel, traps.includes(option.key) && styles.optionLabelSelected]}>
-                  {option.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <Text style={styles.heading}>{heading}</Text>
+            <View style={styles.grid}>
+              {OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[styles.option, traps.includes(option.key) && styles.optionSelected, SHADOWS.small]}
+                  onPress={() => toggleOption(option.key)}
+                  activeOpacity={0.8}
+                >
+                  <Image source={option.image} style={styles.iconImage} />
+                  <Text style={[styles.optionLabel, traps.includes(option.key) && styles.optionLabelSelected]}>
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
+          <TouchableOpacity
+            style={[styles.button, (traps.length === 0 || isSubmitting) && styles.buttonDisabled, SHADOWS.medium]}
+            onPress={() => {
+              if (onSubmit) {
+                setIsSubmitting(true);
+                disableSwipeFn();
+                onSubmit();
+              }
+            }}
+            disabled={traps.length === 0 || isSubmitting}
+          >
+            <Text style={styles.buttonText}>Next</Text>
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.button, (traps.length === 0 || isSubmitting) && styles.buttonDisabled, SHADOWS.medium]}
-          onPress={() => {
-            if (onSubmit) {
-              setIsSubmitting(true);
-              disableSwipeFn();
-              onSubmit();
-            }
-          }}
-          disabled={traps.length === 0 || isSubmitting}
-        >
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -83,11 +86,16 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   content: {
     flex: 1,
     alignItems: "center",
     paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.xxl,
+    paddingTop: SPACING.xxl * 0.5,
   },
   heading: {
     fontFamily: TYPOGRAPHY.heading.fontFamily,

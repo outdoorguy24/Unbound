@@ -1,3 +1,4 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
 import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
 
@@ -8,21 +9,23 @@ export default function Screen2() {
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <View style={styles.illustrationContainer}>
-          <Image source={require("../../assets/images/onboarding/trap.png")} style={styles.illustration} />
+      <ScreenContainer style={styles.screenContainer}>
+        <View style={styles.content}>
+          <View style={styles.illustrationContainer}>
+            <Image source={require("../../assets/images/onboarding/trap.png")} style={styles.illustration} />
+          </View>
+          <View style={styles.headingContainer}>
+            <Text style={styles.heading}>Technology has benefits, but it's{"\n"}stealing your life.</Text>
+          </View>
+          <Text style={styles.subheading} numberOfLines={3}>
+            You know what you should be doing,{"\n"}but the phone is always there,{"\n"}ready with a quick hit.
+          </Text>
+          <Text style={styles.body} numberOfLines={3}>
+            It creates a <Text style={styles.underline}>cycle</Text> of cheap dopamine, constant distractions, and a lack
+            of purpose and drive.
+          </Text>
         </View>
-        <View style={styles.headingContainer}>
-          <Text style={styles.heading}>Technology has benefits, but it's{"\n"}stealing your life.</Text>
-        </View>
-        <Text style={styles.subheading}>
-          You know what you should be doing,{"\n"}but the phone is always there,{"\n"}ready with a quick hit.
-        </Text>
-        <Text style={styles.body}>
-          It creates a <Text style={styles.underline}>cycle</Text> of cheap dopamine, constant distractions, and a lack
-          of purpose and drive.
-        </Text>
-      </View>
+      </ScreenContainer>
     </ImageBackground>
   );
 }
@@ -35,12 +38,17 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  screenContainer: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.xxl,
+    paddingTop: SPACING.xxl * 0.125,
   },
   illustrationContainer: {
     width: "100%",

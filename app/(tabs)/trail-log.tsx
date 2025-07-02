@@ -1,9 +1,10 @@
+import { ScreenContainer } from "@/components/ui/ScreenContainer";
 import { SPACING } from "@/constants/theme";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTrailLog } from "@/lib/trailLog";
 import { getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const MILESTONES = [10, 50, 100, 500, 1000]; // in days
 
@@ -49,10 +50,43 @@ export default function TrailLogScreen() {
     fetchData();
   }, [user]);
 
+  // Add AppState listener to refresh data on resume
+  useEffect(() => {
+    const appState = { current: AppState.currentState };
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // Re-run the same fetchData logic as above
+        if (user?.id) {
+          (async () => {
+            setLoading(true);
+            try {
+              const logsData = await getTrailLog(user.id, { limit: 500 });
+              setLogs(logsData || []);
+              const streak = await getStreak(user.id);
+              setStreakData(streak);
+              const startDate = new Date(0);
+              const endDate = new Date();
+              const totalTime = await getTotalBlockedTime(user.id, startDate, endDate);
+              setTotalTimeSaved(totalTime || 0);
+            } catch (error) {
+              console.error("Error fetching trail log data (resume):", error);
+            } finally {
+              setLoading(false);
+            }
+          })();
+        }
+      }
+      appState.current = nextAppState;
+    });
+    return () => subscription.remove();
+  }, [user]);
+
   if (loading) {
     return (
       <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
-        <ActivityIndicator size="large" color="#4B3415" style={{ marginTop: 40 }} />
+        <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+          <ActivityIndicator size="large" color="#4B3415" style={{ marginTop: 40 }} />
+        </ScreenContainer>
       </ImageBackground>
     );
   }
@@ -65,46 +99,48 @@ export default function TrailLogScreen() {
 
   return (
     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
-      <ScrollView 
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-        bounces={true}
-        alwaysBounceVertical={true}
-        overScrollMode="always"
-      >
-        <Text style={styles.header}>Trail Log</Text>
-        <View style={styles.quoteBox}>
-          <Text style={styles.quoteText}>
-            "I have a friend who's always in a hurry, he never gets anywhere."
-          </Text>
-          <Text style={styles.quoteAuthor}>- Edward Abbey</Text>
-        </View>
+      <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+        <ScrollView 
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+          alwaysBounceVertical={true}
+          overScrollMode="always"
+        >
+          <Text style={styles.header} numberOfLines={1}>Trail Log</Text>
+          <View style={styles.quoteBox}>
+            <Text style={styles.quoteText} numberOfLines={3}>
+              "I have a friend who's always in a hurry, he never gets anywhere."
+            </Text>
+            <Text style={styles.quoteAuthor} numberOfLines={1}>- Edward Abbey</Text>
+          </View>
 
-        <View style={styles.statsGrid}>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{(timeSavedDays * 24 * 60).toFixed(0)}m</Text>
-            <Text style={styles.statLabel}>TIME SAVED</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue} numberOfLines={1}>{(timeSavedDays * 24 * 60).toFixed(0)}m</Text>
+              <Text style={styles.statLabel} numberOfLines={1}>TIME SAVED</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue} numberOfLines={1}>{Math.floor(timeSavedDays)}</Text>
+              <Text style={styles.statLabel} numberOfLines={1}>DAYS SAVED</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue} numberOfLines={1}>{totalBlocks}</Text>
+              <Text style={styles.statLabel} numberOfLines={1}>TOTAL BLOCKS</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statValue} numberOfLines={1}>{streakDays}</Text>
+              <Text style={styles.statLabel} numberOfLines={1}>Streak Days</Text>
+            </View>
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{Math.floor(timeSavedDays)}</Text>
-            <Text style={styles.statLabel}>DAYS SAVED</Text>
+          <View style={styles.milestoneBox}>
+            <Image source={require("../../assets/images/flag.png")} style={styles.milestoneIcon} />
+            <Text style={styles.milestoneValue} numberOfLines={1}>{milestoneHours} Hours</Text>
+            <Text style={styles.milestoneSub} numberOfLines={1}>Time Saved Goal</Text>
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{totalBlocks}</Text>
-            <Text style={styles.statLabel}>TOTAL BLOCKS</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statValue}>{streakDays}</Text>
-            <Text style={styles.statLabel}>Streak Days</Text>
-          </View>
-        </View>
-        <View style={styles.milestoneBox}>
-          <Image source={require("../../assets/images/flag.png")} style={styles.milestoneIcon} />
-          <Text style={styles.milestoneValue}>{milestoneHours} Hours</Text>
-          <Text style={styles.milestoneSub}>Time Saved Goal</Text>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </ScreenContainer>
     </ImageBackground>
   );
 }

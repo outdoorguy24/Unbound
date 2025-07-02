@@ -3,14 +3,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { saveUserSchedule } from "@/lib/userTracking";
 import React, { useState } from "react";
 import {
-    Alert,
-    ImageBackground,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  ImageBackground,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -34,11 +34,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 10,
     zIndex: 1000,
-    paddingHorizontal: 20,
   },
   modalBackground: {
-    width: "100%",
+    width: '100%',
     maxHeight: "85%",
     borderRadius: 28,
     overflow: "hidden",

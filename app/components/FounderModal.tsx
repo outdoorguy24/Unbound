@@ -49,14 +49,17 @@ export default function FounderModal({ visible, onClose }: FounderModalProps) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    width: '100%',
     backgroundColor: "rgba(44,26,5,0.8)",
     justifyContent: "center",
     alignItems: "center",
   },
   bg: {
-    width: 360,
+    width: '90%',
+    maxWidth: 360,
     borderRadius: SPACING.xl,
     overflow: "hidden",
+    alignSelf: 'center',
   },
   bgImage: {
     borderRadius: SPACING.xl,
