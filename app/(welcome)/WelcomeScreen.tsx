@@ -12,7 +12,7 @@ const WelcomeScreen = () => {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push("/(onboarding)/new-onboarding");
+    router.push("/(auth)/signup");
   };
 
   const handleLogin = () => {
