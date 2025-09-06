@@ -64,14 +64,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const checkProfileAndRoute = async () => {
       if (isLoadingAuth) return;
+      
       const inAuthGroup = segments[0] === "(auth)";
       const inOnboardingGroup = segments[0] === "(onboarding)";
-      if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup) {
-        router.replace("/(auth)/login");
+      const inWelcomeGroup = segments[0] === "(welcome)";
+      
+      // If not logged in and not in auth/welcome groups, go to welcome
+      if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup && !inWelcomeGroup) {
+        router.replace("/(welcome)/WelcomeScreen");
         return;
       }
+      
+      // If logged in, check profile and route accordingly
       if (isLoggedIn) {
-        // Check for user profile
         try {
           const profile = await getUserProfile(user!.id);
           if (!profile) {
@@ -81,8 +86,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             return;
           }
-          // Profile exists, go to partner matching
-          if (inAuthGroup || (inOnboardingGroup && segments[1] !== "Screen13")) {
+          // Profile exists, go to main app
+          if (inAuthGroup || inWelcomeGroup || (inOnboardingGroup && segments[1] !== "Screen13")) {
             router.replace("/(onboarding)/Screen13");
           }
         } catch (e) {

@@ -1,4 +1,4 @@
-import SplashScreen from "@/components/SplashScreen";
+import SplashScreenV2 from "@/components/SplashScreenV2";
 import { COLORS } from "@/constants/theme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -27,6 +27,13 @@ export default function RootLayout() {
     "Vollkorn-Regular": require("../assets/fonts/Vollkorn-Regular.ttf"),
     "Vollkorn-SemiBold": require("../assets/fonts/Vollkorn-Semibold.ttf"),
     "Vollkorn-SemiBoldItalic": require("../assets/fonts/Vollkorn-SemiboldItalic.ttf"),
+    "Cinzel-Regular": require("../assets/fonts/Cinzel-Regular.ttf"),
+    "Cinzel-Medium": require("../assets/fonts/Cinzel-Medium.ttf"),
+    "Cinzel-Bold": require("../assets/fonts/Cinzel-Bold.ttf"),
+    "Zilla-Slab": require("../assets/fonts/ZillaSlab-Regular.ttf"),
+    "Zilla-Slab-Bold": require("../assets/fonts/ZillaSlab-Bold.ttf"),
+    "Zilla-Slab-Medium": require("../assets/fonts/ZillaSlab-Medium.ttf"),
+    "Zilla-Slab-Regular": require("../assets/fonts/ZillaSlab-Regular.ttf"),
   });
   const [showSplash, setShowSplash] = useState(!splashShown);
   const router = useRouter();
@@ -59,7 +66,7 @@ export default function RootLayout() {
     <StripeProvider>
       <AuthProvider>
         <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+          {showSplash && <SplashScreenV2 onFinish={handleSplashFinish} />}
           {!showSplash && <AppNavigator loaded={loaded} colorScheme={colorScheme} />}
           <StatusBar style="auto" />
         </ThemeProvider>
@@ -86,13 +93,11 @@ function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: a
         },
       }}
     >
-      {!user ? (
-        <Stack.Screen name="(onboarding)" />
-      ) : !profile ? (
-        <Stack.Screen name="(onboarding)/ScreenProfileSetup" />
-      ) : (
-        <Stack.Screen name="(tabs)" />
-      )}
+      {/* Always include all possible screens - let AuthContext handle routing */}
+      <Stack.Screen name="(welcome)" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(onboarding)" />
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen 
         name="messages/[partnerId]" 
         options={{ 
@@ -100,7 +105,6 @@ function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: a
           presentation: 'card',
         }} 
       />
-      <Stack.Screen name="(auth)" />
       <Stack.Screen name="defend-modal" options={{ presentation: "modal" }} />
       <Stack.Screen name="founder" options={{ title: "Talk with the Founder", headerShown: true }} />
       <Stack.Screen name="+not-found" options={{ headerShown: true }}/>
