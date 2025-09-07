@@ -1,16 +1,19 @@
 import React from "react";
+import { Dimensions } from "react-native";
 import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get("screen");
+
 const FirstSliderGradient = () => (
-  <Svg width="394" height="852" viewBox="0 0 394 852" fill="none">
+  <Svg width={screenWidth} height={screenHeight} viewBox={`0 0 ${screenWidth} ${screenHeight}`} fill="none">
     <Path 
-      d="M0.5 0H393.5V852H0.5V0Z" 
+      d={`M0.5 0H${screenWidth - 0.5}V${screenHeight}H0.5V0Z`} 
       fill="url(#paint0_linear_578_7812)"
     />
     <Defs>
       <LinearGradient 
         id="paint0_linear_578_7812" 
-        x1="197.5" 
+        x1={screenWidth / 2} 
         y1="302.5" 
         x2="233.207" 
         y2="567.183" 
