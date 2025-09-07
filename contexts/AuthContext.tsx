@@ -1,7 +1,7 @@
 import { loginWithGoogle, supabase } from "@/lib/supabaseClient";
 import { getStoredPushToken } from "@/utils/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter, useSegments } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 // Types
@@ -33,12 +33,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const router = useRouter();
-  const segments = useSegments();
 
   // Check if user is logged in
   const isLoggedIn = !!user;
 
-  // Minimal auth state setup - no routing logic
+  // TODO: AuthContext routing logic disabled to prevent navigation interference
+  // Current behavior: Only handles authentication state, no automatic routing
+  // Future: Need to implement proper routing logic that doesn't interfere with user navigation
+  
+  // Minimal auth state setup - handles session management only
   useEffect(() => {
     const getSession = async () => {
       setIsLoadingAuth(true);
@@ -59,25 +62,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Minimal routing - only redirect to welcome if not in any valid group
-  useEffect(() => {
-    const checkInitialRoute = async () => {
-      if (isLoadingAuth) return;
+  // TODO: DISABLED - Routing logic commented out to prevent navigation interference
+  // Issue: This was causing Login/Get Started buttons to jitter and not navigate properly
+  // Future: Need to implement smarter routing that only redirects on app startup, not on every navigation
+  // 
+  // useEffect(() => {
+  //   const checkInitialRoute = async () => {
+  //     if (isLoadingAuth) return;
       
-      const inAuthGroup = segments[0] === "(auth)";
-      const inOnboardingGroup = segments[0] === "(onboarding)";
-      const inWelcomeGroup = segments[0] === "(welcome)";
-      const inTabsGroup = segments[0] === "(tabs)";
-      
-      // Only redirect to welcome if not in any valid group and not logged in
-      if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup && !inWelcomeGroup && !inTabsGroup) {
-        console.log("🚀 Redirecting to welcome screen (initial route)");
-        router.replace("/(welcome)/WelcomeScreen");
-      }
-    };
-    checkInitialRoute();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingAuth, segments]);
+  //     // Only redirect to welcome if we're at the root and not logged in
+  //     if (!isLoggedIn && segments.length === 0) {
+  //       console.log("🚀 Redirecting to welcome screen (initial route)");
+  //       router.replace("/(welcome)/WelcomeScreen");
+  //     }
+  //   };
+  //   checkInitialRoute();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isLoadingAuth]);
 
   // Login with Google
   const login = async () => {
