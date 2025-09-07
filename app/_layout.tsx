@@ -2,7 +2,6 @@ import SplashScreenV2 from "@/components/SplashScreenV2";
 import { COLORS } from "@/constants/theme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useProfileCheck } from "@/hooks/useProfileCheck";
 import { StripeProvider } from "@/lib/stripeProvider";
 import { addNotificationListeners } from "@/utils/notifications";
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
@@ -76,8 +75,11 @@ export default function RootLayout() {
 }
 
 function AppNavigator({ loaded, colorScheme }: { loaded: boolean; colorScheme: any }) {
-  const { user, profile, loading } = useProfileCheck();
-  if (!loaded || loading) {
+  // const { user, profile, loading } = useProfileCheck();
+  // if (!loaded || loading) {
+  //   return null;
+  // }
+  if (!loaded) {
     return null;
   }
   return (

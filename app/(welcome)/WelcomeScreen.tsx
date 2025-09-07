@@ -12,7 +12,8 @@ const WelcomeScreen = () => {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push("/(auth)/signup");
+    console.log("🚀 WelcomeScreen: Get Started button pressed");
+    router.replace("/(onboarding)/carousel");
   };
 
   const handleLogin = () => {
