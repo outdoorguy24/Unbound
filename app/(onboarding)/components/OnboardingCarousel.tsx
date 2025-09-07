@@ -445,6 +445,7 @@ export default function OnboardingCarousel({ onComplete }: OnboardingCarouselPro
           index,
         })}
         style={{ flex: 1 }}
+        scrollEnabled={false}
       />
     </View>
   );
