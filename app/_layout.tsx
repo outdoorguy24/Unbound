@@ -40,6 +40,8 @@ export default function RootLayout() {
   const handleSplashFinish = () => {
     splashShown = true;
     setShowSplash(false);
+    // Navigate to Welcome Screen after splash
+    router.replace("/(welcome)/WelcomeScreen");
   };
 
   // Set up push notifications
