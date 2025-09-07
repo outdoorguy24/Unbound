@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import WelcomeGradient from "./components/WelcomeGradient";
 
 const WelcomeScreen = () => {
   const router = useRouter();
@@ -21,22 +22,22 @@ const WelcomeScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/welcome-screen.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      {/* Light gray overlay to reduce brightness */}
-      <View style={styles.brightnessOverlay} />
-
-      <View style={styles.content}>
-        <Text style={styles.text}>Digital freedom starts here</Text>
+    <View style={styles.container}>
+      <ImageBackground
+        source={require("../../assets/images/welcome-screen.png")}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <View style={styles.brightnessOverlay} />
+        <View style={styles.content}>
+          <Text style={styles.text}>Digital freedom starts here</Text>
+        </View>
+      </ImageBackground>
+      
+      <View style={styles.gradientContainer}>
+        <WelcomeGradient />
       </View>
 
-      {/* Black overlay background */}
-      <View style={styles.overlay} />
-
-      {/* Bottom Buttons */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.getStartedButton} onPress={handleGetStarted}>
           <Text style={styles.getStartedText}>Get Started</Text>
@@ -46,17 +47,20 @@ const WelcomeScreen = () => {
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
 export default WelcomeScreen;
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
+    backgroundColor: "#000",
+  },
+  background: {
     width: "100%",
-    height: "80%",
+    height: "90%",
   },
   brightnessOverlay: {
     position: "absolute",
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.3)", // lightgray with 30% opacity
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   content: {
     flex: 1,
@@ -79,13 +83,14 @@ const styles = StyleSheet.create({
     lineHeight: 50,
     letterSpacing: 0.5,
   },
-  overlay: {
+  gradientContainer: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: 170, // increased height for better coverage
-    backgroundColor: "black", // more opaque black overlay
+    bottom: 0,
+    width: "100%",
+    height: "100%",
   },
   bottomContainer: {
     position: "absolute",
@@ -93,7 +98,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    gap: 24, // works in RN 0.71+. Otherwise, use marginTop on loginButton
+    gap: 24,
   },
   getStartedButton: {
     width: "90%",
