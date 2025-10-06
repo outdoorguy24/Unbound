@@ -1,140 +1,148 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import React, { useEffect, useRef } from "react";
-import { Animated, Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-export default function Screen4({ isActive }: { isActive?: boolean }) {
-  const fadeAnims = useRef([new Animated.Value(0), new Animated.Value(0), new Animated.Value(0)]).current;
+const { width, height } = Dimensions.get("window");
+const OPTIONS = [
+  { key: "social", label: "Social media", image: require("../../assets/new-images/icon-fb.png") },
+  { key: "porn", label: "Porn", image: require("../../assets/new-images/icon-porn.png") },
+  { key: "youtube", label: "Youtube", image: require("../../assets/new-images/icon-yt.png") },
+  { key: "news", label: "News", image: require("../../assets/new-images/icon-news.png") },
+  { key: "gaming", label: "Gaming", image: require("../../assets/new-images/icon-game.png") },
+  { key: "all", label: "All of the above", image: require("../../assets/new-images/icon-all-above.png") },
+];
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+const Screen4 = ({ traps, toggleOption, progressBarHeight = 0 }: any) => {
+  const renderItem = ({ item }: { item: typeof OPTIONS[0] }) => {
+    const isActive = traps?.includes(item.key);
+    return (
+      <TouchableOpacity
+        style={[styles.item, isActive && styles.itemActive]}
+        onPress={() => toggleOption(item.key)}
+        activeOpacity={1}
+      >
 
-    const runAnimation = () => {
-      // Reset animations before running
-      fadeAnims.forEach((anim) => anim.setValue(0));
-      const animations = fadeAnims.map((anim) => {
-        return Animated.timing(anim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        });
-      });
+        <View style={styles.leftRow}>
+          <Image source={item.image} style={styles.iconImage} />
+          <Text style={[styles.label]}>
+            {item.label}
+          </Text>
+        </View>
 
-      timeoutId = setTimeout(() => {
-        Animated.stagger(1000, animations).start();
-      }, 1500);
-    };
-
-    if (isActive) {
-      runAnimation();
-    }
-
-    // Cleanup function
-    return () => {
-      clearTimeout(timeoutId);
-      fadeAnims.forEach((anim) => anim.stopAnimation());
-    };
-  }, [isActive, fadeAnims]);
+        {isActive ? (
+          <Image
+            source={require("../../assets/new-images/checked-box.png")}
+            style={styles.checkbox}
+          />
+        ) : (
+          <Image
+            source={require("../../assets/new-images/unchecked-box.png")}
+            style={styles.checkbox}
+          />
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.content}>
-          <View style={styles.headingContainer}>
-          <Text style={styles.heading}>
-            Which is why this app{"\n"}is an act of <Text style={styles.underline}>rebellion.</Text>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-4.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay-full.png")} style={styles.overlayImage} />
+      
+        <View style={styles.textContainer}>
+          <Text style={styles.slogan}>
+            {'What’s stealing your time and focus?'}
           </Text>
-          </View>
-          <View style={styles.illustrationContainer}>
-            <Image source={require("../../assets/images/onboarding/builder.png")} style={styles.illustration} />
-          </View>
-          <View>
-            <Text style={styles.body}>
-              Society wants a bunch of{"\n"}screen-addicted consumers.{"\n"}But you&apos;re here to:
-          </Text>
-            <Animated.Text style={[styles.subBody, { opacity: fadeAnims[0] }]}>CREATE.</Animated.Text>
-            <Animated.Text style={[styles.subBody, { opacity: fadeAnims[1] }]}>EXPLORE.</Animated.Text>
-            <Animated.Text style={[styles.subBody, { opacity: fadeAnims[2] }]}>BUILD.</Animated.Text>
-          </View>
+          <FlatList
+            style={[styles.listView, {marginBottom: progressBarHeight + 20}]}
+            data={OPTIONS}
+            keyExtractor={(item) => item.key}
+            renderItem={renderItem}
+          />
         </View>
-      </ScreenContainer>
-    </ImageBackground>
+      </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  background: {
-    flex: 1,
-  },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
-  },
-  headingContainer: {
-    backgroundColor: "#2C1A05",
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 12,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: "#E6D3A7",
+  image: {
     width: '100%',
-    marginTop: SPACING.xl * 0.25 * 0.35,
+    height: width * 0.939,
   },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "900",
-    color: "#F3E2C7",
-    textAlign: "center",
+
+  overlayImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '120%',
   },
-  underline: {
-    textDecorationLine: "underline",
-    fontWeight: "900",
+  textContainer: {
+    position: "absolute",
+    top: scaleVertical(130),
+    bottom: 0,
+    left: scale(24),
+    right: scale(24),    
   },
-  illustrationContainer: {
-    width: "100%",
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(30),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+  },
+  listView: {
+    flex: 1,
+    marginTop: scaleVertical(23),
+  },
+  item: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: SPACING.md / 4,
-    marginTop: SPACING.xl * 0.25,
+    backgroundColor: "rgba(44, 23, 7, 0.6)",
+    borderRadius: 6,
+    marginBottom: scaleVertical(12),
+    borderWidth: 2,
+    borderColor: "transparent",
   },
-  illustration: {
-    width: "100%",
-    aspectRatio: 1.2,
-    height: undefined,
-    resizeMode: "contain",
-    marginBottom: SPACING.md / 4,
+  itemActive: {
+    borderColor: "rgba(255, 202, 145, 1)",
   },
-  body: {
-    fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 20,
-    lineHeight: 30,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: SPACING.sm,
-    fontWeight: "bold",
+  leftRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  subBody: {
-    fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 20,
-    lineHeight: 30,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    fontWeight: "bold",
+  label: {
+    flex: 1,
+    color: "#FFF",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+    marginLeft: scale(20),
+    marginRight: scale(10),
+  },
+  checkbox: {
+    width: scale(24),
+    height: scale(24),
+    marginRight: scaleVertical(12),
+  },
+  iconImage: {
+    marginVertical: scaleVertical(12),
+    marginLeft: scaleVertical(10),
+    width: scale(40),
+    height: scale(40),
   },
 });
+
+export default Screen4;

@@ -1,199 +1,170 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useEffect } from "react";
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-const heading = "When do you find yourself mindlessly scrolling?";
+const { width, height } = Dimensions.get("window");
+
 const OPTIONS = [
   {
-    key: "morning",
-    label: "MORNING",
-    desc: "Starting the day distracted",
-    image: require("../../assets/images/onboarding/morning.png"),
+    key: "fitness",
+    label: "Fitness",
+    image: require("../../assets/new-images/icon_fitness.png"),
   },
   {
-    key: "work",
-    label: "WORK BREAKS",
-    desc: "Procrastinating productivity",
-    image: require("../../assets/images/onboarding/work.png"),
+    key: "outdoor",
+    label: "Get outdoors",
+    image: require("../../assets/new-images/icon_outdoor.png"),
   },
   {
-    key: "evening",
-    label: "EVENING",
-    desc: "Unwinding becomes scrolling",
-    image: require("../../assets/images/onboarding/evening.png"),
+    key: "learn",
+    label: "Learn something new",
+    image: require("../../assets/new-images/icon_learn.png"),
   },
   {
-    key: "latenight",
-    label: "LATE NIGHT",
-    desc: "Can't stop, won't stop",
-    image: require("../../assets/images/onboarding/latenight.png"),
+    key: "time",
+    label: "Time with friends & family",
+    image: require("../../assets/new-images/icon_time.png"),
+  },
+  {
+    key: "enjoy",
+    label: "Enjoying with present moment",
+    image: require("../../assets/new-images/icon_enjoy.png"),
   },
 ];
 
-export default function Screen7({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const { scrollTimes, setScrollTimes } = useOnboarding();
+const Screen7 = ({ improvementOptions, toggleOption }: any) => {
 
-  useEffect(() => {
-    if (scrollTimes.length === 0 && disableSwipeFn) disableSwipeFn();
-  }, [disableSwipeFn, scrollTimes]);
+  const renderItem = ({ item }: { item: typeof OPTIONS[0] }) => {
+    const isActive = improvementOptions?.includes(item.key);
+    return (
+      <TouchableOpacity
+        style={[styles.item, isActive && styles.itemActive]}
+        onPress={() => toggleOption(item.key)}
+        activeOpacity={1}
+      >
 
-  const toggleOption = (key: string) => {
-    setScrollTimes(
-      scrollTimes.includes(key)
-        ? scrollTimes.filter((k) => k !== key)
-        : [...scrollTimes, key]
+        <View style={styles.leftRow}>
+          <Image source={item.image} style={styles.iconImage} />
+          <Text style={[styles.label]} numberOfLines={0}>
+            {item.label}
+          </Text>
+        </View>
+
+        {isActive ? (
+          <Image
+            source={require("../../assets/new-images/checked-box.png")}
+            style={styles.checkbox}
+          />
+        ) : (
+          <Image
+            source={require("../../assets/new-images/unchecked-box.png")}
+            style={styles.checkbox}
+          />
+        )}
+      </TouchableOpacity>
     );
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.heading}>{heading}</Text>
-            <View style={styles.optionsContainer}>
-              {OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.key}
-                  style={[styles.option, scrollTimes.includes(option.key) && styles.optionSelected]}
-                  onPress={() => toggleOption(option.key)}
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.iconWrap}>
-                    <Image source={option.image} style={styles.iconImage} />
-                  </View>
-                  <View style={styles.labelDescWrap}>
-                    <Text style={styles.optionLabel}>{option.label}</Text>
-                    <Text style={styles.optionDesc}>{option.desc}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.nextBtn, scrollTimes.length === 0 && styles.nextBtnDisabled]}
-            onPress={() => {
-              if (enableSwipe) enableSwipe();
-              if (onSubmit) onSubmit();
-            }}
-            disabled={scrollTimes.length === 0}
-          >
-            <Text style={styles.nextBtnText}>Next</Text>
-          </TouchableOpacity>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-4.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay-full.png")} style={styles.overlayImage} />
+      
+        <View style={styles.textContainer}>
+          <Text style={styles.slogan}>
+            {'What would you rather spend time doing?'}
+          </Text>
+          <FlatList
+            style={styles.listView}
+            data={OPTIONS}
+            keyExtractor={(item) => item.key}
+            renderItem={renderItem}
+          />
         </View>
-      </ScreenContainer>
-    </ImageBackground>
+      </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
+  },
+  image: {
+    width: '100%',
+    height: width * 0.939,
+  },
+
+  overlayImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '120%',
+  },
+  textContainer: {
+    position: "absolute",
+    top: scaleVertical(130),
+    bottom: 0,
+    left: scale(24),
+    right: scale(24),    
+  },
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(30),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+  },
+  listView: {
     flex: 1,
+    marginTop: scaleVertical(23),
+    marginBottom: height < 700 ? scaleVertical(16) : 0,
+  },
+  item: {
+    flex: 1,
+    flexDirection: "row",
     justifyContent: "space-between",
-  },
-  background: {
-    flex: 1,
-  },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
-    flex: 1,
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 18,
+    backgroundColor: "rgba(44, 23, 7, 0.6)",
+    borderRadius: 6,
+    marginBottom: scaleVertical(12),
+    borderWidth: 2,
+    borderColor: "transparent",
   },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "900",
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: SPACING.xl,
-    marginTop: SPACING.xl,
+  itemActive: {
+    borderColor: "rgba(255, 202, 145, 1)",
   },
-  optionsContainer: {
-    width: "100%",
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  option: {
+  leftRow: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "transparent",
-    borderColor: COLORS.textPrimary,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
-    marginVertical: SPACING.md,
-    justifyContent: "flex-start",
   },
-  optionSelected: {
-    backgroundColor: "rgba(159, 106, 0, 0.99)",
-    borderColor: COLORS.textPrimary,
-    opacity: 1,
+  label: {
+    flex: 1,
+    color: "#FFF",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+    marginLeft: scale(20),
+    marginRight: scale(10),
   },
-  iconWrap: {
-    width: 48,
-    alignItems: "center",
-    marginRight: SPACING.md,
+  checkbox: {
+    width: scale(24),
+    height: scale(24),
+    marginRight: scaleVertical(12),
   },
   iconImage: {
-    width: 48,
-    height: 48,
-    resizeMode: "contain",
-  },
-  labelDescWrap: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-  },
-  optionLabel: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    color: COLORS.textPrimary,
-    fontSize: 20,
-    textAlign: "left",
-    fontWeight: "bold",
-    marginRight: 8,
-    marginBottom: 2,
-  },
-  optionDesc: {
-    flex: 1,
-    color: COLORS.textPrimary,
-    fontSize: 15,
-    textAlign: "left",
-    fontFamily: "Vollkorn-Regular",
-    marginRight: SPACING.sm,
-    marginTop: SPACING.xs,
-  },
-  nextBtn: {
-    backgroundColor: "#3C6845",
-    borderRadius: 12,
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    minWidth: 200,
-    alignItems: "center",
-    alignSelf: "center",
-    marginBottom: SPACING.huge,
-  },
-  nextBtnDisabled: {
-    opacity: 0.5,
-  },
-  nextBtnText: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    color: COLORS.buttonText,
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
+    marginVertical: scaleVertical(12),
+    marginLeft: scaleVertical(10),
+    width: scale(40),
+    height: scale(40),
   },
 });
+
+export default Screen7;

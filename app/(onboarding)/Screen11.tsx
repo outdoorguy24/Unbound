@@ -1,59 +1,84 @@
-import { useEffect, useRef } from "react";
-import { Animated, Dimensions, ImageBackground, StyleSheet } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
-export default function Screen11({ onFinish, onFadeOutStart }: { onFinish: () => void, onFadeOutStart?: () => void }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    // Fade in
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 1800,
-      useNativeDriver: true,
-    }).start(() => {
-      // Stay for 2 seconds, then prepare for fade out
-      setTimeout(() => {
-        // Jump pager FIRST
-        if (onFadeOutStart) onFadeOutStart();
-        // THEN start fade out after a tiny delay
-      setTimeout(() => {
-        Animated.timing(opacity, {
-          toValue: 0,
-            duration: 300,
-          useNativeDriver: true,
-        }).start(() => {
-          if (onFinish) onFinish();
-        });
-        }, 100);
-      }, 2000);
-    });
-  }, [onFinish, onFadeOutStart, opacity]);
-
+const Screen11 = () => {
+  
   return (
-    <Animated.View style={[styles.container, { opacity }]}> 
-    <ImageBackground
-      source={require("../../assets/images/onboarding/fisherman.png")}
-      style={styles.background}
-      resizeMode="cover"
-    />
-    </Animated.View>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-11.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay.png")} style={styles.overlayImage} />
+      
+      <View style={styles.textContainer}>
+        <Text style={styles.slogan}>
+          {'so Unbound blocks distracting apps, websites, and porn with '}
+        <Text style={styles.underline}>
+          {'zero'}
+        </Text>
+        <Text style={styles.slogan}>
+          {' workarounds'}
+        </Text>
+        </Text>
+      </View>
+
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width,
-    height,
-    zIndex: 9999,
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  background: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
+  image: {
+    height: '65%',
+    width: '100%',
+  },
+
+  overlayImage: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
+  textContainer: {
+    position: "absolute",
+    top: height * 0.62,
+    alignItems: "center",
+    marginHorizontal: scale(24),
+  },
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(25),
+    textAlign: "center",
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0.5,
+  },
+  underline: {
+    color: "#FFF",
+    fontSize: scale(25),
+    textAlign: "center",
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0.5,
+    textDecorationLine: "underline",
+  },
+  slogan2: {
+    color: "#FFF",
+    fontSize: scale(20),
+    opacity: 0.7,
+    textAlign: "center",
+    fontFamily: "ZillaSlab-Regular",
+    letterSpacing: 0.5,
+    marginTop: scaleVertical(10),
   },
 });
+
+export default Screen11;

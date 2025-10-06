@@ -1,0 +1,214 @@
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
+import { scale, scaleVertical } from "@/constants/Scale";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
+
+const { width } = Dimensions.get("window");
+
+const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
+  const insets = useSafeAreaInsets();
+  const { login } = useAuth();
+
+  const handleGoogleSignup = async () => {
+    try {
+      await login();
+    } catch (err: any) {
+      console.log(err.message || "Signup failed");
+    } finally {
+      
+    }
+  };
+  return (
+    <View style={styles.safe}>
+      <Image
+        source={require("../../assets/new-images/onboarding-screen-4.png")}
+        style={styles.image}
+      />
+      <Image
+        source={require("../../assets/new-images/onboarding-overlay-full.png")}
+        style={styles.overlayImage}
+      />
+
+      <View
+        style={[styles.textContainer, { top: insets.top + scaleVertical(16) }]}
+      >
+      <TouchableOpacity style={styles.buttonBack} activeOpacity={0.8} onPress={() => router.back()}>
+        <Image
+          source={require("../../assets/new-images/icon-back.png")}
+          // resizeMode={"center"}
+          style={{
+            height: scale(20),
+            width: scale(20),
+          }}
+        />
+      </TouchableOpacity>
+      <Text style={styles.slogan}>{"Create an account"}</Text>
+
+      <TouchableOpacity
+        style={[styles.item, styles.itemActive, {marginTop: scaleVertical(40)}]}
+        activeOpacity={0.8}
+        onPress={() => router.push("/(auth)/signup")}
+      >
+        <View style={styles.leftRow}>
+          <View style={styles.buttonText}>
+            <Text style={[styles.label]}>{"Continue with Email"}</Text>
+          </View>
+          <Image
+            source={require("../../assets/new-images/icon-email.png")}
+            style={styles.iconImage}
+            resizeMode={"contain"}
+          />
+        </View>
+      </TouchableOpacity>
+
+      <View style={styles.separator} />
+
+      <TouchableOpacity
+        style={[styles.item, styles.itemActive, { marginBottom: scale(16) }]}
+        activeOpacity={0.8}
+        onPress={handleGoogleSignup}
+      >
+        <View style={styles.leftRow}>
+          <View style={styles.buttonText}>
+            <Text style={[styles.label]}>{"Continue with Google"}</Text>
+          </View>
+          <Image
+            source={require("../../assets/new-images/icon-google.png")}
+            style={styles.iconImage}
+            resizeMode={"contain"}
+          />
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.item, styles.itemActive]}
+        activeOpacity={0.8}
+      >
+        <View style={styles.leftRow}>
+          <View style={styles.buttonText}>
+            <Text style={[styles.label]}>{"Continue with Apple"}</Text>
+          </View>
+          <Image
+            source={require("../../assets/new-images/icon-apple.png")}
+            style={styles.iconImage}
+            resizeMode={"contain"}
+          />
+        </View>
+      </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        style={[styles.haveAccountView, { bottom: insets.bottom + scaleVertical(16) }]}
+        activeOpacity={0.8}
+        onPress={() => router.push("/(auth)/login")}
+      >
+        <Text style={styles.haveAccountText}>
+          {"Already have an account?"}
+          <Text style={styles.loginText}>{" Log in"}</Text>
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  image: {
+    width: "100%",
+    height: width * 0.939,
+  },
+
+  overlayImage: {
+    position: "absolute",
+    width: "100%",
+    height: "95%",
+  },
+  buttonBack: {
+    backgroundColor: "#000",
+    width: scale(40),
+    aspectRatio: 1,
+    borderRadius: scale(20),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textContainer: {
+    position: "absolute",
+    left: scale(24),
+    right: scale(24),
+    // backgroundColor: 'red'
+  },
+  slogan: {
+    marginTop: scale(24),
+    color: "#FFF",
+    fontSize: scale(40),
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0.5,
+  },
+  separator: {
+    backgroundColor: "rgba(217, 217, 217, 0.1)",
+    height: 1,
+    marginVertical: scale(24),
+  },
+  item: {
+    flexDirection: "row",
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  itemActive: {
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  leftRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  label: {
+    color: "#FFF",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-SemiBold",
+    letterSpacing: 0,
+    paddingVertical: scale(18),
+  },
+  iconImage: {
+    position: "absolute",
+    left: scaleVertical(17),
+    width: scale(24),
+    height: scale(24),
+  },
+  buttonText: {
+    flex: 1,
+    alignContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  haveAccountView: {
+    position: "absolute",
+    alignSelf: "center",
+    padding: scale(6),
+  },
+  haveAccountText: {
+    color: "rgba(255, 255, 255, 0.5)",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-Regular",
+  },
+  loginText: {
+    color: "rgba(255, 202, 145, 1)",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-Medium",
+  },
+});
+
+export default SignupOptionsScreen;

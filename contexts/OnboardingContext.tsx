@@ -8,6 +8,8 @@ interface OnboardingState {
   setScrollTimes: (times: string[]) => void;
   concerns: string[];
   setConcerns: (concerns: string[]) => void;
+  improvementOptions: string[];
+  setImprovementOptions: (improvementOptions: string[]) => void;
   // Add other onboarding states here as needed
 }
 
@@ -19,6 +21,7 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
   const [traps, setTraps] = useState<string[]>([]);
   const [scrollTimes, setScrollTimes] = useState<string[]>([]);
   const [concerns, setConcerns] = useState<string[]>([]);
+  const [improvementOptions, setImprovementOptions] = useState<string[]>([]);
 
   const value = {
     traps,
@@ -27,6 +30,8 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
     setScrollTimes,
     concerns,
     setConcerns,
+    improvementOptions,
+    setImprovementOptions,
   };
 
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;

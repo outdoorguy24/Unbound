@@ -1,167 +1,70 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { useOnboarding } from "@/contexts/OnboardingContext";
-import { supabase } from "@/lib/supabaseClient";
-import { useEffect } from "react";
-import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-const heading = "What concerns you the most about too much phone use?";
-const options = [
-  "Choosing the screen over friends, family, & hobbies",
-  "Brain feels fried and scattered",
-  "Turning into a lazy POS",
-  "Feeling like I'm wasting my life",
-];
+const { height } = Dimensions.get("window");
 
-export default function Screen8({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const { traps, scrollTimes, concerns, setConcerns } = useOnboarding();
-
-  useEffect(() => {
-    if (concerns.length === 0 && disableSwipeFn) disableSwipeFn();
-    if (concerns.length > 0 && enableSwipe) enableSwipe();
-  }, [disableSwipeFn, enableSwipe, concerns]);
-
-  const toggleOption = (option: string) => {
-    setConcerns(
-      concerns.includes(option)
-        ? concerns.filter((o) => o !== option)
-        : [...concerns, option]
-    );
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const { error } = await supabase.functions.invoke("submit-onboarding-survey", {
-        body: { traps, scrollTimes, concerns },
-      });
-
-      if (error) {
-        // Don't block the user, just log the error
-        console.error("Error submitting survey:", error);
-      }
-    } catch (e) {
-      console.error("Caught error submitting survey:", e);
-    }
-
-    // Proceed to the next screen regardless
-    if (onSubmit) {
-      onSubmit();
-    }
-  };
-
+const Screen8 = () => {
+  
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.heading}>{heading}</Text>
-            <View style={styles.optionsContainer}>
-              {options.map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  style={[styles.option, concerns.includes(option) && styles.optionSelected, SHADOWS.small]}
-                  onPress={() => toggleOption(option)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.optionText, concerns.includes(option) && styles.optionTextSelected]}>{option}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.button, concerns.length === 0 && styles.buttonDisabled, SHADOWS.medium]}
-            onPress={handleSubmit}
-            disabled={concerns.length === 0}
-          >
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
-      </ScreenContainer>
-    </ImageBackground>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-8.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay.png")} style={styles.overlayImage} />
+      
+      <View style={styles.textContainer}>
+        <Text style={styles.slogan}>
+          {'Men are almost 2x more likely to be addicted to their phones than women'}
+        </Text>
+      </View>
+
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  background: {
-    flex: 1,
+  image: {
+    height: '60%',
+    width: '100%',
   },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
+
+  overlayImage: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
-  content: {
-    flex: 1,
+  textContainer: {
+    position: "absolute",
+    top: height * 0.62,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
+    marginHorizontal: scale(24),
   },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: "900",
-    color: COLORS.textPrimary,
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(25),
     textAlign: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.xl,
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0.5,
   },
-  optionsContainer: {
-    width: "100%",
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.sm,
-  },
-  option: {
-    backgroundColor: "transparent",
-    borderColor: COLORS.textPrimary,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.md,
-    marginVertical: SPACING.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  optionSelected: {
-    backgroundColor: "rgba(159, 106, 0, 0.99)",
-    borderColor: COLORS.textPrimary,
-    opacity: 1,
-  },
-  optionText: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    color: COLORS.textPrimary,
-    fontSize: 20,
+  slogan2: {
+    color: "#FFF",
+    fontSize: scale(20),
+    opacity: 0.7,
     textAlign: "center",
-    fontWeight: "bold",
-  },
-  optionTextSelected: {
-    color: COLORS.textPrimary,
-  },
-  button: {
-    backgroundColor: "#3C6845",
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    minWidth: 200,
-    alignItems: "center",
-    alignSelf: "center",
-    marginBottom: SPACING.huge,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    color: COLORS.buttonText,
-    fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: "ZillaSlab-Regular",
+    letterSpacing: 0.5,
+    marginTop: scaleVertical(10),
   },
 });
+
+export default Screen8;

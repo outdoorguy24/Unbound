@@ -19,6 +19,13 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    "Cinzel-Black": require("../assets/fonts/Cinzel-Black.ttf"),
+    "Cinzel-Bold": require("../assets/fonts/Cinzel-Bold.ttf"),
+    "Cinzel-Regular": require("../assets/fonts/Cinzel-Regular.ttf"),
+    "ZillaSlab-Bold": require("../assets/fonts/ZillaSlab-Bold.ttf"),
+    "ZillaSlab-Medium": require("../assets/fonts/ZillaSlab-Medium.ttf"),
+    "ZillaSlab-Regular": require("../assets/fonts/ZillaSlab-Regular.ttf"),
+    "ZillaSlab-SemiBold": require("../assets/fonts/ZillaSlab-SemiBold.ttf"),
     "Vollkorn-Bold": require("../assets/fonts/Vollkorn-Bold.ttf"),
     "Vollkorn-BoldItalic": require("../assets/fonts/Vollkorn-BoldItalic.ttf"),
     "Vollkorn-Italic": require("../assets/fonts/Vollkorn-Italic.ttf"),
@@ -27,6 +34,14 @@ export default function RootLayout() {
     "Vollkorn-Regular": require("../assets/fonts/Vollkorn-Regular.ttf"),
     "Vollkorn-SemiBold": require("../assets/fonts/Vollkorn-Semibold.ttf"),
     "Vollkorn-SemiBoldItalic": require("../assets/fonts/Vollkorn-SemiboldItalic.ttf"),
+    "SF-Pro-Display-Black": require("../assets/fonts/SF-Pro-Display-Black.otf"),
+    "SF-Pro-Display-Semibold": require("../assets/fonts/SF-Pro-Display-Semibold.otf"),
+    "SF-Pro-Display-Bold": require("../assets/fonts/SF-Pro-Display-Bold.otf"),
+    "SF-Pro-Display-Heavy": require("../assets/fonts/SF-Pro-Display-Heavy.otf"),
+    "SF-Pro-Display-Medium": require("../assets/fonts/SF-Pro-Display-Medium.otf"),
+    "SF-Pro-Display-Regular": require("../assets/fonts/SF-Pro-Display-Regular.otf"),
+    "Geist-Bold": require("../assets/fonts/Geist-Bold.otf"),
+    "Geist-Black": require("../assets/fonts/Geist-Black.otf"),
   });
   const [showSplash, setShowSplash] = useState(!splashShown);
   const router = useRouter();
@@ -56,15 +71,23 @@ export default function RootLayout() {
   }, [router]);
 
   return (
-    <StripeProvider>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-          {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
-          {!showSplash && <AppNavigator loaded={loaded} colorScheme={colorScheme} />}
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </AuthProvider>
-    </StripeProvider>
+    <>
+      {!loaded ? null : (
+        <StripeProvider>
+          <AuthProvider>
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              {showSplash && <SplashScreen onFinish={handleSplashFinish} />}
+              {!showSplash && (
+                <AppNavigator loaded={loaded} colorScheme={colorScheme} />
+              )}
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </AuthProvider>
+        </StripeProvider>
+      )}
+    </>
   );
 }
 

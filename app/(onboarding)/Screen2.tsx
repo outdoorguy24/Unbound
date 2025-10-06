@@ -1,104 +1,72 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-export default function Screen2() {
+const { height } = Dimensions.get("window");
+
+const Screen2 = () => {
+  
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.content}>
-          <View style={styles.illustrationContainer}>
-            <Image source={require("../../assets/images/onboarding/trap.png")} style={styles.illustration} />
-          </View>
-          <View style={styles.headingContainer}>
-            <Text style={styles.heading}>Technology has benefits, but it's{"\n"}stealing your life.</Text>
-          </View>
-          <Text style={styles.subheading} numberOfLines={3}>
-            You know what you should be doing,{"\n"}but the phone is always there,{"\n"}ready with a quick hit.
-          </Text>
-          <Text style={styles.body} numberOfLines={3}>
-            It creates a <Text style={styles.underline}>cycle</Text> of cheap dopamine, constant distractions, and a lack
-            of purpose and drive.
-          </Text>
-        </View>
-      </ScreenContainer>
-    </ImageBackground>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-2.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay.png")} style={styles.overlayImage} />
+      
+      <View style={styles.textContainer}>
+        <Text style={styles.slogan}>
+          {'phone use is stealing your potential'}
+        </Text>
+        <Text style={styles.slogan2}>
+          {'With every swipe, corporations harvest your attention for profit while that promotion, workout, or relationship is put on hold'}
+        </Text>
+      </View>
+
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 16,
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  background: {
-    flex: 1,
-  },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.xxl * 0.125,
-  },
-  illustrationContainer: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.xl,
-  },
-  illustration: {
-    width: "100%",
-    aspectRatio: 1.8,
-    height: undefined,
-    resizeMode: "contain",
-    marginBottom: SPACING.xl,
-    marginTop: SPACING.xxl,
-  },
-  headingContainer: {
-    backgroundColor: "#2C1A05",
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 12,
-    marginBottom: SPACING.lg,
-    borderWidth: 1,
-    borderColor: "#E6D3A7",
+  image: {
+    height: '75%',
     width: '100%',
   },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "900",
-    color: "#F3E2C7",
-    textAlign: "center",
+
+  overlayImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
   },
-  subheading: {
-    fontFamily: TYPOGRAPHY.subheading.fontFamily,
-    fontSize: 18,
-    lineHeight: 28,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: SPACING.md,
+  textContainer: {
+    position: "absolute",
+    top: height < 700 ? height * 0.61 : height * 0.59,
+    alignItems: "center",
+    marginHorizontal: scale(24),
   },
-  body: {
-    fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 18,
-    lineHeight: 30,
-    color: COLORS.textPrimary,
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(25),
     textAlign: "center",
-    marginBottom: SPACING.xl,
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0.5,
   },
-  underline: {
-    textDecorationLine: "underline",
+  slogan2: {
+    color: "#FFF",
+    fontSize: scale(20),
+    opacity: 0.7,
+    textAlign: "center",
+    fontFamily: "ZillaSlab-Regular",
+    letterSpacing: 0.5,
+    marginTop: scaleVertical(10),
   },
 });
+
+export default Screen2;

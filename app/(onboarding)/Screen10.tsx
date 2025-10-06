@@ -1,136 +1,70 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-export default function Screen10({ onSubmit }: { onSubmit?: () => void }) {
+const { height } = Dimensions.get("window");
+
+const Screen10 = () => {
+  
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.title}>
-              Accountability & community{"\n"}are <Text style={styles.underline}>powerful</Text>...
-            </Text>
-            <View style={styles.card}>
-              <View style={styles.avatarContainer}>
-                <View style={styles.avatarWrapper}>
-                  <Image source={require('../../assets/images/onboarding/avatarguy1.png')} style={styles.avatar} />
-                </View>
-                <Text style={styles.plusSign}>+</Text>
-                <View style={styles.avatarWrapper}>
-                  <Image source={require('../../assets/images/onboarding/dudewithglasses.png')} style={styles.avatar} />
-                </View>
-              </View>
-              <Text style={styles.subtitle}>
-                So you&apos;ll also be paired{"\n"}with another guy to see{"\n"}each others&apos; progress.
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.button, SHADOWS.medium]}
-            onPress={() => {
-              if (onSubmit) onSubmit();
-            }}
-          >
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
-      </ScreenContainer>
-    </ImageBackground>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-10.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay.png")} style={styles.overlayImage} />
+      
+      <View style={styles.textContainer}>
+        <Text style={styles.slogan}>
+          {'the average guy spends 2 months a year looking at their phone'}
+        </Text>
+      </View>
+
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
-  content: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
-  },
-  card: {
-    borderRadius: SPACING.xl,
-    padding: SPACING.xl,
-    alignItems: "center",
+  image: {
+    height: height < 700 ? '65%' : '60%',
     width: '100%',
-    marginTop: SPACING.lg,
-    borderWidth: 4,
-    borderColor: '#2C1A05',
   },
-  title: {
-    fontFamily: "Vollkorn-Bold",
-    fontSize: 28,
-    lineHeight: 36,
-    color: "#2C1A05",
-    textAlign: "center",
+
+  overlayImage: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
-  underline: {
-    textDecorationLine: "underline",
-  },
-  avatarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.lg,
-  },
-  avatarWrapper: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    ...SHADOWS.medium,
-    overflow: 'hidden',
-  },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-  },
-  plusSign: {
-    fontFamily: 'Vollkorn-Bold',
-    fontSize: 64,
-    color: '#2C1A05',
-    marginHorizontal: SPACING.md,
-  },
-  subtitle: {
-    fontFamily: "Vollkorn-Bold",
-    fontSize: 20,
-    lineHeight: 28,
-    color: "#4B3415",
-    textAlign: "center",
-    marginTop: SPACING.md,
-  },
-  button: {
-    backgroundColor: "#3C6845",
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    minWidth: 200,
+  textContainer: {
+    position: "absolute",
+    top: height < 700 ? height * 0.66 : height * 0.64,
     alignItems: "center",
-    alignSelf: "center",
-    marginBottom: SPACING.huge,
+    marginHorizontal: scale(24),
   },
-  buttonText: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    color: COLORS.buttonText,
-    fontSize: 24,
-    fontWeight: "bold",
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(25),
+    textAlign: "center",
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0.5,
+  },
+  slogan2: {
+    color: "#FFF",
+    fontSize: scale(20),
+    opacity: 0.7,
+    textAlign: "center",
+    fontFamily: "ZillaSlab-Regular",
+    letterSpacing: 0.5,
+    marginTop: scaleVertical(10),
   },
 });
+
+export default Screen10;

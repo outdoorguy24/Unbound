@@ -1,0 +1,257 @@
+// import { ScreenContainer } from "@/components/ui/ScreenContainer";
+// import { SPACING } from "@/constants/theme";
+// import { useAuth } from "@/contexts/AuthContext";
+// import { getTrailLog } from "@/lib/trailLog";
+// import { getStreak, getTotalBlockedTime } from "@/lib/userTracking";
+// import React, { useEffect, useState } from "react";
+// import { ActivityIndicator, AppState, Image, ImageBackground, ScrollView, StyleSheet, Text, View } from "react-native";
+
+// const MILESTONES = [10, 50, 100, 500, 1000]; // in days
+
+// function getNextMilestone(currentDays: number) {
+//   for (let m of MILESTONES) {
+//     if (currentDays < m) return m;
+//   }
+//   return null;
+// }
+
+// export default function TrailLogScreen() {
+//   const { user } = useAuth();
+//   const [logs, setLogs] = useState<any[]>([]);
+//   const [streakData, setStreakData] = useState<any>(null);
+//   const [totalTimeSaved, setTotalTimeSaved] = useState<number>(0);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     async function fetchData() {
+//       if (!user?.id) return;
+//       setLoading(true);
+      
+//       try {
+//         // Fetch trail logs for total blocks count
+//         const logsData = await getTrailLog(user.id, { limit: 500 });
+//         setLogs(logsData || []);
+
+//         // Fetch real streak data
+//         const streak = await getStreak(user.id);
+//         setStreakData(streak);
+
+//         // Fetch total time saved (all time)
+//         const startDate = new Date(0); // Beginning of time
+//         const endDate = new Date();
+//         const totalTime = await getTotalBlockedTime(user.id, startDate, endDate);
+//         setTotalTimeSaved(totalTime || 0);
+//       } catch (error) {
+//         console.error("Error fetching trail log data:", error);
+//       } finally {
+//       setLoading(false);
+//       }
+//     }
+//     fetchData();
+//   }, [user]);
+
+//   // Add AppState listener to refresh data on resume
+//   useEffect(() => {
+//     const appState = { current: AppState.currentState };
+//     const subscription = AppState.addEventListener('change', nextAppState => {
+//       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+//         // Re-run the same fetchData logic as above
+//         if (user?.id) {
+//           (async () => {
+//             setLoading(true);
+//             try {
+//               const logsData = await getTrailLog(user.id, { limit: 500 });
+//               setLogs(logsData || []);
+//               const streak = await getStreak(user.id);
+//               setStreakData(streak);
+//               const startDate = new Date(0);
+//               const endDate = new Date();
+//               const totalTime = await getTotalBlockedTime(user.id, startDate, endDate);
+//               setTotalTimeSaved(totalTime || 0);
+//             } catch (error) {
+//               console.error("Error fetching trail log data (resume):", error);
+//             } finally {
+//               setLoading(false);
+//             }
+//           })();
+//         }
+//       }
+//       appState.current = nextAppState;
+//     });
+//     return () => subscription.remove();
+//   }, [user]);
+
+//   if (loading) {
+//     return (
+//       <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
+//         <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+//           <ActivityIndicator size="large" color="#4B3415" style={{ marginTop: 40 }} />
+//         </ScreenContainer>
+//       </ImageBackground>
+//     );
+//   }
+
+//   const totalBlocks = logs.filter((log) => log.action === "blocked_attempt").length;
+//   const streakDays = streakData?.current_streak || 0;
+//   const timeSavedDays = totalTimeSaved / (24 * 60); // Convert minutes to days
+//   const nextMilestone = getNextMilestone(timeSavedDays);
+//   const milestoneHours = nextMilestone ? nextMilestone * 24 : 100;
+
+//   return (
+//     <ImageBackground source={require("../../assets/images/parchment-bg.png")} style={styles.bg}>
+//       <ScreenContainer style={{ backgroundColor: 'transparent', paddingHorizontal: 0, paddingTop: 0 }}>
+//         <ScrollView 
+//           style={styles.container}
+//           contentContainerStyle={styles.contentContainer}
+//           showsVerticalScrollIndicator={false}
+//           bounces={true}
+//           alwaysBounceVertical={true}
+//           overScrollMode="always"
+//         >
+//           <Text style={styles.header} numberOfLines={1}>Trail Log</Text>
+//           <View style={styles.quoteBox}>
+//             <Text style={styles.quoteText} numberOfLines={3}>
+//               "I have a friend who's always in a hurry, he never gets anywhere."
+//             </Text>
+//             <Text style={styles.quoteAuthor} numberOfLines={1}>- Edward Abbey</Text>
+//           </View>
+
+//           <View style={styles.statsGrid}>
+//             <View style={styles.statBox}>
+//               <Text style={styles.statValue} numberOfLines={1}>{(timeSavedDays * 24 * 60).toFixed(0)}m</Text>
+//               <Text style={styles.statLabel} numberOfLines={1}>TIME SAVED</Text>
+//             </View>
+//             <View style={styles.statBox}>
+//               <Text style={styles.statValue} numberOfLines={1}>{Math.floor(timeSavedDays)}</Text>
+//               <Text style={styles.statLabel} numberOfLines={1}>DAYS SAVED</Text>
+//             </View>
+//             <View style={styles.statBox}>
+//               <Text style={styles.statValue} numberOfLines={1}>{totalBlocks}</Text>
+//               <Text style={styles.statLabel} numberOfLines={1}>TOTAL BLOCKS</Text>
+//             </View>
+//             <View style={styles.statBox}>
+//               <Text style={styles.statValue} numberOfLines={1}>{streakDays}</Text>
+//               <Text style={styles.statLabel} numberOfLines={1}>Streak Days</Text>
+//             </View>
+//           </View>
+//           <View style={styles.milestoneBox}>
+//             <Image source={require("../../assets/images/flag.png")} style={styles.milestoneIcon} />
+//             <Text style={styles.milestoneValue} numberOfLines={1}>{milestoneHours} Hours</Text>
+//             <Text style={styles.milestoneSub} numberOfLines={1}>Time Saved Goal</Text>
+//           </View>
+//         </ScrollView>
+//       </ScreenContainer>
+//     </ImageBackground>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   bg: {
+//     flex: 1,
+//     width: "100%",
+//     height: "100%",
+//   },
+//   container: {
+//     flex: 1,
+//   },
+//   contentContainer: {
+//     margin: SPACING.md,
+//     padding: SPACING.md,
+//     alignItems: "center",
+//     paddingBottom: SPACING.huge,
+//   },
+//   header: {
+//     fontSize: 32,
+//     fontFamily: "Vollkorn-Bold",
+//     color: "#2C1A05",
+//     marginTop: SPACING.xl,
+//     marginBottom: 0,
+//     textAlign: "center",
+//   },
+//   statsGrid: {
+//     flexDirection: "row",
+//     flexWrap: "wrap",
+//     justifyContent: "space-between",
+//     marginTop: SPACING.md,
+//     marginBottom: -1 * SPACING.xxl,
+//     width: "100%",
+//     height: undefined,
+//   },
+//   statBox: {
+//     width: "47%",
+//     aspectRatio: 1.1,
+//     backgroundColor: "#4B3415",
+//     borderRadius: 22,
+//     marginBottom: SPACING.md,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     padding: 8,
+//   },
+//   statValue: {
+//     fontSize: 32,
+//     fontFamily: "Arial",
+//     color: "#F9E7B0",
+//     marginBottom: 2,
+//   },
+//   statLabel: {
+//     fontSize: 16,
+//     fontFamily: "Vollkorn-SemiBold",
+//     color: "#F9E7B0",
+//     letterSpacing: 1.1,
+//     textTransform: "uppercase",
+//     textAlign: "center",
+//   },
+//   milestoneBox: {
+//     backgroundColor: "#4B3415",
+//     borderRadius: 22,
+//     alignItems: "center",
+//     paddingVertical: 32,
+//     marginTop: SPACING.sm,
+//     marginBottom: SPACING.sm,
+//     width: "100%",
+//   },
+//   milestoneIcon: {
+//     width: 32,
+//     height: 32,
+//     marginBottom: 8,
+//   },
+//   milestoneValue: {
+//     color: "#F9E7B0",
+//     fontSize: 30,
+//     fontFamily: "Arial",
+//     fontWeight: "bold",
+//     marginBottom: SPACING.sm,
+//   },
+//   milestoneSub: {
+//     color: "#F9E7B0",
+//     fontSize: 18,
+//     fontFamily: "Vollkorn-SemiBold",
+//     letterSpacing: 1.1,
+//   },
+//   quoteBox: {
+//     backgroundColor: "#F9E7B0",
+//     borderRadius: 18,
+//     borderWidth: 1.5,
+//     borderColor: "#E6D3A7",
+//     padding: SPACING.md,
+//     marginTop: SPACING.xl,
+//     marginBottom: SPACING.md,
+//     width: "100%",
+//     alignItems: "center",
+//   },
+//   quoteText: {
+//     fontSize: 20,
+//     fontFamily: "Vollkorn-Bold",
+//     color: "#2C1A05",
+//     textAlign: "center",
+//     marginBottom: 8,
+//   },
+//   quoteAuthor: {
+//     fontSize: 16,
+//     fontFamily: "Vollkorn-SemiBold",
+//     color: "#2C1A05",
+//     textAlign: "right",
+//     alignSelf: "flex-end",
+//     marginTop: SPACING.sm,
+//   },
+// });

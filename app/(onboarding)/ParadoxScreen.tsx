@@ -1,113 +1,92 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { scale, scaleVertical } from '@/constants/Scale';
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function ParadoxScreen({ isActive, onSubmit }: { isActive?: boolean; onSubmit?: () => void }) {
+const { height } = Dimensions.get("window");
+
+const ParadoxScreen = ({isActive, onSubmit, onLogin} : { isActive?: boolean; onSubmit?: () => void; onLogin: () => void }) => {
+  const insets = useSafeAreaInsets();
+  
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.content}>
-          <View style={styles.headingContainer}>
-            <Text style={styles.heading} numberOfLines={1}>Well this is awkward</Text>
-          </View>
-          <View style={styles.bodyContainer}>
-            <Text style={styles.body} numberOfLines={8}><Text style={styles.bold}>You&apos;re using an app...</Text>{"\n"}to stop using apps.{"\n\n"}
-              <Text style={styles.bold}>You&apos;re staring at a screen...</Text>{"\n"}to avoid staring at screens.{"\n\n"}
-              <Text style={styles.bold}>You downloaded more technology...</Text>{"\n"}to escape technology.
-            </Text>
-            <Text style={styles.caption} numberOfLines={1}>Yes, we see the irony.</Text>
-            <Text style={styles.caption} numberOfLines={2}>But sometimes you need to{"\n"}fight fire with fire.</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.greenButton}
-            onPress={onSubmit}
-          >
-            <Text style={styles.greenButtonText} numberOfLines={1}>Embrace the Paradox</Text>
-          </TouchableOpacity>
-        </View>
-      </ScreenContainer>
-    </ImageBackground>
+    <View style={styles.safe}>
+      <View style={{flex: 1}}>
+        <Image source={require("../../assets/new-images/campfire.png")} style={styles.image} />
+
+        <Text style={styles.title}>
+          {`DIGITAL FREEDOM STARTS HERE`}
+        </Text>
+      </View>
+      <View style={[styles.bottomCard, {marginBottom: insets.bottom + scaleVertical(16)}]}>
+        <TouchableOpacity style={styles.primaryBtn} onPress={onSubmit} activeOpacity={0.9}>
+          <Text style={styles.primaryText}>Get Started</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.secondaryBtn} onPress={onLogin} activeOpacity={0.9}>
+          <Text style={styles.secondaryText}>Login</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
+  safe: { flex: 1, backgroundColor: '#000' },
+  image: {
+    height: '100%',
+    width: '100%',
   },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
+  title: {
+    top: height * 0.21,
+    position: 'absolute',
+    color: '#FFFFFF',
+    fontSize: scale(50),
+    lineHeight: scale(54),
+    letterSpacing: 0.5,
+    fontFamily: 'Cinzel-Bold',
+    marginHorizontal: scale(16),
   },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
+  bottomCard: {
+    marginHorizontal: scale(24),
   },
-  headingContainer: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 12,
-    marginBottom: SPACING.lg,
+  primaryBtn: {
+    backgroundColor: '#BE5E19',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: scaleVertical(20),
+  },
+  primaryText: {
+    color: "#FFFFFF",
+    fontSize: scale(16),
+    textAlign: "center",
+    fontFamily: "ZillaSlab-SemiBold",
+    letterSpacing: 0,
+  },
+  secondaryBtn: {
+    marginTop: scaleVertical(16),
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
-    borderColor: "#E6D3A7",
-    width: '100%',
-    marginTop: SPACING.xl,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: 'transparent',
+    paddingVertical: scaleVertical(20),
   },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "900",
-    color: COLORS.background,
+  secondaryText: {
+    color: "#FFFFFF",
+    fontSize: scale(16),
     textAlign: "center",
+    fontFamily: "ZillaSlab-SemiBold",
+    letterSpacing: 0,
   },
-  bodyContainer: {
-    marginBottom: SPACING.xl,
-    width: '100%',
-  },
-  body: {
-    fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 20,
-    lineHeight: 32,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: SPACING.md,
-    fontWeight: "bold",
-  },
-  bold: {
-    fontWeight: "900",
-    color: COLORS.textPrimary,
-  },
-  caption: {
-    fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 20,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginTop: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  greenButton: {
-    backgroundColor: "#3C6845",
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    minWidth: 200,
-    alignItems: "center",
-    alignSelf: "center",
-    marginTop: SPACING.lg,
-    marginBottom: SPACING.xl,
-  },
-  greenButtonText: {
-    color: COLORS.background,
-    fontSize: 18,
-    fontWeight: "bold",
-    fontFamily: "Vollkorn-Bold",
-  },
-}); 
+});
+
+export default ParadoxScreen;

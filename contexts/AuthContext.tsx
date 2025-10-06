@@ -66,7 +66,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isLoadingAuth) return;
       const inAuthGroup = segments[0] === "(auth)";
       const inOnboardingGroup = segments[0] === "(onboarding)";
+      console.log("isLoggedIn ====>", isLoggedIn)
+      console.log("inAuthGroup ====>", inAuthGroup)
+      console.log("inOnboardingGroup ====>", inOnboardingGroup)
+      console.log("segments ====>", segments)
+
       if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup) {
+        console.log("1111 ====>", segments)
         router.replace("/(auth)/login");
         return;
       }
@@ -74,17 +80,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check for user profile
         try {
           const profile = await getUserProfile(user!.id);
+          console.log("profile ==> ", profile);
           if (!profile) {
             // No profile, go to profile setup
-            if (segments[1] !== "ScreenProfileSetup") {
-              router.replace("/(onboarding)/ScreenProfileSetup");
+            // if (segments[1] !== "ScreenProfileSetup") {
+            //   router.replace("/(onboarding)/ScreenProfileSetup");
+            // }
+            console.log("2222 ====>", segments)
+
+            if (segments[1] === "signup") {
+
+              console.log("2222 ====> signup");
+              router.replace("/(onboarding)/EmailVerificationScreen");
+
+            } else if (segments[1] === "SignupOptionsScreen") {
+
+              console.log("2222 ====> SignupOptionsScreen");
+              router.replace("/(onboarding)/BiometricScreen");
+
+            } else if (segments[1] === "login") {
+
+              console.log("2222 ====> login");
+              router.replace("/(tabs)/camp");
             }
             return;
+          } else {
+            console.log("3333 ====>", segments)
+
+            if (segments[1] === "signup") {
+
+              console.log("3333 ====> signup");
+              router.replace("/(onboarding)/EmailVerificationScreen");
+
+            } else if (segments[1] === "SignupOptionsScreen") {
+
+              console.log("3333 ====> SignupOptionsScreen");
+              router.replace("/(onboarding)/BiometricScreen");
+
+            } else if (segments[1] === "login") {
+
+              console.log("3333 ====> login");
+              router.replace("/(tabs)/camp");
+            }
           }
           // Profile exists, go to partner matching
-          if (inAuthGroup || (inOnboardingGroup && segments[1] !== "Screen13")) {
-            router.replace("/(onboarding)/Screen13");
-          }
+          // if (inAuthGroup || (inOnboardingGroup && segments[1] !== "Screen13")) {
+          //   router.replace("/(onboarding)/Screen13");
+          // }
         } catch (e) {
           // If error is not 'no rows found', log it
           console.error("Profile check error:", e);
@@ -92,6 +134,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     checkProfileAndRoute();
+    //TODO: FOR TESTING
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, segments, isLoadingAuth, user]);
 

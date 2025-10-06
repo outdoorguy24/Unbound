@@ -37,16 +37,16 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-client (5.2.0):
+  - expo-dev-client (5.2.1):
     - EXManifests
     - expo-dev-launcher
     - expo-dev-menu
     - expo-dev-menu-interface
     - EXUpdatesInterface
-  - expo-dev-launcher (5.1.12):
+  - expo-dev-launcher (5.1.13):
     - DoubleConversion
     - EXManifests
-    - expo-dev-launcher/Main (= 5.1.12)
+    - expo-dev-launcher/Main (= 5.1.13)
     - expo-dev-menu
     - expo-dev-menu-interface
     - ExpoModulesCore
@@ -76,7 +76,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-launcher/Main (5.1.12):
+  - expo-dev-launcher/Main (5.1.13):
     - DoubleConversion
     - EXManifests
     - expo-dev-launcher/Unsafe
@@ -109,7 +109,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-launcher/Unsafe (5.1.12):
+  - expo-dev-launcher/Unsafe (5.1.13):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu
@@ -141,10 +141,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu (6.1.11):
+  - expo-dev-menu (6.1.12):
     - DoubleConversion
-    - expo-dev-menu/Main (= 6.1.11)
-    - expo-dev-menu/ReactNativeCompatibles (= 6.1.11)
+    - expo-dev-menu/Main (= 6.1.12)
+    - expo-dev-menu/ReactNativeCompatibles (= 6.1.12)
     - glog
     - hermes-engine
     - RCT-Folly (= 2024.11.18.00)
@@ -168,7 +168,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - expo-dev-menu-interface (1.10.0)
-  - expo-dev-menu/Main (6.1.11):
+  - expo-dev-menu/Main (6.1.12):
     - DoubleConversion
     - EXManifests
     - expo-dev-menu-interface
@@ -198,7 +198,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/ReactNativeCompatibles (6.1.11):
+  - expo-dev-menu/ReactNativeCompatibles (6.1.12):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -222,7 +222,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/SafeAreaView (6.1.11):
+  - expo-dev-menu/SafeAreaView (6.1.12):
     - DoubleConversion
     - ExpoModulesCore
     - glog
@@ -247,7 +247,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - expo-dev-menu/Vendored (6.1.11):
+  - expo-dev-menu/Vendored (6.1.12):
     - DoubleConversion
     - expo-dev-menu/SafeAreaView
     - glog
@@ -296,6 +296,8 @@ PODS:
     - SDWebImageSVGCoder (~> 1.7.0)
     - SDWebImageWebPCoder (~> 0.14.6)
   - ExpoKeepAwake (14.1.4):
+    - ExpoModulesCore
+  - ExpoLinearGradient (14.1.5):
     - ExpoModulesCore
   - ExpoLinking (7.1.5):
     - ExpoModulesCore
@@ -1710,6 +1712,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
+  - react-native-render-html (6.3.4):
+    - React-Core
   - react-native-safe-area-context (5.4.0):
     - DoubleConversion
     - glog
@@ -2180,7 +2184,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNDateTimePicker (8.3.0):
+  - RNDateTimePicker (8.4.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2455,10 +2459,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - SDWebImage (5.21.0):
-    - SDWebImage/Core (= 5.21.0)
-  - SDWebImage/Core (5.21.0)
-  - SDWebImageAVIFCoder (0.11.0):
+  - SDWebImage (5.21.1):
+    - SDWebImage/Core (= 5.21.1)
+  - SDWebImage/Core (5.21.1)
+  - SDWebImageAVIFCoder (0.11.1):
     - libavif/core (>= 0.11.0)
     - SDWebImage (~> 5.10)
   - SDWebImageSVGCoder (1.7.0):
@@ -2581,6 +2585,7 @@ DEPENDENCIES:
   - ExpoHead (from `../node_modules/expo-router/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSplashScreen (from `../node_modules/expo-splash-screen/ios`)
@@ -2628,6 +2633,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
+  - react-native-render-html (from `../node_modules/react-native-render-html`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
@@ -2738,6 +2744,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLinearGradient:
+    :path: "../node_modules/expo-linear-gradient/ios"
   ExpoLinking:
     :path: "../node_modules/expo-linking/ios"
   ExpoModulesCore:
@@ -2829,6 +2837,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-pager-view:
     :path: "../node_modules/react-native-pager-view"
+  react-native-render-html:
+    :path: "../node_modules/react-native-render-html"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-webview:
@@ -2925,9 +2935,9 @@ SPEC CHECKSUMS:
   EXManifests: 951161dd9a63523c4eef0fa2a7476639a7ba230d
   EXNotifications: 1afe5275cf399920480fc5a9008676749a767d19
   Expo: 8c19e656be789af96dd7a4bc21f22af4ec0dea34
-  expo-dev-client: cdc6599329032065992014c40413afd46629a9bc
-  expo-dev-launcher: 0dc31c4b9834d170745fbed01673279db732dc1d
-  expo-dev-menu: e0a52332a0daa07b22ea61f9d8ff0b25bc7e3971
+  expo-dev-client: bf14fdb681b2dc761f5df9ad4edca8bb55d640f4
+  expo-dev-launcher: 6ebab8448f23b80545c8b21eb026b6bfefad1f98
+  expo-dev-menu: c8b438f2db8e6a6ca6714a01d9425b8a9690fa06
   expo-dev-menu-interface: 609c35ae8b97479cdd4c9e23c8cf6adc44beea0e
   ExpoAsset: 3bc9adb7dbbf27ae82c18ca97eb988a3ae7e73b1
   ExpoBlur: 3c8885b9bf9eef4309041ec87adec48b5f1986a9
@@ -2939,6 +2949,7 @@ SPEC CHECKSUMS:
   ExpoHead: af044f3e9c99e7d8d21bf653b4c2f2ef53a7f082
   ExpoImage: e7738bebc58cee17e93fa161f2444f9c343996f5
   ExpoKeepAwake: bf0811570c8da182bfb879169437d4de298376e7
+  ExpoLinearGradient: 7734c8059972fcf691fb4330bcdf3390960a152d
   ExpoLinking: b85ff4eafeae6fc638c6cace60007ae521af0ef4
   ExpoModulesCore: d431ffe83c8673d02cb38425594a5f5480fd3061
   ExpoSplashScreen: 03ef991c0f9575a10269e08083cb4bd10e0989bc
@@ -2988,6 +2999,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: fae8da2c01aeb7f26ad739731b6dba61fd02fd97
   React-microtasksnativemodule: 20454ffccff553f0ee73fd20873aa8555a5867fb
   react-native-pager-view: f238ed7fb53458bd03366944a33686f067c83e9a
+  react-native-render-html: 5afc4751f1a98621b3009432ef84c47019dcb2bd
   react-native-safe-area-context: 562163222d999b79a51577eda2ea8ad2c32b4d06
   react-native-webview: 520bcb79c3f2af91e157cdd695732a34ab5f25c8
   React-NativeModulesApple: 65b2735133d6ce8a3cb5f23215ef85e427b0139c
@@ -3024,14 +3036,14 @@ SPEC CHECKSUMS:
   RevenueCat: 87171c9f2412778354c8523f5625d1fece2560a5
   RNCAsyncStorage: 39c42c1e478e1f5166d1db52b5055e090e85ad66
   RNCPicker: e51a9eb07c7dfbfba3d6c6cc567e083376c717cc
-  RNDateTimePicker: 43ee3de2bc639bc0d9b77564961060a54dfc7111
+  RNDateTimePicker: a4ad049fdd568755003c479beac3bdea742ac4d0
   RNGestureHandler: 7d0931a61d7ba0259f32db0ba7d0963c3ed15d2b
   RNPurchases: 614ae87f4071d2be2fbfcb9e7fe6064080cc676f
   RNReanimated: 2313402fe27fecb7237619e9c6fcee3177f08a65
   RNScreens: 5621e3ad5a329fbd16de683344ac5af4192b40d3
   RNSVG: 8a1054afe490b5d63b9792d7ae3c1fde8c05cdd0
-  SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
-  SDWebImageAVIFCoder: 00310d246aab3232ce77f1d8f0076f8c4b021d90
+  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748

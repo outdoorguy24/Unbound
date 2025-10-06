@@ -1,169 +1,170 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SHADOWS, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useEffect, useState } from "react";
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-const heading = "First, know your trap. What's stealing your time and focus?";
+const { width, height } = Dimensions.get("window");
+
 const OPTIONS = [
-  { key: "social", label: "Social Media", image: require("../../assets/images/onboarding/social.png") },
-  { key: "porn", label: "Porn", image: require("../../assets/images/onboarding/porn.png") },
-  { key: "youtube", label: "YouTube", image: require("../../assets/images/onboarding/youtube.png") },
-  { key: "news", label: "Reddit/News", image: require("../../assets/images/onboarding/reddit.png") },
-  { key: "gaming", label: "Gaming", image: require("../../assets/images/onboarding/gaming.png") },
-  { key: "all", label: "All of the Above", image: require("../../assets/images/onboarding/all.png") },
+  {
+    key: "choose_screen_over_friends",
+    label: "Choosing the screen over friends, family & hobbies",
+    image: require("../../assets/new-images/icon-choosing-screen.png"),
+  },
+  {
+    key: "brain_feels_fried",
+    label: "Brain feels fried and scattered",
+    image: require("../../assets/new-images/icon-brain-fried.png"),
+  },
+  {
+    key: "turning_lazy",
+    label: "Turning into a lazy POS",
+    image: require("../../assets/new-images/icon-turning-lazy.png"),
+  },
+  {
+    key: "wasting_life",
+    label: "Feeling like I’m wasting my life",
+    image: require("../../assets/new-images/icon-wasting-life.png"),
+  },
+  {
+    key: "all",
+    label: "All of the above",
+    image: require("../../assets/new-images/icon-all-above.png"),
+  },
 ];
 
-export default function Screen6({ onSubmit, disableSwipe, enableSwipe, disableSwipeFn }: any) {
-  const { traps, setTraps } = useOnboarding();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const Screen6 = ({ concerns, toggleOption }: any) => {
 
-  useEffect(() => {
-    if (traps.length === 0 && disableSwipeFn) {
-      disableSwipeFn();
-    }
-    if (traps.length > 0 && enableSwipe) {
-      enableSwipe();
-    }
-  }, [disableSwipeFn, enableSwipe, traps]);
+  const renderItem = ({ item }: { item: typeof OPTIONS[0] }) => {
+    const isActive = concerns?.includes(item.key);
+    return (
+      <TouchableOpacity
+        style={[styles.item, isActive && styles.itemActive]}
+        onPress={() => toggleOption(item.key)}
+        activeOpacity={1}
+      >
 
-  const toggleOption = (key: string) => {
-    setTraps(
-      traps.includes(key) ? traps.filter((k) => k !== key) : [...traps, key]
+        <View style={styles.leftRow}>
+          <Image source={item.image} style={styles.iconImage} />
+          <Text style={[styles.label]} numberOfLines={0}>
+            {item.label}
+          </Text>
+        </View>
+
+        {isActive ? (
+          <Image
+            source={require("../../assets/new-images/checked-box.png")}
+            style={styles.checkbox}
+          />
+        ) : (
+          <Image
+            source={require("../../assets/new-images/unchecked-box.png")}
+            style={styles.checkbox}
+          />
+        )}
+      </TouchableOpacity>
     );
   };
 
   return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.container}>
-          <View style={styles.content}>
-            <Text style={styles.heading}>{heading}</Text>
-            <View style={styles.grid}>
-              {OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.key}
-                  style={[styles.option, traps.includes(option.key) && styles.optionSelected, SHADOWS.small]}
-                  onPress={() => toggleOption(option.key)}
-                  activeOpacity={0.8}
-                >
-                  <Image source={option.image} style={styles.iconImage} />
-                  <Text style={[styles.optionLabel, traps.includes(option.key) && styles.optionLabelSelected]}>
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.button, (traps.length === 0 || isSubmitting) && styles.buttonDisabled, SHADOWS.medium]}
-            onPress={() => {
-              if (onSubmit) {
-                setIsSubmitting(true);
-                disableSwipeFn();
-                onSubmit();
-              }
-            }}
-            disabled={traps.length === 0 || isSubmitting}
-          >
-            <Text style={styles.buttonText}>Next</Text>
-          </TouchableOpacity>
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-4.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay-full.png")} style={styles.overlayImage} />
+      
+        <View style={styles.textContainer}>
+          <Text style={styles.slogan}>
+            {'What scares you the most about phone addiction?'}
+          </Text>
+          <FlatList
+            style={styles.listView}
+            data={OPTIONS}
+            keyExtractor={(item) => item.key}
+            renderItem={renderItem}
+          />
         </View>
-      </ScreenContainer>
-    </ImageBackground>
+      </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
+  },
+  image: {
+    width: '100%',
+    height: width * 0.939,
+  },
+
+  overlayImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '120%',
+  },
+  textContainer: {
+    position: "absolute",
+    top: scaleVertical(130),
+    bottom: 0,
+    left: scale(24),
+    right: scale(24),    
+  },
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(30),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+  },
+  listView: {
     flex: 1,
-    justifyContent: "space-between",
+    marginTop: scaleVertical(23),
+    marginBottom: height < 700 ? scaleVertical(16) : 0,
   },
-  background: {
+  item: {
     flex: 1,
-  },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: SPACING.xxl * 0.5,
-  },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "900",
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: SPACING.xl,
-    marginTop: SPACING.xl,
-  },
-  grid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginBottom: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
-  },
-  option: {
-    width: "44%",
-    aspectRatio: 1,
-    backgroundColor: "transparent",
-    borderRadius: 16,
-    margin: "3%",
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: COLORS.textPrimary,
+    backgroundColor: "rgba(44, 23, 7, 0.6)",
+    borderRadius: 6,
+    marginBottom: scaleVertical(12),
+    borderWidth: 2,
+    borderColor: "transparent",
   },
-  optionSelected: {
-    backgroundColor: "rgba(159, 106, 0, 0.99)",
-    borderColor: COLORS.textPrimary,
-    opacity: 1,
+  itemActive: {
+    borderColor: "rgba(255, 202, 145, 1)",
+  },
+  leftRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  label: {
+    flex: 1,
+    color: "#FFF",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+    marginLeft: scale(20),
+    marginRight: scale(10),
+  },
+  checkbox: {
+    width: scale(24),
+    height: scale(24),
+    marginRight: scaleVertical(12),
   },
   iconImage: {
-    width: 56,
-    height: 56,
-    resizeMode: "contain",
-    marginBottom: SPACING.md,
-  },
-  optionLabel: {
-    color: COLORS.textPrimary,
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 17,
-    textAlign: "center",
-    fontWeight: "bold",
-    marginTop: SPACING.sm,
-  },
-  optionLabelSelected: {
-    color: COLORS.textPrimary,
-  },
-  button: {
-    backgroundColor: "#3C6845",
-    paddingHorizontal: SPACING.xl,
-    paddingVertical: SPACING.md,
-    borderRadius: 12,
-    minWidth: 200,
-    alignItems: "center",
-    alignSelf: "center",
-    marginBottom: SPACING.huge,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    color: COLORS.buttonText,
-    fontSize: 24,
-    fontWeight: "bold",
+    marginVertical: scaleVertical(12),
+    marginLeft: scaleVertical(10),
+    width: scale(40),
+    height: scale(40),
   },
 });
+
+export default Screen6;

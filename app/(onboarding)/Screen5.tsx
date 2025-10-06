@@ -1,91 +1,170 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { COLORS, LAYOUT, SPACING, TYPOGRAPHY } from "@/constants/theme";
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { scale, scaleVertical } from '@/constants/Scale';
 
-const heading = "So let's make your ancestors proud.";
-const body =
-  "You're not broken, just overstimulated. With Unbound, you'll finally pick up that book or grab the hammer. Lace up your shoes. Laugh deep. Start a business. Hike a mountain. Call a friend. You'll make progress towards a better life.";
+const { width, height } = Dimensions.get("window");
 
-export default function Screen5() {
-  return (
-    <ImageBackground
-      source={require("../../assets/images/parchment-bg.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <ScreenContainer style={styles.screenContainer}>
-        <View style={styles.content}>
-          <View style={styles.headingContainer}>
-            <Text style={styles.heading}>{heading}</Text>
-          </View>
-          <View style={styles.illustrationContainer}>
-            <Image source={require("../../assets/images/onboarding/hiker.png")} style={styles.illustration} />
-          </View>
-          <Text style={styles.body}>{body}</Text>
+const OPTIONS = [
+  {
+    key: "morning",
+    label: "Morning",
+    image: require("../../assets/new-images/icon-morning.png"),
+  },
+  {
+    key: "work",
+    label: "Work breaks",
+    image: require("../../assets/new-images/icon-work-breaks.png"),
+  },
+  {
+    key: "evening",
+    label: "Evening",
+    image: require("../../assets/new-images/icon-evening.png"),
+  },
+  {
+    key: "latenight",
+    label: "Late night",
+    image: require("../../assets/new-images/icon-late-night.png"),
+  },
+  {
+    key: "all",
+    label: "All of the above",
+    image: require("../../assets/new-images/icon-all-above.png"),
+  },
+];
+
+const Screen5 = ({ scrollTimes, toggleOption }: any) => {
+
+  const renderItem = ({ item }: { item: typeof OPTIONS[0] }) => {
+    const isActive = scrollTimes?.includes(item.key);
+    return (
+      <TouchableOpacity
+        style={[styles.item, isActive && styles.itemActive]}
+        onPress={() => toggleOption(item.key)}
+        activeOpacity={1}
+      >
+
+        <View style={styles.leftRow}>
+          <Image source={item.image} style={styles.iconImage} />
+          <Text style={[styles.label]}>
+            {item.label}
+          </Text>
         </View>
-      </ScreenContainer>
-    </ImageBackground>
+
+        {isActive ? (
+          <Image
+            source={require("../../assets/new-images/checked-box.png")}
+            style={styles.checkbox}
+          />
+        ) : (
+          <Image
+            source={require("../../assets/new-images/unchecked-box.png")}
+            style={styles.checkbox}
+          />
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.safe}>
+      <Image source={require("../../assets/new-images/onboarding-screen-4.png")} style={styles.image} />
+      <Image source={require("../../assets/new-images/onboarding-overlay-full.png")} style={styles.overlayImage} />
+      
+        <View style={styles.textContainer}>
+          <Text style={styles.slogan}>
+            {'When do you find yourself mindlessly scrolling?'}
+          </Text>
+          <FlatList
+            style={styles.listView}
+            data={OPTIONS}
+            keyExtractor={(item) => item.key}
+            renderItem={renderItem}
+          />
+        </View>
+      </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  safe: { 
+    flex: 1, 
+    backgroundColor: '#000' 
   },
-  background: {
-    flex: 1,
-  },
-  screenContainer: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 0,
-    paddingTop: 0,
-  },
-  content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "flex-start",
-    paddingHorizontal: LAYOUT.paddingHorizontal,
-    paddingTop: (SPACING.xxl + SPACING.lg) * 0.25,
-  },
-  headingContainer: {
-    backgroundColor: "#2C1A05",
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.lg,
-    borderRadius: 12,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: "#E6D3A7",
+  image: {
     width: '100%',
+    height: width * 0.939,
   },
-  heading: {
-    fontFamily: TYPOGRAPHY.heading.fontFamily,
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: "900",
-    color: "#F3E2C7",
-    textAlign: "center",
-    marginTop: SPACING.sm,
+
+  overlayImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '120%',
   },
-  illustrationContainer: {
-    width: "100%",
+  textContainer: {
+    position: "absolute",
+    top: scaleVertical(130),
+    bottom: 0,
+    left: scale(24),
+    right: scale(24),    
+  },
+  slogan: {
+    color: "#FFF",
+    fontSize: scale(30),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+  },
+  listView: {
+    flex: 1,
+    marginTop: scaleVertical(23),
+    marginBottom: height < 700 ? scaleVertical(16) : 0,
+  },
+  item: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: SPACING.md,
-    marginTop: SPACING.md,
+    backgroundColor: "rgba(44, 23, 7, 0.6)",
+    borderRadius: 6,
+    marginBottom: scaleVertical(12),
+    borderWidth: 2,
+    borderColor: "transparent",
   },
-  illustration: {
-    width: "100%",
-    aspectRatio: 1.2,
-    height: undefined,
-    resizeMode: "contain",
-    marginBottom: SPACING.sm,
+  itemActive: {
+    borderColor: "rgba(255, 202, 145, 1)",
   },
-  body: {
-    fontFamily: TYPOGRAPHY.body.fontFamily,
-    fontSize: 20,
-    lineHeight: 30,
-    color: COLORS.textPrimary,
-    textAlign: "center",
-    marginBottom: SPACING.xl,
-    fontWeight: "bold",
+  leftRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  label: {
+    flex: 1,
+    color: "#FFF",
+    fontSize: scale(16),
+    fontFamily: "ZillaSlab-Medium",
+    letterSpacing: 0,
+    marginLeft: scale(20),
+    marginRight: scale(10),
+  },
+  checkbox: {
+    width: scale(24),
+    height: scale(24),
+    marginRight: scaleVertical(12),
+  },
+  iconImage: {
+    marginVertical: scaleVertical(12),
+    marginLeft: scaleVertical(10),
+    width: scale(40),
+    height: scale(40),
   },
 });
+
+export default Screen5;

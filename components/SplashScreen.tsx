@@ -1,3 +1,4 @@
+import { scale, scaleVertical } from "@/constants/Scale";
 import { useEffect, useRef } from "react";
 import { Animated, Dimensions, Image, StyleSheet, Text, View } from "react-native";
 
@@ -22,16 +23,22 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         }).start(() => {
           onFinish();
         });
-      }, 4000);
+      }, 4000); //4000
+
+      //TODO: FOR TESTING
+      
     });
   }, [onFinish, opacity]);
 
   return (
-    <Animated.View style={[styles.container, { opacity }]}>
-      <Image source={require("../assets/images/splash-screen.png")} style={styles.image} resizeMode="contain" />
+    <Animated.View style={[{ opacity }]}>
+      <Image source={require("../assets/new-images/splash-screen.png")} style={styles.image} />
       <View style={styles.textContainer}>
         <Text style={styles.slogan}>
-          YOU WERE BORN{"\n"}TO DO MORE{"\n"}THAN SCROLL
+          {'UNBOUND'}
+        </Text>
+        <Text style={styles.slogan2}>
+          {'You were born\nto do more\nthan scroll'}
         </Text>
       </View>
     </Animated.View>
@@ -39,37 +46,36 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width,
-    height,
-    backgroundColor: "#2C1A05",
-    zIndex: 9999,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   image: {
     width: width,
     height: height,
-    position: "absolute",
-    top: 0,
-    left: 0,
   },
   textContainer: {
     position: "absolute",
-    bottom: height * 0.24,
+    top: height * 0.43,
     width: "100%",
     alignItems: "center",
   },
   slogan: {
-    color: "#F3B74C",
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "bold",
+    color: "#000",
+    fontSize: scale(55),
     textAlign: "center",
-    fontFamily: "Vollkorn-Bold",
-    letterSpacing: 1,
+    fontFamily: "Cinzel-Black",
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 4,
+  },
+  slogan2: {
+    color: "#000",
+    fontSize: scale(24),
+    lineHeight: scale(28),
+    textAlign: "center",
+    fontFamily: "Cinzel-Bold",
+    letterSpacing: 0,
+    textShadowColor: 'rgba(0, 0, 0, 0.25)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 4,
+    marginHorizontal: scale(65),
   },
 });

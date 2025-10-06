@@ -2,7 +2,8 @@ import { HapticTab } from "@/components/HapticTab";
 import { COLORS, SPACING } from "@/constants/theme";
 import { Tabs } from "expo-router";
 import React from "react";
-import { Image, Platform } from "react-native";
+import { Alert, Image, Platform, Text } from "react-native";
+import ScreenTimeManager from "../services/ScreenTimeManager";
 
 export default function TabLayout() {
   return (
@@ -15,32 +16,41 @@ export default function TabLayout() {
         tabBarStyle: Platform.select({
           ios: {
             backgroundColor: COLORS.tabBarBackground,
-            borderTopWidth: 0,
-            paddingTop: SPACING.sm,
+            borderTopWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.2)'
           },
           default: {
             backgroundColor: COLORS.tabBarBackground,
-            borderTopWidth: 0,
-            paddingTop: SPACING.sm,
+            borderTopWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.2)'
           },
         }),
-        tabBarLabelStyle: {
-          fontFamily: "Vollkorn-Bold",
-          fontSize: 12,
-        },
       }}
     >
       <Tabs.Screen
         name="camp"
         options={{
-          title: "Home",
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color,
+                fontFamily: focused ? "SF-Pro-Display-Bold" : "SF-Pro-Display-Medium",
+                fontSize: 12,
+              }}
+            >
+              Dashboard
+            </Text>
+          ),
           tabBarIcon: ({ focused }) => (
             <Image
-              source={require("../../assets/images/home.png")}
+              source={
+                focused ? 
+                  require("../../assets/new-images/dashboard-selected.png") :
+                  require("../../assets/new-images/dashboard.png")
+              }
               style={{
-                width: 28,
-                height: 28,
-                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+                width: 24,
+                height: 24,
               }}
             />
           ),
@@ -49,20 +59,45 @@ export default function TabLayout() {
       <Tabs.Screen
         name="defend"
         options={{
-          title: "Defend",
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color,
+                fontFamily: focused ? "SF-Pro-Display-Bold" : "SF-Pro-Display-Medium",
+                fontSize: 12,
+              }}
+            >
+              Defend
+            </Text>
+          ),
           tabBarIcon: ({ focused }) => (
             <Image
-              source={require("../../assets/images/defend.png")}
+              source={
+                focused ? 
+                  require("../../assets/new-images/defend-selected.png") :
+                  require("../../assets/new-images/defend.png")
+              }
               style={{
-                width: 28,
-                height: 28,
-                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+                width: 24,
+                height: 24,
               }}
             />
           ),
+          tabBarButton: (props) => {
+            const { onPress, ...rest } = props;
+            return (
+              <HapticTab
+                {...rest}
+                onPress={async () => {
+                  await ScreenTimeManager.requestAuthorization('individual');
+                  onPress?.();
+                }}
+              />
+            );
+          },
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="trail-log"
         options={{
           title: "Trail Log",
@@ -77,18 +112,31 @@ export default function TabLayout() {
             />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color,
+                fontFamily: focused ? "SF-Pro-Display-Bold" : "SF-Pro-Display-Medium",
+                fontSize: 12,
+              }}
+            >
+              Profile
+            </Text>
+          ),
           tabBarIcon: ({ focused }) => (
             <Image
-              source={require("../../assets/images/profile.png")}
+              source={
+                focused ? 
+                  require("../../assets/new-images/profile-selected.png") :
+                  require("../../assets/new-images/profile.png")
+              }
               style={{
-                width: 28,
-                height: 28,
-                tintColor: focused ? COLORS.tabBarActive : COLORS.tabBarInactive,
+                width: 24,
+                height: 24,
               }}
             />
           ),

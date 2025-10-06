@@ -1,68 +1,185 @@
-import { ScreenContainer } from "@/components/ui/ScreenContainer";
-import { SPACING } from "@/constants/theme";
-import { Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 
-export default function PrivacyPolicyScreen() {
-  const router = useRouter();
+import { scale, scaleVertical } from "@/constants/Scale";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
+
+const { width } = Dimensions.get("window");
+
+const TermsOfUseScreen = () => {
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScreenContainer>
-      <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <View style={styles.backCircle}>
-            <Feather name="arrow-left" size={22} color="#F9E7B0" />
+    <View style={styles.safe}>
+      <Image
+        source={require("../../assets/new-images/onboarding-screen-4.png")}
+        style={styles.image}
+      />
+      <Image
+        source={require("../../assets/new-images/onboarding-overlay-full.png")}
+        style={styles.overlayImage}
+      />
+
+      <View
+        style={[
+          styles.mainContainer,
+          {
+            marginTop: insets.top + scaleVertical(16),
+          },
+        ]}
+      >
+        <View
+          style={styles.headerView}
+        >
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={styles.slogan}>{"Privacy and Policy"}</Text>
+            <TouchableOpacity
+              style={styles.buttonBack}
+              activeOpacity={0.8}
+              onPress={() => router.back()}
+            >
+              <Image
+                source={require("../../assets/new-images/icon-back.png")}
+                style={{
+                  height: scale(20),
+                  width: scale(20),
+                }}
+              />
+            </TouchableOpacity>
           </View>
-        </TouchableOpacity>
-        <Text style={styles.header}>Privacy Policy</Text>
+        </View>
+        
+        <ScrollView
+          style={[styles.keyboard, {marginTop: scaleVertical(16), marginBottom: insets.bottom + scaleVertical(16)}]}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <Text style={{
+              color: "#FFF",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Bold",
+              letterSpacing: 0.5,
+              lineHeight: scale(22),
+          }}>
+            {"1. Your Privacy Matters"}
+          </Text>
+
+          <Text style={{
+              color: "rgba(255, 255, 255, 0.7)",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Regular",
+              letterSpacing: 0.5,
+              marginTop: scaleVertical(24),
+              lineHeight: scale(22),
+          }}>
+            {"We built Unbound to help you reclaim your time — not to take your data. This Privacy Policy explains what we collect, how we use it, and how we keep it safe."}
+          </Text>
+
+          <Text style={{
+              color: "#FFF",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Bold",
+              letterSpacing: 0.5,
+              marginTop: scaleVertical(24),
+              lineHeight: scale(22),
+          }}>
+            {"2. What We Collect"}
+          </Text>
+
+          <Text style={{
+              color: "rgba(255, 255, 255, 0.7)",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Regular",
+              letterSpacing: 0.5,
+              marginTop: scaleVertical(24),
+              lineHeight: scale(22),
+          }}>
+            {"  • Account info: your name, email, or phone number (if you sign up with one).\n\n  • Usage data: how you interact with the app (e.g., session length, features used).\n\n  • Device info: basic data like device model, OS, and language settings"}
+          </Text>
+
+          <Text style={{
+              color: "#FFF",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Bold",
+              letterSpacing: 0.5,
+              marginTop: scaleVertical(24),
+              lineHeight: scale(22),
+          }}>
+            {"3. What We Don’t Collect"}
+          </Text>
+
+          <Text style={{
+              color: "rgba(255, 255, 255, 0.7)",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Regular",
+              letterSpacing: 0.5,
+              marginTop: scaleVertical(24),
+              lineHeight: scale(22),
+          }}>
+            {"  • Your exact location\n\n  • Your contacts, photos, or files\n\n  • Sensitive personal identifiers (like social security numbers)\n\nWe also do not sell or trade your data — ever."}
+          </Text>
+        </ScrollView>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.text}>
-          [Placeholder] Your privacy is important to us. This is where the privacy policy will go.
-        </Text>
-        {/* TODO: Replace with real privacy policy */}
-      </ScrollView>
-    </ScreenContainer>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: SPACING.xxxl,
-    marginBottom: 0,
-    paddingHorizontal: 18,
-  },
-  backBtn: {
-    padding: 0,
-    marginRight: 16,
-  },
-  backCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#564110",
-    borderWidth: 1.5,
-    borderColor: "#E6D3A7",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  header: {
-    fontSize: 27,
-    fontFamily: "Vollkorn-Bold",
-    color: "#2C1A05",
-    textAlign: "left",
+  safe: {
     flex: 1,
-    marginLeft: SPACING.sm,
+    backgroundColor: "#000",
   },
-  content: {
-    padding: 16,
+  image: {
+    position: "absolute",
+    width: "100%",
+    height: width * 0.939,
   },
-  text: {
-    fontSize: 15,
-    color: "#2C1A05",
+  overlayImage: {
+    position: "absolute",
+    width: "100%",
+    height: "95%",
+  },
+  buttonBack: {
+    backgroundColor: "#000",
+    width: scale(40),
+    aspectRatio: 1,
+    borderRadius: scale(20),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  mainContainer: {
+    flex: 1,
+    width: '100%',
+  },
+  slogan: {
+    position: 'absolute',
+    color: "#FFF",
+    fontSize: scale(22),
+    fontFamily: "ZillaSlab-SemiBold",
+    letterSpacing: 0.5,
+    width: '100%',
+    textAlign: 'center',
+  },
+  headerView: {
+    width: '100%',
+    paddingHorizontal: scale(24),
+  },
+  keyboard: {
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: scale(16),
+    paddingTop: scaleVertical(40),
   },
 });
+
+export default TermsOfUseScreen;
