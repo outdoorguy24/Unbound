@@ -1,22 +1,38 @@
-import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-} from "react-native";
-import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scale, scaleVertical } from "@/constants/Scale";
 import { router } from "expo-router";
+import React, { useEffect, useRef } from "react";
+import {
+    Animated,
+    Image,
+    StyleSheet,
+    Text,
+    View
+} from "react-native";
 
 const StartBlockLoadingScreen = () => {
+  const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Start the spinning animation
+    const spinAnimation = Animated.loop(
+      Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 1000, // 1 second for 1 rotation
+        useNativeDriver: true,
+      })
+    );
+    spinAnimation.start();
+
+    // Navigate after 3 seconds
     setTimeout(() => {
       router.push('/defend/FocusSession')
     }, 3000)
-  }, [])
+
+    // Cleanup animation on unmount
+    return () => {
+      spinAnimation.stop();
+    };
+  }, [spinValue])
   return (
     <View style={styles.safe}>
       <Image
@@ -33,10 +49,22 @@ const StartBlockLoadingScreen = () => {
         style={[styles.mainContainer]}
       >
         <Text style={styles.headerText}>{'your block is initiating...'}</Text>
-        <Image
+        <Animated.Image
           source={require("../../../assets/new-images/loading-circle.png")}
           resizeMode={"cover"}
-          style={styles.loader}
+          style={[
+            styles.loader,
+            {
+              transform: [
+                {
+                  rotate: spinValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg'],
+                  }),
+                },
+              ],
+            },
+          ]}
         />
         <Image
           source={require("../../../assets/new-images/start-block-loading-text.png")}
