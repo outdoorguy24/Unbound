@@ -1,21 +1,20 @@
+import { scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import { BlurView } from "expo-blur";
+import { router } from "expo-router";
+import * as StoreReview from 'expo-store-review';
 import React, { useState } from "react";
 import {
-  View,
-  StyleSheet,
-  Image,
   Dimensions,
+  FlatList,
+  Image,
+  Linking,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  FlatList,
-  Linking,
+  View,
 } from "react-native";
-import { scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Feather from "react-native-vector-icons/Feather"; // or: @expo/vector-icons
-import { useAuth } from "@/contexts/AuthContext";
-import * as StoreReview from 'expo-store-review';
-import { router } from "expo-router";
-import { BlurView } from "expo-blur";
 
 const { width } = Dimensions.get("window");
 
@@ -61,6 +60,7 @@ const ProfileScreen = () => {
         router.push('/profile/founder')
       } else if (item.id === "r2") {
         //Request a feature
+        Linking.openURL('https://unbound.featurebase.app/');
       } else if (item.id === "r3") {
         try {
           if (await StoreReview.hasAction()) {
