@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
-  ImageBackground,
-  Pressable,
-  FlatList,
-  TextInput,
-} from "react-native";
 import { scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+    Dimensions,
+    FlatList,
+    Image,
+    ImageBackground,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import RenderHTML, { defaultSystemFonts } from "react-native-render-html";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BarChart } from "react-native-gifted-charts";
 const { width } = Dimensions.get("window");
@@ -859,7 +859,7 @@ const CampScreen = () => {
         style={[
           styles.primaryBtn,
         ]}
-        onPress={() => {}}
+        onPress={() => { router.navigate('/defend'); }}
         activeOpacity={0.9}
       >
 
