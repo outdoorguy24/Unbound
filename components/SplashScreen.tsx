@@ -1,4 +1,4 @@
-import { scale, scaleVertical } from "@/constants/Scale";
+import { scale } from "@/constants/Scale";
 import { useEffect, useRef } from "react";
 import { Animated, Dimensions, Image, StyleSheet, Text, View } from "react-native";
 
@@ -23,7 +23,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
         }).start(() => {
           onFinish();
         });
-      }, 4000); //4000
+      }, 2000); //2000
 
       //TODO: FOR TESTING
       

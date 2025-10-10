@@ -30,7 +30,7 @@ const OPTIONS = [
   },
   {
     key: "wasting_life",
-    label: "Feeling like I’m wasting my life",
+    label: "Feel like I’m wasting my life",
     image: require("../../assets/new-images/icon-wasting-life.png"),
   },
   {
