@@ -2,9 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:StoreKitConfiguration.storekit">
-   </FileRef>
-   <FileRef
       location = "group:Unbound.xcodeproj">
    </FileRef>
    <FileRef

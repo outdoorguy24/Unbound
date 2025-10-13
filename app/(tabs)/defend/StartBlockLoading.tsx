@@ -1,5 +1,5 @@
 import { scale, scaleVertical } from "@/constants/Scale";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
     Animated,
@@ -11,6 +11,7 @@ import {
 
 const StartBlockLoadingScreen = () => {
   const spinValue = useRef(new Animated.Value(0)).current;
+  const { duration } = useLocalSearchParams();
 
   useEffect(() => {
     // Start the spinning animation
@@ -25,7 +26,10 @@ const StartBlockLoadingScreen = () => {
 
     // Navigate after 3 seconds
     setTimeout(() => {
-      router.push('/defend/FocusSession')
+      router.push({
+        pathname: '/defend/FocusSession',
+        params: { duration: duration }
+      });
     }, 3000)
 
     // Cleanup animation on unmount

@@ -8,31 +8,27 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		181326BB6C906CBF2727E140 /* libPods-Unbound.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F10ECB5CCCECE53447FBA5C /* libPods-Unbound.a */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		4A6DE1D30003EEC7A04E49BC /* libPods-Unbound.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B2C70626A52042D3A636BD7 /* libPods-Unbound.a */; };
-		64C042362DF6F34F0060E7E4 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64C042352DF6F34E0060E7E4 /* StoreKit.framework */; };
-		64E35EAA2E0191F000F67DE2 /* ScreenTimeManager1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E35EA92E0191F000F67DE2 /* ScreenTimeManager1.swift */; };
-		64E35EAC2E01921400F67DE2 /* ScreenTimeManager1.m in Sources */ = {isa = PBXBuildFile; fileRef = 64E35EAB2E01921400F67DE2 /* ScreenTimeManager1.m */; };
-		73B496CEF0B8FF4BFA9D8E35 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CF4EDD57CBEC2302C2028289 /* PrivacyInfo.xcprivacy */; };
-		9093E08AEC104812BA2DD85D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC57AC2BA0D1AF77F136AD3 /* ExpoModulesProvider.swift */; };
+		64DF63862E9D53560071B06C /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64DF63852E9D53560071B06C /* StoreKit.framework */; };
+		74BADA45E016BD448E4ACEF9 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43F25FE12F8ADBA452C63B79 /* ExpoModulesProvider.swift */; };
+		7C9C9DDAABCAF124B00AA2E0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 64C255E9C491DFAF96EFF6E8 /* PrivacyInfo.xcprivacy */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		04C155FB95A330FF72DF0870 /* Pods-Unbound.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Unbound.release.xcconfig"; path = "Target Support Files/Pods-Unbound/Pods-Unbound.release.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Unbound.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Unbound.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Unbound/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Unbound/Info.plist; sourceTree = "<group>"; };
-		3B2C70626A52042D3A636BD7 /* libPods-Unbound.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Unbound.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		64C042352DF6F34E0060E7E4 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		64E35EA92E0191F000F67DE2 /* ScreenTimeManager1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenTimeManager1.swift; sourceTree = "<group>"; };
-		64E35EAB2E01921400F67DE2 /* ScreenTimeManager1.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScreenTimeManager1.m; sourceTree = "<group>"; };
+		43F25FE12F8ADBA452C63B79 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Unbound/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		5F10ECB5CCCECE53447FBA5C /* libPods-Unbound.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Unbound.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		64C255E9C491DFAF96EFF6E8 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Unbound/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		64DF63852E9D53560071B06C /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Unbound/SplashScreen.storyboard; sourceTree = "<group>"; };
-		AB7A4C3A97EA286293AEDE28 /* Pods-Unbound.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Unbound.debug.xcconfig"; path = "Target Support Files/Pods-Unbound/Pods-Unbound.debug.xcconfig"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CF4EDD57CBEC2302C2028289 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Unbound/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		DEC57AC2BA0D1AF77F136AD3 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Unbound/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		BF3223FDCDEDBC4B50D1CDBD /* Pods-Unbound.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Unbound.debug.xcconfig"; path = "Target Support Files/Pods-Unbound/Pods-Unbound.debug.xcconfig"; sourceTree = "<group>"; };
+		DAE89246EDC2DD4069C5F103 /* Pods-Unbound.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Unbound.release.xcconfig"; path = "Target Support Files/Pods-Unbound/Pods-Unbound.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Unbound/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* Unbound-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "Unbound-Bridging-Header.h"; path = "Unbound/Unbound-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -43,8 +39,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				64C042362DF6F34F0060E7E4 /* StoreKit.framework in Frameworks */,
-				4A6DE1D30003EEC7A04E49BC /* libPods-Unbound.a in Frameworks */,
+				181326BB6C906CBF2727E140 /* libPods-Unbound.a in Frameworks */,
+				64DF63862E9D53560071B06C /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,17 +56,7 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				CF4EDD57CBEC2302C2028289 /* PrivacyInfo.xcprivacy */,
-				64E35EA92E0191F000F67DE2 /* ScreenTimeManager1.swift */,
-				64E35EAB2E01921400F67DE2 /* ScreenTimeManager1.m */,
-			);
-			name = Unbound;
-			sourceTree = "<group>";
-		};
-		28EB5C526A8D47CA67B315E5 /* Unbound */ = {
-			isa = PBXGroup;
-			children = (
-				DEC57AC2BA0D1AF77F136AD3 /* ExpoModulesProvider.swift */,
+				64C255E9C491DFAF96EFF6E8 /* PrivacyInfo.xcprivacy */,
 			);
 			name = Unbound;
 			sourceTree = "<group>";
@@ -78,11 +64,19 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				64C042352DF6F34E0060E7E4 /* StoreKit.framework */,
+				64DF63852E9D53560071B06C /* StoreKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				3B2C70626A52042D3A636BD7 /* libPods-Unbound.a */,
+				5F10ECB5CCCECE53447FBA5C /* libPods-Unbound.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		439EAF2209252F97CF9F8663 /* Unbound */ = {
+			isa = PBXGroup;
+			children = (
+				43F25FE12F8ADBA452C63B79 /* ExpoModulesProvider.swift */,
+			);
+			name = Unbound;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -99,8 +93,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				FB4231DA28475A22700EB1FE /* Pods */,
-				C540EF41E414AF64F50222D8 /* ExpoModulesProviders */,
+				E6E926681BFC0DA191B5633E /* Pods */,
+				AA1B966FB7CDA149928CB114 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -115,6 +109,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		AA1B966FB7CDA149928CB114 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				439EAF2209252F97CF9F8663 /* Unbound */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -124,19 +126,11 @@
 			path = Unbound/Supporting;
 			sourceTree = "<group>";
 		};
-		C540EF41E414AF64F50222D8 /* ExpoModulesProviders */ = {
+		E6E926681BFC0DA191B5633E /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				28EB5C526A8D47CA67B315E5 /* Unbound */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		FB4231DA28475A22700EB1FE /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				AB7A4C3A97EA286293AEDE28 /* Pods-Unbound.debug.xcconfig */,
-				04C155FB95A330FF72DF0870 /* Pods-Unbound.release.xcconfig */,
+				BF3223FDCDEDBC4B50D1CDBD /* Pods-Unbound.debug.xcconfig */,
+				DAE89246EDC2DD4069C5F103 /* Pods-Unbound.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -148,14 +142,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Unbound" */;
 			buildPhases = (
-				26881B22FD7C693A19AB0149 /* [CP] Check Pods Manifest.lock */,
-				2BB652C457AE67D2D279A630 /* [Expo] Configure project */,
+				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
+				EC59A491FE8EDCC2C8B38A8B /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				9BA005CACCA498A9FA0E158D /* [CP] Embed Pods Frameworks */,
-				DE07FC659AC7CA814210E6C4 /* [CP] Copy Pods Resources */,
+				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
+				32C429516558F5E9EA03AEB1 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -205,7 +199,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				73B496CEF0B8FF4BFA9D8E35 /* PrivacyInfo.xcprivacy in Resources */,
+				7C9C9DDAABCAF124B00AA2E0 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,7 +221,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		26881B22FD7C693A19AB0149 /* [CP] Check Pods Manifest.lock */ = {
+		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -249,26 +243,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		2BB652C457AE67D2D279A630 /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Unbound/expo-configure-project.sh\"\n";
-		};
-		9BA005CACCA498A9FA0E158D /* [CP] Embed Pods Frameworks */ = {
+		32C429516558F5E9EA03AEB1 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -286,7 +261,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Unbound/Pods-Unbound-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		DE07FC659AC7CA814210E6C4 /* [CP] Copy Pods Resources */ = {
+		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -356,6 +331,25 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Unbound/Pods-Unbound-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		EC59A491FE8EDCC2C8B38A8B /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Unbound/expo-configure-project.sh\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -363,10 +357,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				64E35EAA2E0191F000F67DE2 /* ScreenTimeManager1.swift in Sources */,
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				64E35EAC2E01921400F67DE2 /* ScreenTimeManager1.m in Sources */,
-				9093E08AEC104812BA2DD85D /* ExpoModulesProvider.swift in Sources */,
+				74BADA45E016BD448E4ACEF9 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,14 +367,12 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AB7A4C3A97EA286293AEDE28 /* Pods-Unbound.debug.xcconfig */;
+			baseConfigurationReference = BF3223FDCDEDBC4B50D1CDBD /* Pods-Unbound.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Unbound/Unbound.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 72DC653W7Q;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -390,14 +380,12 @@
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = Unbound/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Unbound;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				IPHONEOS_DEPLOYMENT_TARGET = 17;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -406,7 +394,6 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.starrman.unbound;
 				PRODUCT_NAME = Unbound;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Unbound/Unbound-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -417,24 +404,20 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 04C155FB95A330FF72DF0870 /* Pods-Unbound.release.xcconfig */;
+			baseConfigurationReference = DAE89246EDC2DD4069C5F103 /* Pods-Unbound.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Unbound/Unbound.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 72DC653W7Q;
 				INFOPLIST_FILE = Unbound/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Unbound;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				IPHONEOS_DEPLOYMENT_TARGET = 17;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -443,7 +426,6 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.starrman.unbound;
 				PRODUCT_NAME = Unbound;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Unbound/Unbound-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -498,7 +480,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -506,10 +488,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -557,17 +536,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
