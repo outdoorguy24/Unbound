@@ -40,6 +40,16 @@ RCT_EXTERN_METHOD(setCurrentSelection:(NSString *)selectionString
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+// Screen Time usage data methods
+RCT_EXTERN_METHOD(getScreenTimeUsageData:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getWeeklyScreenTimeUsage:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(getDailyScreenTimeUsage:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 @end
 
 // // This is required for the module to be properly registered

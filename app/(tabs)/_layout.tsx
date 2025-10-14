@@ -1,9 +1,8 @@
 import { HapticTab } from "@/components/HapticTab";
-import { COLORS, SPACING } from "@/constants/theme";
+import { COLORS } from "@/constants/theme";
 import { Tabs } from "expo-router";
 import React from "react";
-import { Alert, Image, Platform, Text } from "react-native";
-import ScreenTimeManager from "../services/ScreenTimeManager";
+import { Image, Platform, Text } from "react-native";
 
 export default function TabLayout() {
   return (
@@ -88,10 +87,7 @@ export default function TabLayout() {
             return (
               <HapticTab
                 {...rest}
-                onPress={async () => {
-                  await ScreenTimeManager.requestAuthorization('individual');
-                  onPress?.();
-                }}
+                onPress={onPress}
               />
             );
           },

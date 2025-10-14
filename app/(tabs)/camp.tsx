@@ -1,7 +1,9 @@
 import { scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import { getCommunityStats, getDaysWithoutPorn, getPhoneUsageReductionPercentage, getStreak, getTotalBlockedTime } from "@/lib/userTracking";
 import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dimensions,
     FlatList,
@@ -17,6 +19,7 @@ import {
 } from "react-native";
 import RenderHTML, { defaultSystemFonts } from "react-native-render-html";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import PhoneUsageTracker from "../services/PhoneUsageTracker";
 
 import { BarChart } from "react-native-gifted-charts";
 const { width } = Dimensions.get("window");
@@ -29,6 +32,94 @@ enum ViewTypes {
 const CampScreen = () => {
   const [viewType, setViewType] = useState(ViewTypes.Monthly);
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  
+  // Real data state
+  const [userStats, setUserStats] = useState({
+    savedToday: 0,
+    totalSaved: 0,
+    daysWithoutPorn: 0,
+    streakDays: 0,
+    monthlyHours: 0,
+    allTimeHours: 0,
+    phoneUsageReduction: 0,
+  });
+  const [communityStats, setCommunityStats] = useState({
+    totalUsers: 1000,
+    totalTimeSaved: 50000,
+    weeklyHours: 1200,
+    completedBlocks: 10000,
+    goalHitRate: 80,
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real data
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Collect fresh phone usage data if tracking is active
+        if (PhoneUsageTracker.isTrackingActive()) {
+          await PhoneUsageTracker.collectDataNow(user.id);
+        }
+        // Get user streak data
+        const streakData = await getStreak(user.id);
+        
+        // Get time saved today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const timeSavedToday = await getTotalBlockedTime(user.id, today, new Date()) || 0;
+        
+        // Get time saved this month
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthlyTime = await getTotalBlockedTime(user.id, startOfMonth, new Date()) || 0;
+        
+        // Get all-time total
+        const allTimeStart = new Date(2000, 0, 1);
+        const allTimeMinutes = await getTotalBlockedTime(user.id, allTimeStart, new Date()) || 0;
+        
+        // Get days without porn
+        const daysWithoutPorn = await getDaysWithoutPorn(user.id);
+        
+        // Get phone usage reduction percentage
+        const phoneUsageReduction = await getPhoneUsageReductionPercentage(user.id);
+        
+        // Get community stats
+        const communityData = await getCommunityStats();
+        
+        setUserStats({
+          savedToday: Math.round(timeSavedToday / 60 * 10) / 10, // Convert to hours with 1 decimal
+          totalSaved: Math.round(allTimeMinutes / 60 * 10) / 10, // Convert to hours with 1 decimal
+          daysWithoutPorn,
+          streakDays: streakData.current_streak || 0,
+          monthlyHours: Math.round(monthlyTime / 60 * 10) / 10,
+          allTimeHours: Math.round(allTimeMinutes / 60 * 10) / 10,
+          phoneUsageReduction,
+        });
+        
+        setCommunityStats({
+          totalUsers: communityData.totalUsers,
+          totalTimeSaved: communityData.totalTimeSaved,
+          weeklyHours: Math.round(communityData.totalTimeSaved / 60), // Convert minutes to hours
+          completedBlocks: Math.round(communityData.totalTimeSaved / 60), // Estimate based on time
+          goalHitRate: 80, // Keep as static for now
+        });
+        
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        // Keep fallback values on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user?.id]);
+
   const data = [
     { value: 60, label: "Week 1" },
     { value: 45, label: "Week 2" },
@@ -45,10 +136,10 @@ const CampScreen = () => {
 
   type Stat = { label: string; value: string };
   const SMALL_CARDS: Stat[] = [
-    { label: "Saved today", value: "2h 15m" },
-    { label: "Total saved", value: "15 days, 23 min" },
-    { label: "Days without porn", value: "63" },
-    { label: "Streak days", value: "30" },
+    { label: "Saved today", value: `${userStats.savedToday}h` },
+    { label: "Total saved", value: `${userStats.totalSaved}h` },
+    { label: "Days without porn", value: userStats.daysWithoutPorn.toString() },
+    { label: "Streak days", value: userStats.streakDays.toString() },
   ];
 
   function ChartsCard() {
@@ -218,7 +309,7 @@ const CampScreen = () => {
                   fontFamily: "ZillaSlab-SemiBold",
                 }}
               >
-                45%
+                {userStats.phoneUsageReduction}%
               </Text>
               
               <Image
@@ -559,15 +650,15 @@ const CampScreen = () => {
     const data = [
       {
         id: "1",
-        html: `<span> <strong>76</strong> guys reclaimed over <strong>1,200</strong> hours of their time this week</span>`,
+        html: `<span> <strong>${communityStats.totalUsers}</strong> guys reclaimed over <strong>${communityStats.weeklyHours.toLocaleString()}</strong> hours of their time this week</span>`,
       },
       {
         id: "2",
-        html: `<span>Together we’ve completed <strong>10,000</strong> focus blocks.</span>`,
+        html: `<span>Together we've completed <strong>${communityStats.completedBlocks.toLocaleString()}</strong> focus blocks.</span>`,
       },
       {
         id: "3",
-        html: `<span><strong>4</strong> out of <strong>5</strong> men hit their focus goal today</span>`,
+        html: `<span><strong>${communityStats.goalHitRate}</strong>% of men hit their focus goal today</span>`,
       },
     ];
 
@@ -832,7 +923,7 @@ const CampScreen = () => {
               fontFamily: "ZillaSlab-Bold",
               marginLeft: scaleVertical(16),
             }}>
-            {viewType === ViewTypes.Monthly ? "95 hrs" : '490 hrs'}
+            {viewType === ViewTypes.Monthly ? `${userStats.monthlyHours} hrs` : `${userStats.allTimeHours} hrs`}
             </Text>
             <Text style={{
               color: "rgba(255, 255, 255, 0.5)",

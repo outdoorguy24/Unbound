@@ -128,7 +128,7 @@ const BlockNowScreen = () => {
               if (selectedDuration) {
                 router.push({
                   pathname: '/defend/StartBlockLoading',
-                  params: { duration: selectedDuration }
+                  params: { duration: selectedDuration, pornBlocking: 'true' } // Default to true for now
                 });
               }
             }}

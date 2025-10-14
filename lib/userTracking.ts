@@ -300,4 +300,89 @@ export async function deactivateUserSchedule(userId: string) {
     .eq('user_id', userId);
   
   if (error) throw error;
+}
+
+// Porn blocking functions
+export async function recordPornBlockingSession(userId: string) {
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  
+  const { data, error } = await supabase
+    .from('porn_blocking_sessions')
+    .upsert({
+      user_id: userId,
+      session_date: today,
+    }, {
+      onConflict: 'user_id,session_date',
+      ignoreDuplicates: false
+    })
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function getDaysWithoutPorn(userId: string) {
+  const { data, error } = await supabase
+    .rpc('get_days_without_porn', { user_id: userId });
+  
+  if (error) throw error;
+  return data || 0;
+}
+
+// Phone usage tracking functions
+export async function recordPhoneUsageData(userId: string, usageData: {
+  totalScreenTimeMinutes: number;
+  socialMediaMinutes?: number;
+  entertainmentMinutes?: number;
+  productivityMinutes?: number;
+  otherMinutes?: number;
+  isBaseline?: boolean;
+}) {
+  const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+  
+  const { data, error } = await supabase
+    .from('phone_usage_tracking')
+    .upsert({
+      user_id: userId,
+      tracking_date: today,
+      total_screen_time_minutes: usageData.totalScreenTimeMinutes,
+      social_media_minutes: usageData.socialMediaMinutes || 0,
+      entertainment_minutes: usageData.entertainmentMinutes || 0,
+      productivity_minutes: usageData.productivityMinutes || 0,
+      other_minutes: usageData.otherMinutes || 0,
+      is_baseline: usageData.isBaseline || false,
+    }, {
+      onConflict: 'user_id,tracking_date',
+      ignoreDuplicates: false
+    })
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function getPhoneUsageReductionPercentage(userId: string) {
+  const { data, error } = await supabase
+    .rpc('get_phone_usage_reduction_percentage', { user_id: userId });
+  
+  if (error) throw error;
+  return Math.round(data || 0);
+}
+
+export async function getBaselinePhoneUsage(userId: string) {
+  const { data, error } = await supabase
+    .rpc('get_baseline_phone_usage', { user_id: userId });
+  
+  if (error) throw error;
+  return data || 0;
+}
+
+export async function getLatestPhoneUsage(userId: string) {
+  const { data, error } = await supabase
+    .rpc('get_latest_phone_usage', { user_id: userId });
+  
+  if (error) throw error;
+  return data || 0;
 } 

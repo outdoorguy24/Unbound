@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } else if (segments[1] === "SignupOptionsScreen") {
 
               console.log("2222 ====> SignupOptionsScreen");
-              router.replace("/(onboarding)/BiometricScreen");
+              router.replace("/(onboarding)/ScreenTimePermission");
 
             } else if (segments[1] === "login") {
 
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } else if (segments[1] === "SignupOptionsScreen") {
 
               console.log("3333 ====> SignupOptionsScreen");
-              router.replace("/(onboarding)/BiometricScreen");
+              router.replace("/(onboarding)/ScreenTimePermission");
 
             } else if (segments[1] === "login") {
 

@@ -73,6 +73,28 @@ class ScreenTimeManagerService {
     }
     return NativeScreenTimeManager.setAppDeletionProtection(enabled);
   }
+
+  // Screen Time usage data functions
+  async getScreenTimeUsageData() {
+    if (!this.isAvailable()) {
+      throw new Error('ScreenTimeManager is not available on this platform');
+    }
+    return NativeScreenTimeManager.getScreenTimeUsageData();
+  }
+
+  async getWeeklyScreenTimeUsage() {
+    if (!this.isAvailable()) {
+      throw new Error('ScreenTimeManager is not available on this platform');
+    }
+    return NativeScreenTimeManager.getWeeklyScreenTimeUsage();
+  }
+
+  async getDailyScreenTimeUsage() {
+    if (!this.isAvailable()) {
+      throw new Error('ScreenTimeManager is not available on this platform');
+    }
+    return NativeScreenTimeManager.getDailyScreenTimeUsage();
+  }
 }
 
 export default new ScreenTimeManagerService();

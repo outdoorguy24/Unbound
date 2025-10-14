@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 const StartBlockLoadingScreen = () => {
-  const { duration } = useLocalSearchParams();
+  const { duration, pornBlocking } = useLocalSearchParams();
   const spinValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -28,7 +28,7 @@ const StartBlockLoadingScreen = () => {
     setTimeout(() => {
       router.push({
         pathname: '/defend/FocusSession',
-        params: { duration: duration }
+        params: { duration: duration, pornBlocking: pornBlocking }
       });
     }, 3000)
 

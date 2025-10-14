@@ -1,22 +1,23 @@
-import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
-  Switch,
-} from "react-native";
 import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
-import { saveUserProfile } from "@/lib/supabaseUserProfile";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { saveUserProfile } from "@/lib/supabaseUserProfile";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import PhoneUsageTracker from "../services/PhoneUsageTracker";
 
 const { width } = Dimensions.get("window");
 
@@ -58,7 +59,12 @@ const ScreenProfileSetup = () => {
         scrollTimes,
         concerns,
       });
-      router.replace("/(tabs)/camp");
+      
+      // Start phone usage tracking after profile setup is complete
+      await PhoneUsageTracker.startTracking(user.id);
+      
+      // Navigate to Screen Time permission screen
+      router.replace("/(onboarding)/ScreenTimePermission");
     } catch (e: any) {
       setError(e.message || "Failed to save profile");
     } finally {

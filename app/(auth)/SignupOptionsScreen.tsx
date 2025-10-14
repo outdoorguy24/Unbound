@@ -1,30 +1,75 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-} from "react-native";
 import { scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
+import { appleAuth } from '@invertase/react-native-apple-authentication';
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
 const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
   const insets = useSafeAreaInsets();
   const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignup = async () => {
     try {
       await login();
+      // Navigate to Screen Time permission screen after successful signup
+      router.push("/(onboarding)/ScreenTimePermission");
     } catch (err: any) {
       console.log(err.message || "Signup failed");
     } finally {
       
+    }
+  };
+
+  const handleAppleSignUp = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      if (!appleAuth.isSupported) {
+        setError('Apple Sign In is not available on this device');
+        return;
+      }
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+      const { identityToken, nonce } = appleAuthRequestResponse;
+      if (identityToken) {
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: identityToken,
+          nonce: nonce,
+        });
+        if (error) {
+          setError(error.message || 'Apple Sign Up failed');
+        } else {
+          // Navigate to Screen Time permission screen after successful signup
+          router.push("/(onboarding)/ScreenTimePermission");
+        }
+      } else {
+        setError('Apple Sign Up was cancelled');
+      }
+    } catch (err: any) {
+      if (err.code === 'ERR_REQUEST_CANCELED') {
+        setError(null);
+      } else {
+        setError('Apple Sign Up failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -92,6 +137,8 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       <TouchableOpacity
         style={[styles.item, styles.itemActive]}
         activeOpacity={0.8}
+        onPress={handleAppleSignUp}
+        disabled={isLoading}
       >
         <View style={styles.leftRow}>
           <View style={styles.buttonText}>

@@ -1,4 +1,6 @@
 import { scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import { recordPornBlockingSession } from "@/lib/userTracking";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -15,16 +17,27 @@ const { width } = Dimensions.get("window");
 
 const FocusSessionScreen = () => {
   const insets = useSafeAreaInsets();
-  const { duration } = useLocalSearchParams();
+  const { duration, pornBlocking } = useLocalSearchParams();
   const [isBlocking, setIsBlocking] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Start ScreenTime blocking
     const startBlocking = async () => {
       try {
         if (ScreenTimeManager.isAvailable()) {
-          await ScreenTimeManager.requestAuthorization('individual');
+          // Screen Time permissions should already be granted from onboarding
           setIsBlocking(true);
+        }
+        
+        // Track porn blocking session if enabled
+        if (pornBlocking === 'true' && user?.id) {
+          try {
+            await recordPornBlockingSession(user.id);
+            console.log('Porn blocking session recorded');
+          } catch (error) {
+            console.error('Failed to record porn blocking session:', error);
+          }
         }
       } catch (error) {
         console.error('Failed to start blocking:', error);
@@ -32,7 +45,7 @@ const FocusSessionScreen = () => {
     };
     
     startBlocking();
-  }, [])
+  }, [pornBlocking, user?.id])
   
   const FocusTimer = () => {
     const totalHours = duration ? parseInt(duration as string) : 2; // Default to 2 hours if no duration

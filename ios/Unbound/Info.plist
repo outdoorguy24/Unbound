@@ -60,6 +60,11 @@
 	<string>Unbound uses the camera to capture profile photos and enhance your digital wellness experience.</string>
 	<key>NSFamilyControlsUsageDescription</key>
 	<string>Unbound uses Screen Time controls to help you block distracting apps &amp; get your life back.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>background-processing</string>
+		<string>background-fetch</string>
+	</array>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
