@@ -1,20 +1,22 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
+import { saveUserResponse } from "@/lib/userResponses";
 import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     Dimensions,
-    FlatList,
     Image,
     ImageBackground,
+    Keyboard,
     Pressable,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    TouchableWithoutFeedback,
+    View
 } from "react-native";
 import RenderHTML, { defaultSystemFonts } from "react-native-render-html";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -52,6 +54,59 @@ const CampScreen = () => {
   const [loading, setLoading] = useState(true);
   const [appData, setAppData] = useState<any[]>([]);
   const [appDataLoading, setAppDataLoading] = useState(true);
+  
+  // User response state
+  const [responseText, setResponseText] = useState("");
+  const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
+  const responseInputRef = useRef<TextInput>(null);
+
+  // Helper function to count words
+  const getWordCount = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  // Check if response is valid (not empty and under 100 words)
+  const isResponseValid = responseText.trim().length > 0 && getWordCount(responseText) <= 100;
+
+  // Memoized onChangeText function to prevent re-renders
+  const handleResponseTextChange = useCallback((text: string) => {
+    console.log('TextInput onChangeText:', text);
+    setResponseText(text);
+  }, []);
+
+  // Handle response submission
+  const handleSubmitResponse = async () => {
+    if (!user?.id || !isResponseValid || isSubmittingResponse) return;
+
+    setIsSubmittingResponse(true);
+    try {
+      // Check if this is a mock user (from AuthContext) or real Supabase user
+      const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
+      
+      if (isMockUser) {
+        // For mock users, just log the response
+        console.log('Mock user response submitted:', {
+          userId: user.id,
+          responseText: responseText.trim(),
+          wordCount: getWordCount(responseText),
+          timestamp: new Date().toISOString()
+        });
+      } else {
+        // For real Supabase users, save to database
+        await saveUserResponse(user.id, responseText.trim());
+        console.log('Response saved to Supabase for user:', user.id);
+      }
+      
+      // Clear the input after successful submission
+      setResponseText("");
+      
+    } catch (error) {
+      console.error('Error submitting response:', error);
+      // You could add error handling here (show alert, etc.)
+    } finally {
+      setIsSubmittingResponse(false);
+    }
+  };
 
   // Fetch real data
   useEffect(() => {
@@ -656,28 +711,24 @@ const CampScreen = () => {
         }}
       >
 
-        <FlatList
-          style={{marginVertical: scale(20)}}
-          data={DATA}
-          keyExtractor={(i) => i.id}
-          renderItem={({ item }) => <UsageRow item={item} maxMinutes={maxMinutes} />}
-          ListEmptyComponent={
-            appDataLoading ? (
-              <View style={{ padding: scale(20), alignItems: 'center' }}>
-                <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
-                  Loading app usage data...
-                </Text>
-              </View>
-            ) : (
-              <View style={{ padding: scale(20), alignItems: 'center' }}>
-                <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
-                  No data available
-                </Text>
-              </View>
-            )
-          }
-          ListFooterComponent={
-            DATA.length > 0 ? (
+        <View style={{marginVertical: scale(20)}}>
+          {appDataLoading ? (
+            <View style={{ padding: scale(20), alignItems: 'center' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
+                Loading app usage data...
+              </Text>
+            </View>
+          ) : DATA.length === 0 ? (
+            <View style={{ padding: scale(20), alignItems: 'center' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
+                No data available
+              </Text>
+            </View>
+          ) : (
+            <>
+              {DATA.map((item) => (
+                <UsageRow key={item.id} item={item} maxMinutes={maxMinutes} />
+              ))}
               <TouchableOpacity
                 activeOpacity={0.7}
                 onPress={() => {}}
@@ -693,9 +744,9 @@ const CampScreen = () => {
                   Show more
                 </Text>
               </TouchableOpacity>
-            ) : null
-          }
-        />
+            </>
+          )}
+        </View>
 
 
       </ImageBackground>
@@ -783,134 +834,18 @@ const CampScreen = () => {
 
         </View>
 
-        <FlatList
-          contentContainerStyle={{marginTop: scale(16)}}
-          data={data}
-          renderItem={StatCard}
-          ItemSeparatorComponent={() => <View style={{ width: scale(12) }} />}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
-      </>
-    );
-  }
-
-  function ResponseCard() {
-    return (
-      <>
-        <View
-          // source={require('../../assets/new-images/most-used-app-bg.png')}
-          style={{
-            borderWidth: 1,
-            borderColor: "rgba(255, 255, 255, 0.2)",
-            borderRadius: 6,
-            padding: scale(20),
-            marginTop: scale(16),
-          }}
-        >
-
-          <View style={{
-          flexDirection: 'row', 
-          alignItems: 'center',
-          marginBottom: scale(28),
-        }}>
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(22),
-            fontFamily: "ZillaSlab-Medium",
-            flex: 1,
-          }}>
-          {"What have you replaced screen time with?"}
-          </Text>
-
-          </View>
-          {/* Response box */}
-          <TextInput
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.7)", 
-              borderRadius: 6,
-              paddingVertical: scale(18),
-              paddingHorizontal: scale(20),
-              color: "#000",
-              fontSize: scale(16),
-              fontFamily: "ZillaSlab-Medium",
-            }}
-            placeholder="Your response..."
-            placeholderTextColor="rgba(0,0,0,0.4)"
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.primaryRespBtn,
-            ]}
-            onPress={() => {}}
-            activeOpacity={0.9}
-          >
-
-            <View style={{
-              flexDirection: 'row', 
-              alignItems: 'center',
-            }}>
-              <Image
-                source={require('../../assets/new-images/send-icon.png')}
-                style={{
-                  width: scale(16),
-                  height: scale(16),
-                  marginRight: scale(12),
-                }}
-              />
-              <Text style={styles.primaryText}>{"Submit"}</Text>
+        <View style={{marginTop: scale(16), flexDirection: 'row'}}>
+          {data.map((item, index) => (
+            <View key={item.id}>
+              <StatCard item={item} />
+              {index < data.length - 1 && <View style={{ width: scale(12) }} />}
             </View>
-          </TouchableOpacity>
-
-
-           {/* Header */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: scaleVertical(62), marginBottom: scaleVertical(16) }}>
-            <Image
-              source={require('../../assets/new-images/user-dummy-img.png')}
-              style={{
-                width: scale(40),
-                height: scale(40),
-                borderRadius: scale(20),
-                marginRight: scale(12),
-              }}
-            />
-            <View>
-              <Text style={{ 
-                color: "#fff", 
-                fontSize: scale(18),
-                fontFamily: "ZillaSlab-Medium",
-              }}>
-                Mark in Denver
-              </Text>
-              {/* <Text style={{ 
-                color: "rgba(255, 255, 255, 0.5)", 
-                fontSize: scale(14),
-                fontFamily: "ZillaSlab-Regular", 
-                marginTop: scale(2) 
-              }}>
-                4 hours ago
-              </Text> */}
-            </View>
-          </View>
-
-          {/* Message */}
-          <Text style={{ 
-            color: "#fff", 
-            fontSize: scale(16),
-            fontFamily: "ZillaSlab-Medium", 
-            marginBottom: scaleVertical(10),
-          }}>
-            “Finally called my mom to say hi instead of doomscrolling”
-          </Text>
-
+          ))}
         </View>
-
-        
       </>
     );
   }
+
   
   return (
     <View style={styles.safe}>
@@ -928,8 +863,10 @@ const CampScreen = () => {
           marginTop: insets.top + scaleVertical(24),
           marginHorizontal: scale(24),
         }}
+        contentContainerStyle={{ paddingBottom: scale(100) }}
         showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="none"
       >
         <TouchableOpacity style={{
             flexDirection: 'row', 
@@ -1001,9 +938,161 @@ const CampScreen = () => {
         <ChecklistCard />
         <MostUsedAppsCard />
         <CommunityStatsCard />
-        <ResponseCard />
 
       </ScrollView>
+      
+      {/* Move TextInput outside ScrollView */}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={{
+          marginHorizontal: scale(24),
+          marginBottom: scale(16),
+        }}>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: "rgba(255, 255, 255, 0.2)",
+              borderRadius: 6,
+              padding: scale(20),
+            }}
+          >
+          <View style={{
+            flexDirection: 'row', 
+            alignItems: 'center',
+            marginBottom: scale(28),
+          }}>
+            <Text style={{
+              color: "#FFFFFF",
+              fontSize: scale(22),
+              fontFamily: "ZillaSlab-Medium",
+              flex: 1,
+            }}>
+              {"What have you replaced screen time with?"}
+            </Text>
+          </View>
+          
+          {/* Response box */}
+          <View style={{ position: 'relative', zIndex: 1000 }}>
+            <TextInput
+              ref={responseInputRef}
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.7)", 
+                borderRadius: 6,
+                paddingVertical: scale(18),
+                paddingHorizontal: scale(20),
+                color: "#000",
+                fontSize: scale(16),
+                fontFamily: "ZillaSlab-Medium",
+                minHeight: scale(80),
+                zIndex: 1001,
+              }}
+              placeholder="Share what you've been doing instead..."
+              placeholderTextColor="rgba(0,0,0,0.4)"
+              value={responseText}
+              onChangeText={handleResponseTextChange}
+              multiline
+              maxLength={500}
+              editable={!isSubmittingResponse}
+              blurOnSubmit={false}
+              returnKeyType="default"
+              textAlignVertical="top"
+              selectTextOnFocus={true}
+              autoCorrect={false}
+              autoCapitalize="sentences"
+              onFocus={() => {
+                console.log('TextInput focused');
+              }}
+              onBlur={() => {
+                console.log('TextInput blurred');
+              }}
+              onTouchStart={(e) => {
+                console.log('TextInput touch start');
+                e.stopPropagation();
+              }}
+              onTouchEnd={(e) => {
+                console.log('TextInput touch end');
+                e.stopPropagation();
+              }}
+              onSelectionChange={() => {
+                console.log('TextInput selection changed');
+              }}
+              onLayout={() => {
+                console.log('TextInput layout changed');
+              }}
+            />
+          </View>
+          
+          {/* Word count indicator */}
+          <Text style={{
+            color: getWordCount(responseText) > 100 ? "#FF4444" : "rgba(255, 255, 255, 0.6)",
+            fontSize: scale(12),
+            fontFamily: "ZillaSlab-Medium",
+            textAlign: "right",
+            marginTop: scale(4),
+          }}>
+            {getWordCount(responseText)}/100 words
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              styles.primaryRespBtn,
+              !isResponseValid && { opacity: 0.5 }
+            ]}
+            onPress={handleSubmitResponse}
+            activeOpacity={0.9}
+            disabled={!isResponseValid || isSubmittingResponse}
+          >
+            <View style={{
+              flexDirection: 'row', 
+              alignItems: 'center',
+            }}>
+              <Image
+                source={require('../../assets/new-images/send-icon.png')}
+                style={{
+                  width: scale(16),
+                  height: scale(16),
+                  marginRight: scale(12),
+                }}
+              />
+              <Text style={styles.primaryText}>
+                {isSubmittingResponse ? "Submitting..." : "Submit"}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Example response from other users */}
+          <View style={{ flexDirection: "row", alignItems: "center", marginTop: scaleVertical(32), marginBottom: scaleVertical(16) }}>
+            <Image
+              source={require('../../assets/new-images/user-dummy-img.png')}
+              style={{
+                width: scale(40),
+                height: scale(40),
+                borderRadius: scale(20),
+                marginRight: scale(12),
+              }}
+            />
+            <View>
+              <Text style={{ 
+                color: "#fff", 
+                fontSize: scale(18),
+                fontFamily: "ZillaSlab-Medium",
+              }}>
+                Mark in Denver
+              </Text>
+            </View>
+          </View>
+
+          {/* Example response text */}
+          <Text style={{ 
+            color: "#fff", 
+            fontSize: scale(16),
+            fontFamily: "ZillaSlab-Medium", 
+            marginBottom: scaleVertical(10),
+          }}>
+            "Finally called my mom to say hi instead of doomscrolling"
+          </Text>
+        </View>
+        </View>
+      </TouchableWithoutFeedback>
       
       <TouchableOpacity
         style={[
