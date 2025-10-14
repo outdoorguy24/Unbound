@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import {
     Dimensions,
     Image,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
     StyleSheet,
@@ -14,6 +15,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -87,7 +89,8 @@ const ScreenProfileSetup = () => {
   };
 
   return (
-    <View style={styles.safe}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.safe}>
       <Image
         source={require("../../assets/new-images/onboarding-screen-4.png")}
         style={styles.image}
@@ -199,6 +202,7 @@ const ScreenProfileSetup = () => {
 
       
     </View>
+    </TouchableWithoutFeedback>
   );
 };
 
