@@ -1,9 +1,10 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
+import { getUserProfile } from "@/lib/supabaseUserProfile";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import * as StoreReview from 'expo-store-review';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dimensions,
     FlatList,
@@ -23,6 +24,37 @@ const ProfileScreen = () => {
   const insets = useSafeAreaInsets();
   const { logout, user } = useAuth();
   const [showAlert, setShowAlert] = useState(false);
+  const [userName, setUserName] = useState("John Muir"); // Default fallback
+
+  // Fetch user name on component mount
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (!user?.id) return;
+
+      try {
+        // Try to fetch from Supabase first (works for both real and mock users who completed profile setup)
+        const profile = await getUserProfile(user.id);
+        if (profile?.first_name) {
+          setUserName(profile.first_name);
+          return;
+        }
+        
+        // If no profile found, check if this is a mock user and use AuthContext name
+        // But only if it's not an email (AuthContext stores email as name)
+        const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
+        if (isMockUser && user.name && !user.name.includes('@')) {
+          setUserName(user.name);
+        }
+        // If user.name is an email or no name found, keep default "John Muir"
+        
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+        // Keep default "John Muir" on error
+      }
+    };
+
+    fetchUserName();
+  }, [user?.id, user?.name]);
 
   type Row = {
     id: string;
@@ -191,7 +223,7 @@ const ProfileScreen = () => {
         style={styles.overlayImage}
       />
 
-      <Text style={[styles.slogan, { marginTop: insets.top + scaleVertical(16) }]}>Jordan Peterson</Text>
+      <Text style={[styles.slogan, { marginTop: insets.top + scaleVertical(16) }]}>{userName}</Text>
       <BlackSettingsList />
 
       {showAlert && 
