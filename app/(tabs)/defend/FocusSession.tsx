@@ -1,51 +1,70 @@
+import { scale, scaleVertical } from "@/constants/Scale";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    View
 } from "react-native";
-import { scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import ScreenTimeManager from "../../services/ScreenTimeManager";
 
 const { width } = Dimensions.get("window"); 
 
 const FocusSessionScreen = () => {
   const insets = useSafeAreaInsets();
+  const { duration } = useLocalSearchParams();
+  const [isBlocking, setIsBlocking] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
-      router.push('/FocusSessionCompleted')
-    }, 3000)
+    // Start ScreenTime blocking
+    const startBlocking = async () => {
+      try {
+        if (ScreenTimeManager.isAvailable()) {
+          await ScreenTimeManager.requestAuthorization('individual');
+          setIsBlocking(true);
+        }
+      } catch (error) {
+        console.error('Failed to start blocking:', error);
+      }
+    };
+    
+    startBlocking();
   }, [])
   
-  const FocusTimer = ({
-    totalHours = 5,       // total duration for the bar
-    startAtSeconds = 4 * 60 * 60,   // where to start the timer (0 = from the beginning)
-  }) => {
+  const FocusTimer = () => {
+    const totalHours = duration ? parseInt(duration as string) : 2; // Default to 2 hours if no duration
     const totalSeconds = totalHours * 60 * 60;
-    const [elapsed, setElapsed] = useState(startAtSeconds);
+    const [remaining, setRemaining] = useState(totalSeconds);
     const timerRef = useRef<NodeJS.Timer | null>(null);
 
     useEffect(() => {
       timerRef.current = setInterval(() => {
-        setElapsed((s) => (s < totalSeconds ? s + 1 : s));
+        setRemaining((s) => {
+          if (s <= 1) {
+            // Timer finished - stop blocking and navigate to completion
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsBlocking(false);
+            router.push('/FocusSessionCompleted');
+            return 0;
+          }
+          return s - 1;
+        });
       }, 1000);
+      
       return () => {
         if (timerRef.current) clearInterval(timerRef.current);
       };
     }, [totalSeconds]);
 
     const pad = (n: number) => String(n).padStart(2, "0");
-    const hrs = Math.floor(elapsed / 3600);
-    const mins = Math.floor((elapsed % 3600) / 60);
-    const secs = elapsed % 60;
+    const hrs = Math.floor(remaining / 3600);
+    const mins = Math.floor((remaining % 3600) / 60);
+    const secs = remaining % 60;
 
-    const progress = Math.min(elapsed / totalSeconds, 1);
+    const progress = Math.max((totalSeconds - remaining) / totalSeconds, 0);
     const barHeight = 8;
     const barWidth = width - 32; // 16px side margins
 

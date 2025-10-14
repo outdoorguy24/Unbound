@@ -2,13 +2,15 @@ import { scale, scaleVertical } from "@/constants/Scale";
 import { router } from "expo-router";
 import React from "react";
 import {
-  View,
-  StyleSheet,
-  Image,
+  Alert,
+  Clipboard,
   Dimensions,
-  TouchableOpacity,
-  Text,
+  Image,
   Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,6 +18,17 @@ const { width } = Dimensions.get("window");
 
 const ShareScreen = () => {
   const insets = useSafeAreaInsets();
+
+  const handleCopyLink = () => {
+    try {
+      const appStoreLink = "https://apps.apple.com/app/unbound/id123456789"; // Placeholder link
+      Clipboard.setString(appStoreLink);
+      Alert.alert("Link Copied!", "The app store link has been copied to your clipboard.");
+    } catch (error) {
+      console.error("Error copying link:", error);
+      Alert.alert("Error", "Failed to copy link to clipboard.");
+    }
+  };
   
   return (
     <View style={styles.safe}>
@@ -92,6 +105,7 @@ const ShareScreen = () => {
               marginBottom: scaleVertical(16)
             }]}
             activeOpacity={0.8}
+            onPress={handleCopyLink}
           >
             <View style={{
               flex: 1,

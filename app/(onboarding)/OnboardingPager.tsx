@@ -1,8 +1,22 @@
+import { height, scale, scaleVertical } from "@/constants/Scale";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { supabase } from "@/lib/supabaseClient";
+import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import PagerView from "react-native-pager-view";
-import ParadoxScreen from "./ParadoxScreen";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Screen1 from "./Screen1";
+import Screen10 from "./Screen10";
+import Screen11 from "./Screen11";
+import Screen12 from "./Screen12";
+import Screen13 from "./Screen13";
+import Screen14 from "./Screen14";
+import Screen15 from "./Screen15";
+import Screen16 from "./Screen16";
+import Screen17 from "./Screen17";
+import Screen18 from "./Screen18";
+import Screen19 from "./Screen19";
 import Screen2 from "./Screen2";
 import Screen3 from "./Screen3";
 import Screen4 from "./Screen4";
@@ -11,21 +25,6 @@ import Screen6 from "./Screen6";
 import Screen7 from "./Screen7";
 import Screen8 from "./Screen8";
 import Screen9 from "./Screen9";
-import Screen10 from "./Screen10";
-import Screen11 from "./Screen11";
-import Screen12 from "./Screen12";
-import Screen13 from "./Screen13";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useOnboarding } from "@/contexts/OnboardingContext";
-import { supabase } from "@/lib/supabaseClient";
-import Screen14 from "./Screen14";
-import Screen15 from "./Screen15";
-import Screen17 from "./Screen17";
-import Screen16 from "./Screen16";
-import Screen18 from "./Screen18";
-import Screen19 from "./Screen19";
-import { router } from "expo-router";
 
 const SCREEN_ORDER = [
   Screen1,
@@ -90,9 +89,34 @@ export default function OnboardingPager() {
   }, [page, traps]);
 
   const toggleOption = (key: string) => {
-    setTraps(
-      traps.includes(key) ? traps.filter((k) => k !== key) : [...traps, key]
-    );
+    if (key === "all") {
+      if (traps.includes("all")) {
+        // If "all" is selected, deselect everything
+        setTraps([]);
+      } else {
+        // If "all" is not selected, select all options
+        setTraps(["social", "porn", "youtube", "news", "gaming", "all"]);
+      }
+    } else {
+      // Handle individual option selection
+      const newTraps = traps.includes(key) 
+        ? traps.filter((k) => k !== key) 
+        : [...traps, key];
+      
+      // Remove "all" if it was selected and we're deselecting an individual option
+      const filteredTraps = newTraps.filter((k) => k !== "all");
+      
+      // Check if all individual options are now selected
+      const allIndividualOptions = ["social", "porn", "youtube", "news", "gaming"];
+      const allSelected = allIndividualOptions.every(option => filteredTraps.includes(option));
+      
+      // If all individual options are selected, add "all" back
+      if (allSelected) {
+        setTraps([...filteredTraps, "all"]);
+      } else {
+        setTraps(filteredTraps);
+      }
+    }
   };
 
   //
@@ -112,11 +136,34 @@ export default function OnboardingPager() {
   }, [page, scrollTimes]);
 
   const toggleOptionScrollTimes = (key: string) => {
-    setScrollTimes(
-      scrollTimes.includes(key)
-        ? scrollTimes.filter((k) => k !== key)
-        : [...scrollTimes, key]
-    );
+    if (key === "all") {
+      if (scrollTimes.includes("all")) {
+        // If "all" is selected, deselect everything
+        setScrollTimes([]);
+      } else {
+        // If "all" is not selected, select all options
+        setScrollTimes(["morning", "work", "evening", "latenight", "all"]);
+      }
+    } else {
+      // Handle individual option selection
+      const newScrollTimes = scrollTimes.includes(key) 
+        ? scrollTimes.filter((k) => k !== key) 
+        : [...scrollTimes, key];
+      
+      // Remove "all" if it was selected and we're deselecting an individual option
+      const filteredScrollTimes = newScrollTimes.filter((k) => k !== "all");
+      
+      // Check if all individual options are now selected
+      const allIndividualOptions = ["morning", "work", "evening", "latenight"];
+      const allSelected = allIndividualOptions.every(option => filteredScrollTimes.includes(option));
+      
+      // If all individual options are selected, add "all" back
+      if (allSelected) {
+        setScrollTimes([...filteredScrollTimes, "all"]);
+      } else {
+        setScrollTimes(filteredScrollTimes);
+      }
+    }
   };
 
   //
@@ -136,11 +183,34 @@ export default function OnboardingPager() {
   }, [concerns, page]);
 
   const toggleOptionConcerns = (option: string) => {
-    setConcerns(
-      concerns.includes(option)
-        ? concerns.filter((o) => o !== option)
-        : [...concerns, option]
-    );
+    if (option === "all") {
+      if (concerns.includes("all")) {
+        // If "all" is selected, deselect everything
+        setConcerns([]);
+      } else {
+        // If "all" is not selected, select all options
+        setConcerns(["choose_screen_over_friends", "brain_feels_fried", "turning_lazy", "wasting_life", "all"]);
+      }
+    } else {
+      // Handle individual option selection
+      const newConcerns = concerns.includes(option) 
+        ? concerns.filter((o) => o !== option) 
+        : [...concerns, option];
+      
+      // Remove "all" if it was selected and we're deselecting an individual option
+      const filteredConcerns = newConcerns.filter((o) => o !== "all");
+      
+      // Check if all individual options are now selected
+      const allIndividualOptions = ["choose_screen_over_friends", "brain_feels_fried", "turning_lazy", "wasting_life"];
+      const allSelected = allIndividualOptions.every(opt => filteredConcerns.includes(opt));
+      
+      // If all individual options are selected, add "all" back
+      if (allSelected) {
+        setConcerns([...filteredConcerns, "all"]);
+      } else {
+        setConcerns(filteredConcerns);
+      }
+    }
   };
 
   //

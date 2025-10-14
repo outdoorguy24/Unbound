@@ -1,25 +1,23 @@
+import { height, scale, scaleVertical } from "@/constants/Scale";
+import { BlurView } from "expo-blur";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Modal,
-  TouchableWithoutFeedback,
-  Keyboard,
-  TextInput,
-  Alert,
-  Linking,
+    Alert,
+    Dimensions,
+    Image,
+    Linking,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View
 } from "react-native";
-import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { BlurView } from "expo-blur";
 
 const { width } = Dimensions.get("window");
 const CONTACT_PHONE = process.env.EXPO_PUBLIC_CONTACT_PHONE || "+19164207262"; // Unbound contact number
@@ -38,6 +36,10 @@ const FounderScreen = () => {
   };
 
   const handleCancel = () => setIsMessageOpen(false);
+
+  const handleBookCall = () => {
+    Linking.openURL('https://tidycal.com/3z9gzwm/15-minute-meeting');
+  };
 
   const handleSendText = () => {
     // Format the phone number to ensure it works on all devices
@@ -219,7 +221,7 @@ const FounderScreen = () => {
               marginBottom: scaleVertical(16)
             }]}
             activeOpacity={0.8}
-            onPress={handleSend}
+            onPress={handleSendText}
           >
             <View style={{
               flex: 1,
@@ -288,7 +290,7 @@ const FounderScreen = () => {
               borderColor: "rgba(255, 255, 255, 0.2)",
             }]}
             activeOpacity={0.8}
-            onPress={handleSendText}
+            onPress={handleBookCall}
           >
             <View style={{
               flex: 1,

@@ -1,16 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
 import { scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import React from "react";
+import {
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window"); 
 
@@ -49,7 +48,7 @@ const SavedFocusSessionScreen = () => {
          {marginTop: -scaleVertical(24)}
         ]}
         onPress={() => {
-          router.navigate('/defend')
+          router.navigate('/(tabs)/camp')
         }}
         activeOpacity={0.9}
         >

@@ -1,25 +1,22 @@
+import { scale, scaleVertical } from "@/constants/Scale";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
-  ScrollView,
-  Switch,
-  Platform
+    Dimensions,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
-import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 const { width } = Dimensions.get("window"); 
 
 const BlockNowScreen = () => {
   const insets = useSafeAreaInsets();
+  const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
 
   const DURATION_OPTIONS = [
     { id: "2", label: "2 hour block" },
@@ -29,14 +26,12 @@ const BlockNowScreen = () => {
   ];
 
   const DurationList = () => {
-    const [selectedId, setSelectedId] = useState<string | null>(null);
-
     const renderItem = ({ item }: { item: (typeof DURATION_OPTIONS)[number] }) => {
-      const selected = selectedId === item.id;
+      const selected = selectedDuration === item.id;
 
       return (
         <TouchableOpacity
-          onPress={() => setSelectedId(item.id)}
+          onPress={() => setSelectedDuration(item.id)}
           activeOpacity={0.8}
           style={{
             backgroundColor: "rgba(44, 23, 7, 0.6)",
@@ -127,11 +122,18 @@ const BlockNowScreen = () => {
           <TouchableOpacity
             style={[
               styles.primaryBtn,
+              !selectedDuration && styles.buttonDisabled,
             ]}
             onPress={() => {
-              router.push('/defend/StartBlockLoading')
+              if (selectedDuration) {
+                router.push({
+                  pathname: '/defend/StartBlockLoading',
+                  params: { duration: selectedDuration }
+                });
+              }
             }}
             activeOpacity={0.9}
+            disabled={!selectedDuration}
           >
             <Text style={styles.primaryText}>{"Start now"}</Text>
           </TouchableOpacity>
@@ -196,6 +198,10 @@ const styles = StyleSheet.create({
     borderRadius: scale(20),
     justifyContent: "center",
     alignItems: "center",
+  },
+  buttonDisabled: {
+    backgroundColor: '#312B27',
+    opacity: 0.6,
   },
 });
 
