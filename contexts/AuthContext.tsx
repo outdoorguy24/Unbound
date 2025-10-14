@@ -158,8 +158,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const pushToken = await getStoredPushToken();
+      
+      // Generate a proper UUID for the user
+      const generateUUID = () => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+      
       const userData: User = {
-        id: "1",
+        id: generateUUID(),
         email,
         name,
         pushToken: pushToken || undefined,

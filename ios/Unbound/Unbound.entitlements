@@ -6,7 +6,5 @@
 	<string>development</string>
 	<key>com.apple.developer.family-controls</key>
 	<true/>
-	<key>com.apple.developer.device-activity</key>
-	<true/>
 </dict>
 </plist>

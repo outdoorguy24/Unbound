@@ -385,4 +385,26 @@ export async function getLatestPhoneUsage(userId: string) {
   
   if (error) throw error;
   return data || 0;
+}
+
+// App usage data functions
+export async function storeAppUsageData(userId: string, appsData: any[]) {
+  const { error } = await supabase
+    .rpc('store_app_usage_data', { 
+      user_id: userId, 
+      apps_data: appsData 
+    });
+  
+  if (error) throw error;
+}
+
+export async function getMostUsedApps(userId: string, limit: number = 5) {
+  const { data, error } = await supabase
+    .rpc('get_most_used_apps', { 
+      user_id: userId, 
+      limit_count: limit 
+    });
+  
+  if (error) throw error;
+  return data || [];
 } 

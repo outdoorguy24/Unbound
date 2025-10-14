@@ -35,7 +35,7 @@ const OPTIONS = [
   },
   {
     key: "enjoy",
-    label: "Enjoying with present moment",
+    label: "Enjoy the present moment",
     image: require("../../assets/new-images/icon_enjoy.png"),
   },
 ];

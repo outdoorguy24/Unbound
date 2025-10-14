@@ -10,6 +10,7 @@ export default function OnboardingLayout() {
         <Stack.Screen name="ScreenProfileSetup" />
         {/* <Stack.Screen name="Screen13" /> */}
         <Stack.Screen name="paywall-pricing" />
+        {/* Removed email verification screens */}
       </Stack>
     </OnboardingProvider>
   );

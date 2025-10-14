@@ -95,6 +95,13 @@ class ScreenTimeManagerService {
     }
     return NativeScreenTimeManager.getDailyScreenTimeUsage();
   }
+
+  async getMostUsedApps() {
+    if (!this.isAvailable()) {
+      throw new Error('ScreenTimeManager is not available on this platform');
+    }
+    return NativeScreenTimeManager.getMostUsedApps();
+  }
 }
 
 export default new ScreenTimeManagerService();

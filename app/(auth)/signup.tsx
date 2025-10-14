@@ -1,25 +1,25 @@
+import { height, scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
 
 const { width } = Dimensions.get("window");
 
 const SignupScreen = () => {
   const insets = useSafeAreaInsets();
+  const { signup } = useAuth();
     
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -48,29 +48,18 @@ const SignupScreen = () => {
     setIsLoading(true);
     setError(null);
 
-    // Validate email
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: pass,
-      });
-
-      if (error) {
-        if (error.message.includes('already registered')) {
-          setError('An account with this email already exists. Please login instead.');
-        } else {
-          setError(error.message || 'Signup failed. Please try again.');
-        }
-        // Reset fields on error
-        setEmail('');
-        setPass('');
-        setConfirm('');
-      } else {
-        // Signup successful - user will be automatically logged in
-        // The AuthContext will handle the redirect to onboarding
-      }
+      // Use AuthContext signup which bypasses email verification
+      await signup(email, pass, email); // Using email as name for now
+      
+      // Signup successful - AuthContext will handle navigation to profile setup
+      // No need to navigate here as AuthContext handles it
     } catch (err: any) {
-      setError('Network error. Please check your connection and try again.');
+      if (err.message?.includes('already registered')) {
+        setError('An account with this email already exists. Please login instead.');
+      } else {
+        setError(err.message || 'Signup failed. Please try again.');
+      }
       // Reset fields on error
       setEmail('');
       setPass('');
@@ -231,7 +220,7 @@ const SignupScreen = () => {
             onLayout={(e) => setButtonHeight(e.nativeEvent.layout.height)}
             onPress={handleSignup}
           >
-            <Text style={[styles.btnText, {opacity: canSubmit ? 1 : 0.5}]}>Verify email</Text>
+            <Text style={[styles.btnText, {opacity: canSubmit ? 1 : 0.5}]}>Create Account</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

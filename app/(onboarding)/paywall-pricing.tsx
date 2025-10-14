@@ -4,19 +4,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
-  ImageBackground,
-  Linking,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Purchases, {
-  CustomerInfo,
-  PurchasesOffering,
-  PurchasesPackage,
+    CustomerInfo,
+    PurchasesOffering,
+    PurchasesPackage,
 } from "react-native-purchases";
 
 const termsUrl = "https://yourdomain.com/terms";
@@ -117,7 +115,7 @@ export default function PaywallPricing() {
   const handlePurchase = async () => {
     // if (__DEV__ && !FORCE_PRODUCTION_MODE) {
     if (!FORCE_PRODUCTION_MODE) {
-      // Go to auth screen in dev mode
+      // Go to create account in dev mode
       router.push("/(auth)/SignupOptionsScreen");
       return;
     }
@@ -136,10 +134,9 @@ export default function PaywallPricing() {
       console.log("✅ Purchase completed, checking entitlements...");
 
       if (customerInfo.activeSubscriptions.length > 0) {
-        console.log("🎉 Active subscription found, navigating to app");
-        // Unlock app, navigate to main app
-        // router.replace("/(tabs)/camp");
-        router.push("/(auth)/SignupOptionsScreen");
+        console.log("🎉 Active subscription found, navigating to create account");
+        // Navigate to create account screen
+        router.replace("/(auth)/SignupOptionsScreen");
       } else {
         console.log("❌ No active subscription after purchase");
         setError(
