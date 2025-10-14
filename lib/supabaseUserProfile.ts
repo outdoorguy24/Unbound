@@ -4,7 +4,8 @@ export async function saveUserProfile(
   userId: string,
   firstName: string,
   city: string,
-  onboardingData: { traps: string[]; scrollTimes: string[]; concerns: string[] }
+  onboardingData: { traps: string[]; scrollTimes: string[]; concerns: string[] },
+  emailSubscriptionEnabled: boolean = true
 ) {
   const { error } = await supabase.from('user_profiles').upsert({
     user_id: userId,
@@ -13,6 +14,7 @@ export async function saveUserProfile(
     onboarding_traps: onboardingData.traps,
     onboarding_scroll_times: onboardingData.scrollTimes,
     onboarding_concerns: onboardingData.concerns,
+    email_subscription_enabled: emailSubscriptionEnabled,
   });
   if (error) throw error;
 }

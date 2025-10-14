@@ -1,6 +1,7 @@
 import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { saveUserProfile } from "@/lib/supabaseUserProfile";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -25,7 +26,7 @@ const ScreenProfileSetup = () => {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   
-  const [toggle, setToggle] = useState(false);
+  const [toggle, setToggle] = useState(true);
   const [bottomBarHeight, setBottomBarHeight] = useState(0);
   const [buttonHeight, setButtonHeight] = useState(0);
 
@@ -52,14 +53,29 @@ const ScreenProfileSetup = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // For mock users (from AuthContext), skip Supabase save and just proceed
-      // This avoids the row-level security policy error
-      console.log('Profile setup completed for user:', user.id);
-      console.log('Name:', name.trim(), 'City:', city.trim());
-      console.log('Onboarding data:', { traps, scrollTimes, concerns });
+      // Check if this is a mock user (from AuthContext) or real Supabase user
+      const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
       
-      // For mock users, skip phone usage tracking to avoid Supabase errors
-      console.log('Skipping phone usage tracking for mock user:', user.id);
+      if (isMockUser) {
+        // For mock users, skip Supabase save to avoid security policy errors
+        console.log('Profile setup completed for mock user:', user.id);
+        console.log('Name:', name.trim(), 'City:', city.trim());
+        console.log('Email subscription enabled:', toggle);
+        console.log('Onboarding data:', { traps, scrollTimes, concerns });
+        console.log('Skipping Supabase save for mock user');
+      } else {
+        // For real Supabase users, save to database
+        await saveUserProfile(user.id, name.trim(), city.trim(), {
+          traps,
+          scrollTimes,
+          concerns,
+        }, toggle);
+        
+        console.log('Profile setup completed for real user:', user.id);
+        console.log('Name:', name.trim(), 'City:', city.trim());
+        console.log('Email subscription enabled:', toggle);
+        console.log('Onboarding data:', { traps, scrollTimes, concerns });
+      }
       
       // Navigate to Screen Time permission screen
       router.replace("/(onboarding)/ScreenTimePermission");
