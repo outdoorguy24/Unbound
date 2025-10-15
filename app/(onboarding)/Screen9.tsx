@@ -12,25 +12,25 @@ import {
 const { height } = Dimensions.get("window");
 
 const Screen9 = ({ isActive }: { isActive?: boolean }) => {
-  // Animation values - Option 1: Gentle Fade-In with Slight Scale
-  const fadeAnim = useRef(new Animated.Value(0.8)).current;
-  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  // Animation values - Option 2: Soft Slide-Up with Fade
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(15)).current;
 
   useEffect(() => {
     // Only run animations when screen is active
     if (!isActive) return;
     
-    // Option 1: Gentle fade-in with slight scale
+    // Option 2: Soft slide-up with fade
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 600,
+        duration: 500,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 600,
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
@@ -48,7 +48,7 @@ const Screen9 = ({ isActive }: { isActive?: boolean }) => {
             styles.slogan,
             {
               opacity: fadeAnim,
-              transform: [{ scale: scaleAnim }],
+              transform: [{ translateY: slideAnim }],
             }
           ]}
         >
