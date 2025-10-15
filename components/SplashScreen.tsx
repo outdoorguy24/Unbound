@@ -1,4 +1,5 @@
 import { scale } from "@/constants/Scale";
+import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, Image, StyleSheet, Text, View } from "react-native";
 
@@ -23,6 +24,13 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
       typewriterInterval = setInterval(() => {
         if (currentIndex < fullText.length) {
           setDisplayedText(fullText.substring(0, currentIndex + 1));
+          
+          // Add haptic feedback for each letter (except spaces and line breaks)
+          const currentChar = fullText[currentIndex];
+          if (currentChar !== ' ' && currentChar !== '\n') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
+          
           currentIndex++;
         } else {
           if (typewriterInterval) {
@@ -73,6 +81,13 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
     const taglineInterval = setInterval(() => {
       if (currentIndex < fullTagline.length) {
         setDisplayedTagline(fullTagline.substring(0, currentIndex + 1));
+        
+        // Add haptic feedback for each letter (except spaces and line breaks)
+        const currentChar = fullTagline[currentIndex];
+        if (currentChar !== ' ' && currentChar !== '\n') {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        
         console.log('Tagline progress:', currentIndex + 1, '/', fullTagline.length);
         currentIndex++;
       } else {

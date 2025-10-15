@@ -1,4 +1,5 @@
 import { scale, scaleVertical } from '@/constants/Scale';
+import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from 'react';
 import {
   Dimensions,
@@ -27,6 +28,13 @@ const Screen19 = ({ isActive }: { isActive?: boolean }) => {
       typewriterInterval = setInterval(() => {
         if (currentIndex < fullText.length) {
           setDisplayedText(fullText.substring(0, currentIndex + 1));
+          
+          // Add haptic feedback for each letter (except spaces and line breaks)
+          const currentChar = fullText[currentIndex];
+          if (currentChar !== ' ' && currentChar !== '\n') {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
+          
           currentIndex++;
         } else {
           if (typewriterInterval) {
