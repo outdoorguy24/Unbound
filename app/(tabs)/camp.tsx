@@ -19,6 +19,7 @@ import {
     Platform,
     Pressable,
     ScrollView,
+    Share,
     StyleSheet,
     Text,
     TextInput,
@@ -87,6 +88,24 @@ const CampScreen = () => {
   const handleResponseTextChange = (text: string) => {
     console.log('TextInput onChangeText:', text);
     setResponseText(text);
+  };
+
+  // Handle phone usage sharing
+  const handlePhoneUsageShare = async () => {
+    try {
+      const shareMessage = `I've reduced my phone usage by ${userStats.phoneUsageReduction}% since downloading Unbound! 🚀\n\nDownload Unbound to start your own journey: https://apps.apple.com/app/unbound`;
+      
+      const result = await Share.share({
+        message: shareMessage,
+        title: 'My Unbound Progress',
+      });
+
+      if (result.action === Share.sharedAction) {
+        console.log('Phone usage stat shared successfully');
+      }
+    } catch (error) {
+      console.error('Error sharing phone usage stat:', error);
+    }
   };
 
 
@@ -552,15 +571,23 @@ const CampScreen = () => {
               />
             </View>
           </View>
-          <Image
-            source={require("../../assets/new-images/dashboard-share.png")}
+          <TouchableOpacity
+            onPress={handlePhoneUsageShare}
             style={{
               position: 'absolute',
-              width: scale(16),
-              height: scale(16),
               right: scale(16),
+              padding: scale(4),
             }}
-          />
+            activeOpacity={0.7}
+          >
+            <Image
+              source={require("../../assets/new-images/dashboard-share.png")}
+              style={{
+                width: scale(16),
+                height: scale(16),
+              }}
+            />
+          </TouchableOpacity>
         </View>
         </>
   }
