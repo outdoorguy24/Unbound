@@ -1,6 +1,10 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
+import { getCommunityStats } from "@/lib/communityStats";
+import { getMonthlyProgress, getWeeklyProgress } from "@/lib/progressData";
+import { testDatabaseConnection } from "@/lib/testDatabaseConnection";
 import { saveUserResponse } from "@/lib/userResponses";
+import { getUserStats } from "@/lib/userStats";
 import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -54,6 +58,8 @@ const CampScreen = () => {
   const [loading, setLoading] = useState(true);
   const [appData, setAppData] = useState<any[]>([]);
   const [appDataLoading, setAppDataLoading] = useState(true);
+  const [weeklyProgressData, setWeeklyProgressData] = useState<any[]>([]);
+  const [monthlyProgressData, setMonthlyProgressData] = useState<any[]>([]);
   
   // User response state
   const [responseText, setResponseText] = useState("");
@@ -109,7 +115,20 @@ const CampScreen = () => {
     }
   };
 
-  // Fetch real data
+  // Test database connection on mount (development only)
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        await testDatabaseConnection();
+      } catch (error) {
+        console.log('Database connection test failed (expected for mock users):', error);
+      }
+    };
+    
+    testConnection();
+  }, []);
+
+  // Fetch dashboard data
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.id) {
@@ -118,26 +137,61 @@ const CampScreen = () => {
       }
 
       try {
-        // For mock users, use fallback data to avoid Supabase errors
-        console.log('Loading dashboard with mock data for user:', user.id);
+        // Check if this is a mock user (from AsyncStorage) or real Supabase user
+        const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
         
-        setUserStats({
-          savedToday: 2.5, // Mock data
-          totalSaved: 45.2, // Mock data
-          daysWithoutPorn: 7, // Mock data
-          streakDays: 3, // Mock data
-          monthlyHours: 12.8, // Mock data
-          allTimeHours: 45.2, // Mock data
-          phoneUsageReduction: 25, // Mock data
-        });
-        
-        setCommunityStats({
-          totalUsers: 1000, // Mock data
-          totalTimeSaved: 50000, // Mock data
-          weeklyHours: 1200, // Mock data
-          completedBlocks: 10000, // Mock data
-          goalHitRate: 80, // Mock data
-        });
+        if (isMockUser) {
+          // For mock users, use mock data
+          console.log('Loading dashboard with mock data for user:', user.id);
+          
+          setUserStats({
+            savedToday: 2.5,
+            totalSaved: 45.2,
+            daysWithoutPorn: 7,
+            streakDays: 3,
+            monthlyHours: 12.8,
+            allTimeHours: 45.2,
+            phoneUsageReduction: 25,
+          });
+          
+          setCommunityStats({
+            totalUsers: 1000,
+            totalTimeSaved: 50000,
+            weeklyHours: 1200,
+            completedBlocks: 10000,
+            goalHitRate: 80,
+          });
+
+          // Set mock progress data
+          setWeeklyProgressData([
+            { value: 3.2, label: "Week 1" },
+            { value: 4.5, label: "Week 2" },
+            { value: 2.6, label: "Week 3" },
+            { value: 2.5, label: "Week 4" },
+          ]);
+
+          setMonthlyProgressData([
+            { value: 11.3, label: "Oct 24" },
+            { value: 9.0, label: "Nov 24" },
+            { value: 12.8, label: "Dec 24" },
+            { value: 2.5, label: "Jan 25" },
+          ]);
+        } else {
+          // For real Supabase users, fetch real data
+          console.log('Loading dashboard with real data for user:', user.id);
+          
+          const [userStatsData, communityStatsData, weeklyData, monthlyData] = await Promise.all([
+            getUserStats(user.id),
+            getCommunityStats(),
+            getWeeklyProgress(user.id),
+            getMonthlyProgress(user.id)
+          ]);
+          
+          setUserStats(userStatsData);
+          setCommunityStats(communityStatsData);
+          setWeeklyProgressData(weeklyData);
+          setMonthlyProgressData(monthlyData);
+        }
         
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -222,18 +276,19 @@ const CampScreen = () => {
     return iconMap[iconName] || require("../../assets/new-images/facebook-icon.png"); // fallback
   };
 
-  const data = [
-    { value: 60, label: "Week 1" },
-    { value: 45, label: "Week 2" },
-    { value: 60, label: "Week 3" },
-    { value: 45, label: "Week 4" },
+  // Use real progress data if available, otherwise fallback to calculated data
+  const data = weeklyProgressData.length > 0 ? weeklyProgressData : [
+    { value: Math.round(userStats.monthlyHours * 0.25), label: "Week 1" },
+    { value: Math.round(userStats.monthlyHours * 0.35), label: "Week 2" },
+    { value: Math.round(userStats.monthlyHours * 0.20), label: "Week 3" },
+    { value: Math.round(userStats.monthlyHours * 0.20), label: "Week 4" },
   ];
 
-  const dataAllTime = [
-    { value: 50, label: "Oct 24" },
-    { value: 40, label: "Nov 24" },
-    { value: 55, label: "Dec 24" },
-    { value: 20, label: "Jan 25" },
+  const dataAllTime = monthlyProgressData.length > 0 ? monthlyProgressData : [
+    { value: Math.round(userStats.allTimeHours * 0.30), label: "Oct 24" },
+    { value: Math.round(userStats.allTimeHours * 0.25), label: "Nov 24" },
+    { value: Math.round(userStats.allTimeHours * 0.25), label: "Dec 24" },
+    { value: Math.round(userStats.allTimeHours * 0.20), label: "Jan 25" },
   ];
 
   type Stat = { label: string; value: string };
