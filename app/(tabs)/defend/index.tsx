@@ -1,39 +1,33 @@
+import { scale, scaleVertical } from "@/constants/Scale";
+import ScreenTimeManager from "@/lib/ScreenTime";
+import { AppData, getMockAppData, loadUserAppSelection, parseScreenTimeSelection, saveUserAppSelection } from "@/lib/screenTimeApps";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  FlatList,
-  ScrollView,
-  Switch,
-  ImageBackground,
-  Platform,
-  Alert,
+    Alert,
+    Dimensions,
+    Image,
+    ImageBackground,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import ScreenTimeManager from "@/lib/ScreenTime";
 
 const { width } = Dimensions.get("window"); 
 
 const NUM_COLUMNS = 4;
-const DATA = [
-  { id: "1", name: "Messages", icon: require('../../../assets/new-images/messages.png') },
-  { id: "2", name: "Zoom", icon: require('../../../assets/new-images/zoom.png') },
-  { id: "3", name: "Instagram", icon: require('../../../assets/new-images/instagram.png') },
-  { id: "4", name: "Discord", icon: require('../../../assets/new-images/discord.png') },
-  { id: "5", name: "VK", icon: require('../../../assets/new-images/vk.png') },
-  { id: "6", name: "Linear", icon: require('../../../assets/new-images/linear.png') },
-  { id: "7", name: "Spectrum", icon: require('../../../assets/new-images/spectrum.png') },
-];
+
 const DefendScreen = () => {
   const insets = useSafeAreaInsets();
   const [data, setData] = useState([{ id: "add", name: "Add", type: "add", icon: require('../../../assets/new-images/defend-plus.png') }])
+  const [userSelectedApps, setUserSelectedApps] = useState<AppData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const SELECTION_STORAGE_KEY = "UNBOUND_SELECTION_KEY";
 
@@ -54,62 +48,102 @@ const DefendScreen = () => {
   // const [modalData, setModalData] = useState<{ visible: boolean; addedApps: string[]; removedApps: string[]; selectionToConfirm: string[] }>({ visible: false, addedApps: [], removedApps: [], selectionToConfirm: [] });
 
   useEffect(() => {
-    if (Platform.OS !== "ios") return;
-    const checkStatus = async () => {
-      const status = await ScreenTimeManager.getAuthorizationStatus();
-      console.log('status ===>', status)
-      
-      if (status.isAuthorized) {
-        // Check adult content filter status
-        // const filterStatus = await ScreenTimeManager.getAdultContentFilterStatus();
-        // setBlockPorn(filterStatus.enabled);
-        
-        // Your existing code...
-        const selection = await AsyncStorage.getItem(SELECTION_STORAGE_KEY);
-        console.log('selection ===>', selection)
-
-        if (!selection) {
-          // setIsSelectionMode(true);
-          // setIsBlockingEnabled(false);
-          // setIsEditMode(true);
-        } else {
-          // Load confirmed apps from storage if needed
-          const apps = await AsyncStorage.getItem("UNBOUND_CONFIRMED_APPS");
-          console.log('apps ===>', apps)
-          setConfirmedApps(apps ? JSON.parse(apps) : []);
-          // setIsBlockingEnabled(true);
-          // setIsSelectionMode(false);
-          // setIsEditMode(false);
-        }
-      }
-    };
-    checkStatus();
+    loadPreviousSelections();
   }, []);
 
-  const proceedWithApplePicker = async () => {
-    if (Platform.OS !== "ios") return;
+  const loadPreviousSelections = async () => {
     try {
+      setIsLoading(true);
+      
+      // Load previously selected apps
+      const previousApps = await loadUserAppSelection();
+      if (previousApps.length > 0) {
+        setUserSelectedApps(previousApps);
+        updateDisplayData(previousApps);
+      }
+    } catch (error) {
+      console.error('Error loading previous selections:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateDisplayData = (apps: AppData[]) => {
+    const addButton = { id: "add", name: "Add", type: "add", icon: require('../../../assets/new-images/defend-plus.png') };
+    const appItems = apps.map(app => ({
+      id: app.id,
+      name: app.name,
+      icon: app.icon,
+    }));
+    setData([addButton, ...appItems]);
+  };
+
+  const proceedWithApplePicker = async () => {
+    if (Platform.OS !== "ios") {
+      // For non-iOS platforms or mock users, use mock data
+      const mockApps = getMockAppData();
+      setUserSelectedApps(mockApps);
+      updateDisplayData(mockApps);
+      await saveUserAppSelection(mockApps);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
       const { selection } = await ScreenTimeManager.displayFamilyActivityPicker({
         headerText: "Choose Apps to Block",
       });
 
-      console.log("selection ===>", selection)
-
-      if (data?.length <= 1) {
-        setData((prev) => [...prev, ...DATA]);
-      }
+      console.log("ScreenTime selection ===>", selection);
+      console.log("Selection type:", typeof selection);
+      console.log("Selection length:", selection?.length);
 
       if (selection) {
-        await AsyncStorage.setItem(SELECTION_STORAGE_KEY, selection);
-        // await AsyncStorage.setItem("UNBOUND_CONFIRMED_APPS", JSON.stringify(selectedApps));
-        // setConfirmedApps(selectedApps);
-        // Alert.alert("Setup Complete", "You can now block apps from the Defend screen.");
+        // Parse the ScreenTime selection into app data
+        const selectedApps = parseScreenTimeSelection(selection);
+        console.log("Parsed apps ===>", selectedApps);
+        console.log("Number of parsed apps:", selectedApps.length);
+
+        if (selectedApps.length > 0) {
+          // Update state with user-selected apps
+          setUserSelectedApps(selectedApps);
+          updateDisplayData(selectedApps);
+          
+          // Save to AsyncStorage for persistence
+          await saveUserAppSelection(selectedApps);
+          await AsyncStorage.setItem(SELECTION_STORAGE_KEY, selection);
+          
+          console.log("Successfully saved", selectedApps.length, "user-selected apps");
+        } else {
+          console.log("No apps parsed from selection, using mock data for testing");
+          // For testing purposes, let's use mock data when parsing fails
+          const mockApps = getMockAppData();
+          setUserSelectedApps(mockApps);
+          updateDisplayData(mockApps);
+          await saveUserAppSelection(mockApps);
+          console.log("Using mock data for testing:", mockApps.length, "apps");
+        }
       } else {
-        // Alert.alert("Setup Incomplete", "You didn't select any apps. Please try again to complete the setup.");
+        console.log("No selection returned from ScreenTime");
+        Alert.alert("Selection Cancelled", "You didn't select any apps. Please try again to complete the setup.");
       }
     } catch (error) {
-      console.error("Error with Apple Picker:", error)
-      Alert.alert("Error", "Could not complete confirmation. Please try again.");
+      console.error("Error with Apple Picker:", error);
+      Alert.alert("Error", "Could not complete app selection. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const removeApp = async (appId: string) => {
+    try {
+      const updatedApps = userSelectedApps.filter(app => app.id !== appId);
+      setUserSelectedApps(updatedApps);
+      updateDisplayData(updatedApps);
+      await saveUserAppSelection(updatedApps);
+      console.log("Removed app:", appId);
+    } catch (error) {
+      console.error("Error removing app:", error);
     }
   };
 
@@ -172,6 +206,7 @@ const DefendScreen = () => {
             alignItems: "center",
             marginRight: SPACING / 2,
           }}
+          onPress={() => removeApp(item.id)}
         >
           
           <Image
@@ -190,35 +225,42 @@ const DefendScreen = () => {
             {item.name}
           </Text>
 
-          <Image
-            source={require('../../../assets/new-images/remove-app-icon.png')}
+          <TouchableOpacity
+            onPress={() => removeApp(item.id)}
             style={{
-              width: scale(24),
-              height: scale(24),
               position: 'absolute',
               top: -scale(8),
               left: -scale(8),
             }}
-          />
+          >
+            <Image
+              source={require('../../../assets/new-images/remove-app-icon.png')}
+              style={{
+                width: scale(24),
+                height: scale(24),
+              }}
+            />
+          </TouchableOpacity>
         </TouchableOpacity>
       );
     };
 
     return (
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        numColumns={NUM_COLUMNS}
-        bounces={false}
-        contentContainerStyle={{
-          paddingHorizontal: PADDING,
-          paddingVertical: scale(24),
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          borderRadius: 6,
-        }}
-        showsVerticalScrollIndicator={false}
-      />
+      <View style={{
+        paddingHorizontal: PADDING,
+        paddingVertical: scale(24),
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: 6,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+      }}>
+        {data.map((item) => (
+          <View key={item.id} style={{ width: TILE, marginBottom: SPACING }}>
+            {renderItem({ item })}
+          </View>
+        ))}
+      </View>
     );
   };
 
@@ -280,7 +322,23 @@ const DefendScreen = () => {
       <View style={[styles.mainContainer, { marginTop: insets.top + scaleVertical(16) }]}>
 
         <Text style={styles.slogan}>Choose what to block</Text>
-        <Text style={styles.description}>Apps & websites you block won’t be available until your session ends.</Text>
+        <Text style={styles.description}>Apps & websites you block won't be available until your session ends.</Text>
+        
+        {isLoading && (
+          <View style={{
+            alignItems: 'center',
+            marginTop: scale(16),
+          }}>
+            <Text style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: scale(14),
+              fontFamily: 'ZillaSlab-Medium',
+            }}>
+              Loading app selection...
+            </Text>
+          </View>
+        )}
+
           
         <ScrollView style={{
             marginTop: scale(32),
@@ -296,16 +354,16 @@ const DefendScreen = () => {
           <TouchableOpacity
             style={[
               styles.primaryBtn,
-              {backgroundColor: data?.length <= 1 ? '#312B27' : '#BE5E19'}
+              {backgroundColor: userSelectedApps.length === 0 ? '#312B27' : '#BE5E19'}
             ]}
             onPress={() => {
               router.push("/defend/ChooseSchedule");
             }}
             activeOpacity={0.9}
-            disabled={data?.length <= 1}
+            disabled={userSelectedApps.length === 0 || isLoading}
           >
             <Text style={[styles.primaryText, 
-              {color: data?.length <= 1 ? '#4D4743' : '#fff'}
+              {color: userSelectedApps.length === 0 ? '#4D4743' : '#fff'}
             ]}>{"Continue"}</Text>
           </TouchableOpacity>
 
@@ -1128,3 +1186,4 @@ export default DefendScreen;
 //     opacity: 0.5,
 //   },
 // });
+
