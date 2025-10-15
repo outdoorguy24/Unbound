@@ -20,6 +20,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
@@ -185,6 +186,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Update password
+  const updatePassword = async (newPassword: string) => {
+    try {
+      // Check if this is a mock user (from AsyncStorage) or real Supabase user
+      const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
+      const isMockUser = !!storedUser; // If we have a stored user, it's a mock user
+      
+      if (isMockUser) {
+        // For mock users, just simulate success
+        console.log('Mock user password update:', { userId: user?.id, newPassword });
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+        return;
+      } else {
+        // For real Supabase users, use the actual API
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+        
+        if (error) {
+          console.error("Password update error:", error);
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error("Password update error:", error);
+      throw error;
+    }
+  };
+
   // Logout
   const logout = async () => {
     setIsLoadingAuth(true);
@@ -209,6 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         signup,
         logout,
+        updatePassword,
         setUser,
       }}
     >

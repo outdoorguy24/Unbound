@@ -3,19 +3,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { saveUserResponse } from "@/lib/userResponses";
 import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
 import { router } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Dimensions,
     Image,
     ImageBackground,
-    Keyboard,
+    KeyboardAvoidingView,
+    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    TouchableWithoutFeedback,
     View
 } from "react-native";
 import RenderHTML, { defaultSystemFonts } from "react-native-render-html";
@@ -68,11 +68,12 @@ const CampScreen = () => {
   // Check if response is valid (not empty and under 100 words)
   const isResponseValid = responseText.trim().length > 0 && getWordCount(responseText) <= 100;
 
-  // Memoized onChangeText function to prevent re-renders
-  const handleResponseTextChange = useCallback((text: string) => {
+  // Simple onChangeText function
+  const handleResponseTextChange = (text: string) => {
     console.log('TextInput onChangeText:', text);
     setResponseText(text);
-  }, []);
+  };
+
 
   // Handle response submission
   const handleSubmitResponse = async () => {
@@ -834,127 +835,32 @@ const CampScreen = () => {
 
         </View>
 
-        <View style={{marginTop: scale(16), flexDirection: 'row'}}>
+        <ScrollView 
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{marginTop: scale(16), paddingRight: scale(24)}}
+        >
           {data.map((item, index) => (
-            <View key={item.id}>
+            <View key={item.id} style={{ marginRight: index < data.length - 1 ? scale(12) : 0 }}>
               <StatCard item={item} />
-              {index < data.length - 1 && <View style={{ width: scale(12) }} />}
             </View>
           ))}
-        </View>
+        </ScrollView>
       </>
     );
   }
 
-  
-  return (
-    <View style={styles.safe}>
-      <Image
-        source={require("../../assets/new-images/onboarding-screen-4.png")}
-        style={styles.image}
-      />
-      <Image
-        source={require("../../assets/new-images/onboarding-overlay-full.png")}
-        style={styles.overlayImage}
-      />
-
-      <ScrollView 
+  function ResponseCard() {
+    return (
+      <View
         style={{
-          marginTop: insets.top + scaleVertical(24),
-          marginHorizontal: scale(24),
+          borderWidth: 1,
+          borderColor: "rgba(255, 255, 255, 0.2)",
+          borderRadius: 6,
+          padding: scale(20),
+          marginTop: scale(16),
         }}
-        contentContainerStyle={{ paddingBottom: scale(100) }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        keyboardDismissMode="none"
       >
-        <TouchableOpacity style={{
-            flexDirection: 'row', 
-            alignItems: 'center',
-            alignSelf: 'flex-start',
-          }}
-          onPress={() => setViewType(viewType === ViewTypes.Monthly ? ViewTypes.AllTime : ViewTypes.Monthly)}
-          >
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(24),
-            fontFamily: "ZillaSlab-Medium",
-          }}>
-          {viewType === ViewTypes.Monthly ? "This month" : "Your all-time progress"}
-          </Text>
-            
-          <Image
-            source={require("../../assets/new-images/dashboard-down-arrow.png")}
-            style={{
-              width: scale(24),
-              height: scale(24),
-              marginLeft: scaleVertical(8),
-            }}
-            resizeMode={"contain"}
-          />
-        </TouchableOpacity>
-
-        <View style={{
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            borderRadius: 8,
-            marginTop: scaleVertical(8),
-          }}>
-          <Text style={{
-              color: "rgba(255, 255, 255, 0.5)",
-              fontSize: scale(16),
-              fontFamily: "ZillaSlab-Medium",
-              marginTop: scaleVertical(16),
-              marginHorizontal: scaleVertical(16),
-            }}>
-            Your focus progress
-          </Text>
-
-          <View style={{
-              flexDirection: 'row', 
-              alignItems: 'center',
-            }}>
-            <Text style={{
-              color: "#FFFFFF",
-              fontSize: scale(18),
-              fontFamily: "ZillaSlab-Bold",
-              marginLeft: scaleVertical(16),
-            }}>
-            {viewType === ViewTypes.Monthly ? `${userStats.monthlyHours} hrs` : `${userStats.allTimeHours} hrs`}
-            </Text>
-            <Text style={{
-              color: "rgba(255, 255, 255, 0.5)",
-                fontSize: scale(12),
-                fontFamily: "ZillaSlab-Bold",
-                marginLeft: scaleVertical(6),
-              }}>
-              {viewType === ViewTypes.Monthly ? "reclaimed this month" : "total focused time since joining"}
-            </Text>
-          </View>
-
-          {viewType === ViewTypes.Monthly ? <ChartsCard /> : <ChartsAllTimeCard />}
-        </View>
-
-        <StatsCard />
-        <ChecklistCard />
-        <MostUsedAppsCard />
-        <CommunityStatsCard />
-
-      </ScrollView>
-      
-      {/* Move TextInput outside ScrollView */}
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{
-          marginHorizontal: scale(24),
-          marginBottom: scale(16),
-        }}>
-          <View
-            style={{
-              borderWidth: 1,
-              borderColor: "rgba(255, 255, 255, 0.2)",
-              borderRadius: 6,
-              padding: scale(20),
-            }}
-          >
           <View style={{
             flexDirection: 'row', 
             alignItems: 'center',
@@ -971,7 +877,7 @@ const CampScreen = () => {
           </View>
           
           {/* Response box */}
-          <View style={{ position: 'relative', zIndex: 1000 }}>
+          <View>
             <TextInput
               ref={responseInputRef}
               style={{
@@ -983,7 +889,6 @@ const CampScreen = () => {
                 fontSize: scale(16),
                 fontFamily: "ZillaSlab-Medium",
                 minHeight: scale(80),
-                zIndex: 1001,
               }}
               placeholder="Share what you've been doing instead..."
               placeholderTextColor="rgba(0,0,0,0.4)"
@@ -992,31 +897,16 @@ const CampScreen = () => {
               multiline
               maxLength={500}
               editable={!isSubmittingResponse}
+              autoCorrect={false}
+              autoCapitalize="sentences"
               blurOnSubmit={false}
               returnKeyType="default"
               textAlignVertical="top"
-              selectTextOnFocus={true}
-              autoCorrect={false}
-              autoCapitalize="sentences"
               onFocus={() => {
                 console.log('TextInput focused');
               }}
               onBlur={() => {
                 console.log('TextInput blurred');
-              }}
-              onTouchStart={(e) => {
-                console.log('TextInput touch start');
-                e.stopPropagation();
-              }}
-              onTouchEnd={(e) => {
-                console.log('TextInput touch end');
-                e.stopPropagation();
-              }}
-              onSelectionChange={() => {
-                console.log('TextInput selection changed');
-              }}
-              onLayout={() => {
-                console.log('TextInput layout changed');
               }}
             />
           </View>
@@ -1091,8 +981,110 @@ const CampScreen = () => {
             "Finally called my mom to say hi instead of doomscrolling"
           </Text>
         </View>
+    );
+  }
+  
+  return (
+    <View style={styles.safe}>
+      <Image
+        source={require("../../assets/new-images/onboarding-screen-4.png")}
+        style={styles.image}
+      />
+      <Image
+        source={require("../../assets/new-images/onboarding-overlay-full.png")}
+        style={styles.overlayImage}
+      />
+
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          style={{
+            marginTop: insets.top + scaleVertical(24),
+            marginHorizontal: scale(24),
+          }}
+          contentContainerStyle={{ paddingBottom: scale(20) }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="none"
+          nestedScrollEnabled={true}
+        >
+        <TouchableOpacity style={{
+            flexDirection: 'row', 
+            alignItems: 'center',
+            alignSelf: 'flex-start',
+          }}
+          onPress={() => setViewType(viewType === ViewTypes.Monthly ? ViewTypes.AllTime : ViewTypes.Monthly)}
+          >
+          <Text style={{
+            color: "#FFFFFF",
+            fontSize: scale(24),
+            fontFamily: "ZillaSlab-Medium",
+          }}>
+          {viewType === ViewTypes.Monthly ? "This month" : "Your all-time progress"}
+          </Text>
+            
+          <Image
+            source={require("../../assets/new-images/dashboard-down-arrow.png")}
+            style={{
+              width: scale(24),
+              height: scale(24),
+              marginLeft: scaleVertical(8),
+            }}
+            resizeMode={"contain"}
+          />
+        </TouchableOpacity>
+
+        <View style={{
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            borderRadius: 8,
+            marginTop: scaleVertical(8),
+          }}>
+          <Text style={{
+              color: "rgba(255, 255, 255, 0.5)",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Medium",
+              marginTop: scaleVertical(16),
+              marginHorizontal: scaleVertical(16),
+            }}>
+            Your focus progress
+          </Text>
+
+          <View style={{
+              flexDirection: 'row', 
+              alignItems: 'center',
+            }}>
+            <Text style={{
+              color: "#FFFFFF",
+              fontSize: scale(18),
+              fontFamily: "ZillaSlab-Bold",
+              marginLeft: scaleVertical(16),
+            }}>
+            {viewType === ViewTypes.Monthly ? `${userStats.monthlyHours} hrs` : `${userStats.allTimeHours} hrs`}
+            </Text>
+            <Text style={{
+              color: "rgba(255, 255, 255, 0.5)",
+                fontSize: scale(12),
+                fontFamily: "ZillaSlab-Bold",
+                marginLeft: scaleVertical(6),
+              }}>
+              {viewType === ViewTypes.Monthly ? "reclaimed this month" : "total focused time since joining"}
+            </Text>
+          </View>
+
+          {viewType === ViewTypes.Monthly ? <ChartsCard /> : <ChartsAllTimeCard />}
         </View>
-      </TouchableWithoutFeedback>
+
+        <StatsCard />
+        <ChecklistCard />
+        <MostUsedAppsCard />
+        <CommunityStatsCard />
+        <ResponseCard />
+
+        </ScrollView>
+      </KeyboardAvoidingView>
       
       <TouchableOpacity
         style={[
