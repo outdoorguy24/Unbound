@@ -1,12 +1,12 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
 import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
     Dimensions,
     Image,
+    Platform,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -18,7 +18,7 @@ const { width } = Dimensions.get("window");
 
 const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
+  const { login, signInWithApple } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +39,11 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       setIsLoading(true);
       setError(null);
       if (!appleAuth.isSupported) {
-        setError('Apple Sign In is not available on this device');
+        if (Platform.OS === 'ios') {
+          setError('Apple Sign In requires iOS 13+ and a physical device. Please test on a real iPhone/iPad (not simulator).');
+        } else {
+          setError('Apple Sign In is only available on iOS devices.');
+        }
         return;
       }
       const appleAuthRequestResponse = await appleAuth.performRequest({
@@ -48,17 +52,8 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       });
       const { identityToken, nonce } = appleAuthRequestResponse;
       if (identityToken) {
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'apple',
-          token: identityToken,
-          nonce: nonce,
-        });
-        if (error) {
-          setError(error.message || 'Apple Sign Up failed');
-        } else {
-          // Navigate to Screen Time permission screen after successful signup
-          router.push("/(onboarding)/ScreenTimePermission");
-        }
+        await signInWithApple(identityToken, nonce);
+        // Navigation will be handled by AuthContext
       } else {
         setError('Apple Sign Up was cancelled');
       }
@@ -98,6 +93,12 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       </TouchableOpacity>
       <Text style={styles.slogan}>{"Create an account"}</Text>
 
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
       <TouchableOpacity
         style={[styles.item, styles.itemActive, {marginTop: scaleVertical(40)}]}
         activeOpacity={0.8}
@@ -135,18 +136,20 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.item, styles.itemActive]}
+        style={[styles.item, styles.itemActive, isLoading && styles.itemDisabled]}
         activeOpacity={0.8}
         onPress={handleAppleSignUp}
         disabled={isLoading}
       >
         <View style={styles.leftRow}>
           <View style={styles.buttonText}>
-            <Text style={[styles.label]}>{"Continue with Apple"}</Text>
+            <Text style={[styles.label, isLoading && styles.labelDisabled]}>
+              {isLoading ? "Signing in..." : "Continue with Apple"}
+            </Text>
           </View>
           <Image
             source={require("../../assets/new-images/icon-apple.png")}
-            style={styles.iconImage}
+            style={[styles.iconImage, isLoading && styles.iconDisabled]}
             resizeMode={"contain"}
           />
         </View>
@@ -255,6 +258,29 @@ const styles = StyleSheet.create({
     color: "rgba(255, 202, 145, 1)",
     fontSize: scale(16),
     fontFamily: "ZillaSlab-Medium",
+  },
+  errorContainer: {
+    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    borderRadius: scale(8),
+    padding: scale(12),
+    marginTop: scaleVertical(16),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 0, 0, 0.3)',
+  },
+  errorText: {
+    color: '#FF4444',
+    fontSize: scale(14),
+    fontFamily: 'ZillaSlab-Medium',
+    textAlign: 'center',
+  },
+  itemDisabled: {
+    opacity: 0.6,
+  },
+  labelDisabled: {
+    opacity: 0.6,
+  },
+  iconDisabled: {
+    opacity: 0.6,
   },
 });
 

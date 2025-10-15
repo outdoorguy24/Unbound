@@ -19,6 +19,7 @@ interface AuthContextType {
   isLoadingAuth: boolean;
   login: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
+  signInWithApple: (identityToken: string, nonce?: string) => Promise<void>;
   logout: () => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -186,6 +187,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Sign in with Apple
+  const signInWithApple = async (identityToken: string, nonce?: string) => {
+    setIsLoadingAuth(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'apple',
+        token: identityToken,
+        nonce: nonce,
+      });
+
+      if (error) {
+        console.error('Apple Sign-In error:', error);
+        throw error;
+      }
+
+      if (data.user) {
+        // The user will be set automatically by the auth state listener
+        console.log('Apple Sign-In successful');
+        // Navigation will be handled by the useEffect that listens to auth state changes
+      }
+    } catch (error) {
+      console.error('Apple Sign-In error:', error);
+      throw error;
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
+
   // Update password
   const updatePassword = async (newPassword: string) => {
     try {
@@ -238,6 +267,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoadingAuth,
         login,
         signup,
+        signInWithApple,
         logout,
         updatePassword,
         setUser,

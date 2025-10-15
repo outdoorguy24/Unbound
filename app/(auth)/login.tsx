@@ -1,6 +1,7 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
+import { appleAuth } from '@invertase/react-native-apple-authentication';
 import { BlurView } from 'expo-blur';
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -29,11 +30,12 @@ const LoginScreen = () => {
   const [pass, setPass] = useState(""); //12345678
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isAppleLoading, setIsAppleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [loginAttemptExceeded, setLoginAttemptExceeded] = useState(false);
   
-  const { login } = useAuth();
+  const { login, signInWithApple } = useAuth();
 
   const handleGoogleSignup = async () => {
     try {
@@ -42,6 +44,40 @@ const LoginScreen = () => {
       console.log(err.message || "Signup failed");
     } finally {
       
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      setIsAppleLoading(true);
+      setError(null);
+      if (!appleAuth.isSupported) {
+        if (Platform.OS === 'ios') {
+          setError('Apple Sign In requires iOS 13+ and a physical device. Please test on a real iPhone/iPad (not simulator).');
+        } else {
+          setError('Apple Sign In is only available on iOS devices.');
+        }
+        return;
+      }
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+      });
+      const { identityToken, nonce } = appleAuthRequestResponse;
+      if (identityToken) {
+        await signInWithApple(identityToken, nonce);
+        // Navigation will be handled by AuthContext
+      } else {
+        setError('Apple Sign In was cancelled');
+      }
+    } catch (err: any) {
+      if (err.code === 'ERR_REQUEST_CANCELED') {
+        setError(null);
+      } else {
+        setError('Apple Sign In failed. Please try again.');
+      }
+    } finally {
+      setIsAppleLoading(false);
     }
   };
 
@@ -232,16 +268,20 @@ const LoginScreen = () => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.item, styles.itemActive]}
+          style={[styles.item, styles.itemActive, isAppleLoading && styles.itemDisabled]}
           activeOpacity={0.8}
+          onPress={handleAppleSignIn}
+          disabled={isAppleLoading}
         >
           <View style={styles.leftRow}>
             <View style={styles.buttonText}>
-              <Text style={[styles.btnLabel]}>{"Continue with Apple"}</Text>
+              <Text style={[styles.btnLabel, isAppleLoading && styles.labelDisabled]}>
+                {isAppleLoading ? "Signing in..." : "Continue with Apple"}
+              </Text>
             </View>
             <Image
               source={require("../../assets/new-images/icon-apple.png")}
-              style={styles.iconImage}
+              style={[styles.iconImage, isAppleLoading && styles.iconDisabled]}
               resizeMode={"contain"}
             />
           </View>
@@ -573,6 +613,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "ZillaSlab-SemiBold",
     letterSpacing: 0.5,
+  },
+  itemDisabled: {
+    opacity: 0.6,
+  },
+  labelDisabled: {
+    opacity: 0.6,
+  },
+  iconDisabled: {
+    opacity: 0.6,
   },
 });
 
