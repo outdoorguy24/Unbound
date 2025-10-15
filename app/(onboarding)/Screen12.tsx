@@ -1,26 +1,59 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-} from 'react-native';
 import { scale, scaleVertical } from '@/constants/Scale';
+import React, { useEffect, useRef } from 'react';
+import {
+    Animated,
+    Dimensions,
+    Easing,
+    Image,
+    StyleSheet,
+    View
+} from 'react-native';
 
 const { height } = Dimensions.get("window");
 
-const Screen12 = () => {
-  
+const Screen12 = ({ isActive }: { isActive?: boolean }) => {
+  // Animation values - Option 1: Gentle Fade-In with Slight Scale
+  const fadeAnim = useRef(new Animated.Value(0.8)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    // Only run animations when screen is active
+    if (!isActive) return;
+    
+    // Option 1: Gentle fade-in with slight scale
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [isActive]);
+
   return (
     <View style={styles.safe}>
       <Image source={require("../../assets/new-images/onboarding-screen-12.png")} style={styles.image} />
       <Image source={require("../../assets/new-images/onboarding-overlay.png")} style={styles.overlayImage} />
       
       <View style={styles.textContainer}>
-        <Text style={styles.slogan}>
-          {'it’s hard to make lasting changes when you go after it alone'}
-        </Text>
+        <Animated.Text 
+          style={[
+            styles.slogan,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            }
+          ]}
+        >
+          {'it\'s hard to make lasting changes when you go after it alone'}
+        </Animated.Text>
       </View>
 
     </View>

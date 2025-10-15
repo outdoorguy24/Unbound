@@ -1,17 +1,51 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-} from 'react-native';
 import { scale, scaleVertical } from '@/constants/Scale';
+import React, { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  View
+} from 'react-native';
 
 const { height } = Dimensions.get("window");
 
-const Screen19 = () => {
+const Screen19 = ({ isActive }: { isActive?: boolean }) => {
+  const [displayedText, setDisplayedText] = useState("");
   
+  const fullText = "It's time to\nget your\nlife back";
+
+  useEffect(() => {
+    // Only run typewriter effect when screen is active
+    if (!isActive) return;
+    
+    let typewriterInterval: any = null;
+    
+    // Wait 0.5 seconds before starting typewriter effect
+    const startTimeout = setTimeout(() => {
+      let currentIndex = 0;
+      typewriterInterval = setInterval(() => {
+        if (currentIndex < fullText.length) {
+          setDisplayedText(fullText.substring(0, currentIndex + 1));
+          currentIndex++;
+        } else {
+          if (typewriterInterval) {
+            clearInterval(typewriterInterval);
+            typewriterInterval = null;
+          }
+        }
+      }, 80); // 80ms delay between characters (slower than splash for readability)
+    }, 500); // 0.5 second delay before starting
+
+    // Cleanup intervals on unmount
+    return () => {
+      clearTimeout(startTimeout);
+      if (typewriterInterval) {
+        clearInterval(typewriterInterval);
+      }
+    };
+  }, [isActive, fullText]);
+
   return (
     <View style={styles.safe}>
       <Image source={require("../../assets/new-images/onboarding-screen-19.png")} style={styles.image} />
@@ -19,7 +53,7 @@ const Screen19 = () => {
       
       <View style={styles.textContainer}>
         <Text style={styles.slogan}>
-          {'It’s time to\nget your\nlife back'}
+          {displayedText}
         </Text>
       </View>
 
