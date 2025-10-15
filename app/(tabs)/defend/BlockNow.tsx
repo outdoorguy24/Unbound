@@ -56,20 +56,23 @@ const BlockNowScreen = () => {
           <View style={{ flex: 1 }} />
 
           {/* Radio circle */}
-
-          {selected ? <Image 
-            source={require("../../../assets/new-images/radio-selected.png")} 
-            style={{ 
-              width: scale(24), 
-              height: scale(24) 
-            }} 
-          /> : <Image 
-            source={require("../../../assets/new-images/radio-unselected.png")} 
-            style={{ 
-              width: scale(24), 
-              height: scale(24) 
-            }} 
-          />}
+          {selected ? (
+            <Image 
+              source={require("../../../assets/new-images/radio-selected.png")} 
+              style={{ 
+                width: scale(24), 
+                height: scale(24) 
+              }} 
+            />
+          ) : (
+            <Image 
+              source={require("../../../assets/new-images/radio-unselected.png")} 
+              style={{ 
+                width: scale(24), 
+                height: scale(24) 
+              }} 
+            />
+          )}
         </TouchableOpacity>
       );
     };
@@ -118,7 +121,7 @@ const BlockNowScreen = () => {
         
         <DurationList />
 
-        <View style={{}}>
+        <View>
           <TouchableOpacity
             style={[
               styles.primaryBtn,
