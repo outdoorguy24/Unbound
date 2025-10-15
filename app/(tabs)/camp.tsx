@@ -2,6 +2,7 @@ import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { getCommunityStats } from "@/lib/communityStats";
 import { getMonthlyProgress, getWeeklyProgress } from "@/lib/progressData";
+import { getSetupCompletion, SetupCompletion } from "@/lib/setupCompletion";
 import { testDatabaseConnection } from "@/lib/testDatabaseConnection";
 import { saveUserResponse } from "@/lib/userResponses";
 import { getUserStats } from "@/lib/userStats";
@@ -14,6 +15,7 @@ import {
     Image,
     ImageBackground,
     KeyboardAvoidingView,
+    Linking,
     Platform,
     Pressable,
     ScrollView,
@@ -61,6 +63,12 @@ const CampScreen = () => {
   const [appDataLoading, setAppDataLoading] = useState(true);
   const [weeklyProgressData, setWeeklyProgressData] = useState<any[]>([]);
   const [monthlyProgressData, setMonthlyProgressData] = useState<any[]>([]);
+  const [setupCompletion, setSetupCompletion] = useState<SetupCompletion>({
+    setLocation: true,
+    turnNotificationsOn: false,
+    startFirstFocus: false,
+    shareFirstMilestone: false,
+  });
   
   // User response state
   const [responseText, setResponseText] = useState("");
@@ -82,6 +90,18 @@ const CampScreen = () => {
   };
 
 
+  // Refresh setup completion data
+  const refreshSetupCompletion = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const setupData = await getSetupCompletion(user.id);
+      setSetupCompletion(setupData);
+    } catch (error) {
+      console.error('Error refreshing setup completion:', error);
+    }
+  };
+
   // Handle response submission
   const handleSubmitResponse = async () => {
     if (!user?.id || !isResponseValid || isSubmittingResponse) return;
@@ -99,10 +119,19 @@ const CampScreen = () => {
           wordCount: getWordCount(responseText),
           timestamp: new Date().toISOString()
         });
+        
+        // Update mock setup completion to show milestone shared
+        setSetupCompletion(prev => ({
+          ...prev,
+          shareFirstMilestone: true
+        }));
       } else {
         // For real Supabase users, save to database
         await saveUserResponse(user.id, responseText.trim());
         console.log('Response saved to Supabase for user:', user.id);
+        
+        // Refresh setup completion to reflect the new milestone
+        await refreshSetupCompletion();
       }
       
       // Clear the input after successful submission
@@ -177,21 +206,31 @@ const CampScreen = () => {
             { value: 12.8, label: "Dec 24" },
             { value: 2.5, label: "Jan 25" },
           ]);
+
+          // Set mock setup completion
+          setSetupCompletion({
+            setLocation: true, // Always true since they completed profile setup
+            turnNotificationsOn: false, // Mock users typically don't have real permissions
+            startFirstFocus: false, // Mock users haven't completed real blocking sessions
+            shareFirstMilestone: false, // Mock users haven't submitted real responses
+          });
         } else {
           // For real Supabase users, fetch real data
           console.log('Loading dashboard with real data for user:', user.id);
           
-          const [userStatsData, communityStatsData, weeklyData, monthlyData] = await Promise.all([
+          const [userStatsData, communityStatsData, weeklyData, monthlyData, setupData] = await Promise.all([
             getUserStats(user.id),
             getCommunityStats(),
             getWeeklyProgress(user.id),
-            getMonthlyProgress(user.id)
+            getMonthlyProgress(user.id),
+            getSetupCompletion(user.id)
           ]);
           
           setUserStats(userStatsData);
           setCommunityStats(communityStatsData);
           setWeeklyProgressData(weeklyData);
           setMonthlyProgressData(monthlyData);
+          setSetupCompletion(setupData);
         }
         
       } catch (error) {
@@ -533,11 +572,44 @@ const CampScreen = () => {
   };
 
   function ChecklistCard() {
+    const handleTurnNotificationsOn = () => {
+      // Navigate to device settings for notifications
+      // This will open the iOS Settings app to the Notifications section
+      if (Platform.OS === 'ios') {
+        Linking.openURL('app-settings:');
+      }
+    };
+
+    const handleStartFirstFocus = () => {
+      // Navigate to the defend screen
+      router.push('/(tabs)/defend');
+    };
+
+    const handleShareFirstMilestone = () => {
+      // Scroll to the response input section
+      // We could add a ref to scroll to the response section, but for now just focus the input
+      if (responseInputRef.current) {
+        responseInputRef.current.focus();
+      }
+    };
+
     const rows: Row[] = [
-      { label: "Set location", done: true },
-      { label: "Turn notifications on", done: true, onPress: () => {} },
-      { label: "Start your first focus", done: false },
-      { label: "Share your first milestone", done: false },
+      { label: "Set location", done: setupCompletion.setLocation },
+      { 
+        label: "Turn notifications on", 
+        done: setupCompletion.turnNotificationsOn, 
+        onPress: setupCompletion.turnNotificationsOn ? undefined : handleTurnNotificationsOn 
+      },
+      { 
+        label: "Start your first focus", 
+        done: setupCompletion.startFirstFocus,
+        onPress: setupCompletion.startFirstFocus ? undefined : handleStartFirstFocus
+      },
+      { 
+        label: "Share your first milestone", 
+        done: setupCompletion.shareFirstMilestone,
+        onPress: setupCompletion.shareFirstMilestone ? undefined : handleShareFirstMilestone
+      },
     ];
 
     return (
@@ -613,11 +685,20 @@ const CampScreen = () => {
               <Pressable
                 key={r.label}
                 onPress={r.onPress}
-                style={{
+                disabled={!r.onPress}
+                style={({ pressed }) => ({
                   flexDirection: "row",
                   alignItems: "center",
                   paddingVertical: scale(10),
-                }}
+                  paddingHorizontal: r.onPress ? scale(8) : 0,
+                  borderRadius: r.onPress ? scale(6) : 0,
+                  backgroundColor: r.onPress 
+                    ? pressed 
+                      ? 'rgba(255, 255, 255, 0.1)' 
+                      : 'rgba(255, 255, 255, 0.05)'
+                    : 'transparent',
+                  opacity: r.onPress ? 1 : 1,
+                })}
               >
                 {/* check bubble */}
                 <View
@@ -625,26 +706,40 @@ const CampScreen = () => {
                     width: scale(24),
                     height: scale(24),
                     borderRadius: scale(12),
-                    backgroundColor: '#0AB337',
+                    backgroundColor: r.done ? '#0AB337' : 'transparent',
+                    borderWidth: 2,
+                    borderColor: r.done ? '#0AB337' : 'rgba(255, 255, 255, 0.3)',
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: scale(12),
-                    opacity: r.done ? 1 : 0.4,
                   }}
                 >
-                  <Feather name="check" size={16} color="#0B0B0B" />
+                  {r.done && (
+                    <Feather name="check" size={16} color="#FFFFFF" />
+                  )}
                 </View>
 
                 {/* label */}
                 <Text
                   style={{
-                    color: '#fff',
+                    color: r.onPress ? '#fff' : 'rgba(255, 255, 255, 0.7)',
                     fontSize: scale(14),
                     fontFamily: "ZillaSlab-Medium",
+                    flex: 1,
                   }}
                 >
                   {r.label}
                 </Text>
+
+                {/* Arrow icon for clickable items */}
+                {r.onPress && (
+                  <Feather 
+                    name="chevron-right" 
+                    size={16} 
+                    color="rgba(255, 255, 255, 0.6)" 
+                    style={{ marginLeft: scale(8) }}
+                  />
+                )}
               </Pressable>
             );
           })}
