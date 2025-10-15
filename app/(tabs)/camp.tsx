@@ -5,6 +5,7 @@ import { getMonthlyProgress, getWeeklyProgress } from "@/lib/progressData";
 import { testDatabaseConnection } from "@/lib/testDatabaseConnection";
 import { saveUserResponse } from "@/lib/userResponses";
 import { getUserStats } from "@/lib/userStats";
+import { getMostUsedApps } from "@/lib/userTracking";
 import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -215,43 +216,76 @@ const CampScreen = () => {
       try {
         setAppDataLoading(true);
         
-        // For mock users, use mock app data to avoid Supabase errors
-        console.log('Loading mock app data for user:', user.id);
+        // Check if this is a mock user (from AsyncStorage) or real Supabase user
+        const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
         
-        const mockApps = [
-          {
-            id: 'com.facebook.Facebook',
-            name: 'Facebook',
-            icon: getAppIcon('facebook-icon'),
-            minutes: 180,
-          },
-          {
-            id: 'com.google.ios.youtube',
-            name: 'YouTube',
-            icon: getAppIcon('youtube-icon'),
-            minutes: 120,
-          },
-          {
-            id: 'com.instagram.instagram',
-            name: 'Instagram',
-            icon: getAppIcon('instagram-icon'),
-            minutes: 90,
-          },
-          {
-            id: 'com.linkedin.LinkedIn',
-            name: 'LinkedIn',
-            icon: getAppIcon('linkedin-icon'),
-            minutes: 60,
-          },
-          {
-            id: 'ph.telegra.Telegraph',
-            name: 'Telegram',
-            icon: getAppIcon('telegram-icon'),
-            minutes: 45,
-          },
-        ];
-        
-        setAppData(mockApps);
+        if (isMockUser) {
+          // For mock users, use mock app data
+          console.log('Loading mock app data for user:', user.id);
+          
+          const mockApps = [
+            {
+              id: 'com.facebook.Facebook',
+              name: 'Facebook',
+              icon: getAppIcon('facebook-icon'),
+              minutes: 180,
+            },
+            {
+              id: 'com.google.ios.youtube',
+              name: 'YouTube',
+              icon: getAppIcon('youtube-icon'),
+              minutes: 120,
+            },
+            {
+              id: 'com.instagram.instagram',
+              name: 'Instagram',
+              icon: getAppIcon('instagram-icon'),
+              minutes: 90,
+            },
+            {
+              id: 'com.linkedin.LinkedIn',
+              name: 'LinkedIn',
+              icon: getAppIcon('linkedin-icon'),
+              minutes: 60,
+            },
+            {
+              id: 'ph.telegra.Telegraph',
+              name: 'Telegram',
+              icon: getAppIcon('telegram-icon'),
+              minutes: 45,
+            },
+          ];
+          
+          setAppData(mockApps);
+        } else {
+          // For real Supabase users, fetch real app usage data
+          console.log('Loading real app usage data for user:', user.id);
+          
+          try {
+            // First, try to get stored app usage data from Supabase
+            const storedApps = await getMostUsedApps(user.id, 10);
+            
+            if (storedApps && storedApps.length > 0) {
+              // Use stored data
+              const formattedApps = storedApps.map((app: any) => ({
+                id: app.app_id,
+                name: app.app_name,
+                icon: getAppIcon(app.app_name.toLowerCase().replace(/\s+/g, '-') + '-icon'),
+                minutes: app.usage_minutes || 0,
+              }));
+              setAppData(formattedApps);
+            } else {
+              // No stored data, try to fetch from ScreenTime API
+              // TODO: Implement real ScreenTime API data fetching when available
+              // For now, fall back to empty state
+              console.log('No stored app data found, ScreenTime API integration needed');
+              setAppData([]);
+            }
+          } catch (error) {
+            console.error('Error fetching real app usage data:', error);
+            setAppData([]);
+          }
+        }
         
       } catch (error) {
         console.error('Error fetching app usage data:', error);
@@ -723,7 +757,7 @@ const CampScreen = () => {
     };
     return (
       <>
-      <View style={{
+        <View style={{
           flexDirection: 'row', 
           alignItems: 'center',
           marginTop: scale(36),
@@ -744,16 +778,7 @@ const CampScreen = () => {
             flex: 1,
           }}>
           {"Most used apps"}
-          </Text> 
-          <Image
-            source={require("../../assets/new-images/dashboard-up-arrow.png")}
-            style={{
-              width: scale(24),
-              height: scale(24),
-              marginRight: scaleVertical(10),
-            }}
-            resizeMode={"contain"}
-          />
+          </Text>
         </View>
 
       <ImageBackground
@@ -785,21 +810,6 @@ const CampScreen = () => {
               {DATA.map((item) => (
                 <UsageRow key={item.id} item={item} maxMinutes={maxMinutes} />
               ))}
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => {}}
-                style={{ paddingHorizontal: CARD_PADDING }}
-              >
-                <Text
-                  style={{
-                    color: "#FFCA91",
-                    fontSize: scale(16),
-                    fontFamily: "ZillaSlab-Medium",
-                  }}
-                >
-                  Show more
-                </Text>
-              </TouchableOpacity>
             </>
           )}
         </View>
