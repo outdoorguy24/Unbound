@@ -1,5 +1,6 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
+import { CommunityResponse, getMockCommunityResponses, getRecentCommunityResponses } from "@/lib/communityResponses";
 import { getCommunityStats } from "@/lib/communityStats";
 import { getMonthlyProgress, getWeeklyProgress } from "@/lib/progressData";
 import { getSetupCompletion, SetupCompletion } from "@/lib/setupCompletion";
@@ -75,6 +76,10 @@ const CampScreen = () => {
   const [responseText, setResponseText] = useState("");
   const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
   const responseInputRef = useRef<TextInput>(null);
+  
+  // Community responses state
+  const [communityResponses, setCommunityResponses] = useState<CommunityResponse[]>([]);
+  const [communityResponsesLoading, setCommunityResponsesLoading] = useState(true);
 
   // Helper function to count words
   const getWordCount = (text: string) => {
@@ -121,6 +126,35 @@ const CampScreen = () => {
     }
   };
 
+  // Fetch community responses
+  const fetchCommunityResponses = async () => {
+    try {
+      setCommunityResponsesLoading(true);
+      
+      // Check if this is a mock user (from AsyncStorage) or real Supabase user
+      const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
+      
+      if (isMockUser) {
+        // For mock users, use mock data
+        console.log('Loading mock community responses for user:', user.id);
+        const mockResponses = getMockCommunityResponses();
+        setCommunityResponses(mockResponses);
+      } else {
+        // For real Supabase users, fetch real data
+        console.log('Loading real community responses for user:', user.id);
+        const responses = await getRecentCommunityResponses(3);
+        setCommunityResponses(responses);
+      }
+    } catch (error) {
+      console.error('Error fetching community responses:', error);
+      // Fallback to mock data on error
+      const mockResponses = getMockCommunityResponses();
+      setCommunityResponses(mockResponses);
+    } finally {
+      setCommunityResponsesLoading(false);
+    }
+  };
+
   // Handle response submission
   const handleSubmitResponse = async () => {
     if (!user?.id || !isResponseValid || isSubmittingResponse) return;
@@ -152,6 +186,9 @@ const CampScreen = () => {
         // Refresh setup completion to reflect the new milestone
         await refreshSetupCompletion();
       }
+      
+      // Refresh community responses to show the new response
+      await fetchCommunityResponses();
       
       // Clear the input after successful submission
       setResponseText("");
@@ -354,6 +391,11 @@ const CampScreen = () => {
     };
 
     fetchAppData();
+  }, [user?.id]);
+
+  // Fetch community responses
+  useEffect(() => {
+    fetchCommunityResponses();
   }, [user?.id]);
 
   // Helper function to get app icon
@@ -1036,7 +1078,7 @@ const CampScreen = () => {
     );
   }
 
-  function ResponseCard() {
+  function ResponseInputCard() {
     return (
       <View
         style={{
@@ -1134,39 +1176,156 @@ const CampScreen = () => {
               </Text>
             </View>
           </TouchableOpacity>
-
-          {/* Example response from other users */}
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: scaleVertical(32), marginBottom: scaleVertical(16) }}>
-            <Image
-              source={require('../../assets/new-images/user-dummy-img.png')}
-              style={{
-                width: scale(40),
-                height: scale(40),
-                borderRadius: scale(20),
-                marginRight: scale(12),
-              }}
-            />
-            <View>
-              <Text style={{ 
-                color: "#fff", 
-                fontSize: scale(18),
-                fontFamily: "ZillaSlab-Medium",
-              }}>
-                Mark in Denver
-              </Text>
-            </View>
-          </View>
-
-          {/* Example response text */}
-          <Text style={{ 
-            color: "#fff", 
-            fontSize: scale(16),
-            fontFamily: "ZillaSlab-Medium", 
-            marginBottom: scaleVertical(10),
+          
+          {/* Connection opening at bottom */}
+          <View style={{
+            alignItems: 'center',
+            marginTop: scale(16),
           }}>
-            "Finally called my mom to say hi instead of doomscrolling"
+            <View style={{
+              width: scale(40),
+              height: scale(8),
+              backgroundColor: 'transparent',
+              borderBottomWidth: 2,
+              borderBottomColor: 'rgba(255, 255, 255, 0.4)',
+              borderLeftWidth: 2,
+              borderLeftColor: 'rgba(255, 255, 255, 0.4)',
+              borderRightWidth: 2,
+              borderRightColor: 'rgba(255, 255, 255, 0.4)',
+              borderBottomLeftRadius: scale(4),
+              borderBottomRightRadius: scale(4),
+            }} />
+          </View>
+        </View>
+    );
+  }
+
+  function VisualBridge() {
+    return (
+      <View style={{
+        alignItems: 'center',
+        marginVertical: 0,
+        height: scale(16),
+        justifyContent: 'center',
+      }}>
+        {/* Connecting line that links the notches */}
+        <View style={{
+          width: scale(6),
+          height: scale(16),
+          backgroundColor: 'rgba(255, 255, 255, 0.4)',
+          borderRadius: scale(3),
+        }} />
+      </View>
+    );
+  }
+
+  function CommunityResponsesCard() {
+    return (
+      <View
+        style={{
+          borderWidth: 1,
+          borderColor: "rgba(255, 255, 255, 0.2)",
+          borderRadius: 6,
+          padding: scale(20),
+          marginTop: 0,
+        }}
+      >
+        {/* Connection opening at top */}
+        <View style={{
+          alignItems: 'center',
+          marginBottom: scale(16),
+        }}>
+          <View style={{
+            width: scale(40),
+            height: scale(8),
+            backgroundColor: 'transparent',
+            borderTopWidth: 2,
+            borderTopColor: 'rgba(255, 255, 255, 0.4)',
+            borderLeftWidth: 2,
+            borderLeftColor: 'rgba(255, 255, 255, 0.4)',
+            borderRightWidth: 2,
+            borderRightColor: 'rgba(255, 255, 255, 0.4)',
+            borderTopLeftRadius: scale(4),
+            borderTopRightRadius: scale(4),
+          }} />
+        </View>
+        <View style={{
+          flexDirection: 'row', 
+          alignItems: 'center',
+          marginBottom: scale(20),
+        }}>
+          <Text style={{
+            color: "#FFFFFF",
+            fontSize: scale(22),
+            fontFamily: "ZillaSlab-Medium",
+            flex: 1,
+          }}>
+            {"Community Responses"}
           </Text>
         </View>
+
+        {communityResponsesLoading ? (
+          <View style={{ padding: scale(20), alignItems: 'center' }}>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
+              Loading community responses...
+            </Text>
+          </View>
+        ) : communityResponses.length === 0 ? (
+          <View style={{ padding: scale(20), alignItems: 'center' }}>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
+              No responses yet. Be the first to share!
+            </Text>
+          </View>
+        ) : (
+          <>
+            {communityResponses.map((response, index) => (
+              <View key={response.id} style={{ marginBottom: index < communityResponses.length - 1 ? scaleVertical(24) : 0 }}>
+                {/* User info */}
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: scaleVertical(12) }}>
+                  <View
+                    style={{
+                      width: scale(40),
+                      height: scale(40),
+                      borderRadius: scale(20),
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: scale(12),
+                      borderWidth: 1,
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                    }}
+                  >
+                    <Feather 
+                      name="user" 
+                      size={scale(20)} 
+                      color="rgba(255, 255, 255, 0.8)" 
+                    />
+                  </View>
+                  <View>
+                    <Text style={{ 
+                      color: "#fff", 
+                      fontSize: scale(18),
+                      fontFamily: "ZillaSlab-Medium",
+                    }}>
+                      {response.user_name}{response.user_location ? ` in ${response.user_location}` : ''}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Response text */}
+                <Text style={{ 
+                  color: "#fff", 
+                  fontSize: scale(16),
+                  fontFamily: "ZillaSlab-Medium", 
+                  marginBottom: scaleVertical(10),
+                }}>
+                  "{response.response_text}"
+                </Text>
+              </View>
+            ))}
+          </>
+        )}
+      </View>
     );
   }
   
@@ -1267,7 +1426,9 @@ const CampScreen = () => {
         <ChecklistCard />
         <MostUsedAppsCard />
         <CommunityStatsCard />
-        <ResponseCard />
+        <ResponseInputCard />
+        <VisualBridge />
+        <CommunityResponsesCard />
 
         </ScrollView>
       </KeyboardAvoidingView>
