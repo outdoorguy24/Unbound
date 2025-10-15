@@ -690,7 +690,6 @@ const CampScreen = () => {
                   flexDirection: "row",
                   alignItems: "center",
                   paddingVertical: scale(10),
-                  paddingHorizontal: r.onPress ? scale(8) : 0,
                   borderRadius: r.onPress ? scale(6) : 0,
                   backgroundColor: r.onPress 
                     ? pressed 
