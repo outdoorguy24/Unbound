@@ -1008,8 +1008,9 @@ const CampScreen = () => {
           borderWidth: 1,
           borderColor: "rgba(255, 255, 255, 0.2)",
           borderRadius: 6,
-          padding: scale(16),
-          width: (width - scale(24)) / 2.5,
+          paddingHorizontal: scale(12),
+          paddingVertical: scale(16),
+          width: scale(200),
         }}>
 
         <View style={{
@@ -1017,10 +1018,25 @@ const CampScreen = () => {
         }}>
           <RenderHTML
             source={{ html: item.html }}
+            contentWidth={width}
             systemFonts={systemFonts} 
             tagsStyles={{
-              span: { fontFamily: "ZillaSlab-Medium", fontSize: scale(14), color: "#fff" },
-              strong: { fontFamily: "ZillaSlab-Bold", fontSize: scale(16), color: "#fff" },
+              span: { 
+                fontFamily: "ZillaSlab-Medium", 
+                fontSize: scale(14), 
+                color: "#fff",
+                margin: 0,
+                padding: 0,
+                textAlign: 'left',
+                width: '100%',
+              },
+              strong: { 
+                fontFamily: "ZillaSlab-Bold", 
+                fontSize: scale(16), 
+                color: "#fff",
+                margin: 0,
+                padding: 0,
+              },
             }}
           />
         </View>
@@ -1058,7 +1074,7 @@ const CampScreen = () => {
             fontFamily: "ZillaSlab-Medium",
             flex: 1,
           }}>
-          {"Community stats"}
+          {"Community Stats & Inspiration"}
           </Text>
 
         </View>
@@ -1220,6 +1236,24 @@ const CampScreen = () => {
   }
 
   function CommunityResponsesCard() {
+    // Array of profile photos for random assignment
+    const profilePhotos = [
+      require("../../assets/new-images/comm response pic 1.png"),
+      require("../../assets/new-images/comm response pic 2.png"),
+      require("../../assets/new-images/comm response pic 3.png"),
+    ];
+
+    // Function to get a random profile photo based on response ID
+    const getRandomProfilePhoto = (responseId: string) => {
+      // Use the response ID to generate a consistent "random" assignment
+      const hash = responseId.split('').reduce((a, b) => {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+      const index = Math.abs(hash) % profilePhotos.length;
+      return profilePhotos[index];
+    };
+
     return (
       <View
         style={{
@@ -1287,18 +1321,20 @@ const CampScreen = () => {
                       width: scale(40),
                       height: scale(40),
                       borderRadius: scale(20),
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      overflow: 'hidden',
                       marginRight: scale(12),
                       borderWidth: 1,
                       borderColor: 'rgba(255, 255, 255, 0.3)',
                     }}
                   >
-                    <Feather 
-                      name="user" 
-                      size={scale(20)} 
-                      color="rgba(255, 255, 255, 0.8)" 
+                    <Image
+                      source={getRandomProfilePhoto(response.id)}
+                      style={{
+                        width: scale(40),
+                        height: scale(40),
+                        borderRadius: scale(20),
+                      }}
+                      resizeMode="cover"
                     />
                   </View>
                   <View>
