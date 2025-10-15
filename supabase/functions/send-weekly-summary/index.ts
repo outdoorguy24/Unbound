@@ -46,9 +46,9 @@ serve(async (req) => {
         to: user.push_token,
         sound: 'default',
         title: 'Weekly Summary',
-        body: 'How much of your life did you get back this week?',
+        body: 'Your weekly stats and quote are ready for you on Unbound.',
         data: { 
-          screen: 'trail-log',
+          screen: 'weekly-summary',
           type: 'weekly_summary'
         },
       }

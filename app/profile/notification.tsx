@@ -1,35 +1,26 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Modal,
-  TouchableWithoutFeedback,
-  Keyboard,
-  TextInput,
-  Switch,
-  Alert,
-  Linking,
-} from "react-native";
-import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { BlurView } from "expo-blur";
+import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import * as Notifications from 'expo-notifications';
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+    Alert,
+    Dimensions,
+    Image,
+    Linking,
+    StyleSheet,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 const { width } = Dimensions.get("window");
 
 const NotificationScreen = () => {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const [dailyNotificationsEnabled, setDailyNotificationsEnabled] = useState(true);
   const [weeklyNotificationsEnabled, setWeeklyNotificationsEnabled] = useState(true);
 
   // Load user's notification preferences
@@ -45,7 +36,6 @@ const NotificationScreen = () => {
           .single();
         
         if (!error && data?.notification_preferences) {
-          setDailyNotificationsEnabled(data.notification_preferences.daily_updates ?? true);
           setWeeklyNotificationsEnabled(data.notification_preferences.weekly_summary ?? true);
         }
       } catch (error) {
@@ -109,73 +99,6 @@ const NotificationScreen = () => {
           </Text>
           
           
-          <View>
-            <View style={{
-              width: "100%",
-              height: 1, 
-              backgroundColor: "#D9D9D9", 
-              opacity: 0.15,
-              marginTop: scaleVertical(40),
-            }} />
-            <View style={styles.unboundToggleView}>
-              <Text style={[
-                styles.label3, 
-              ]}>Daily Progress</Text>
-              <Switch value={dailyNotificationsEnabled} onValueChange={async (value) => {
-                  const newValue = !dailyNotificationsEnabled;
-
-                  // If user is trying to ENABLE notifications, check for permission first
-                  if (newValue === true) {
-                    const { status } = await Notifications.getPermissionsAsync();
-                    if (status !== 'granted') {
-                      Alert.alert(
-                        'Enable Notifications',
-                        'To receive daily summaries, please enable push notifications for Unbound in your phone\'s settings.',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Open Settings', onPress: () => Linking.openSettings() },
-                        ]
-                      );
-                      return; // Don't update the toggle state or database
-                    }
-                  }
-
-                  // If we're here, either they are disabling notifications, or they have permission
-                  setDailyNotificationsEnabled(newValue);
-                  
-                  // Update in database
-                  if (user?.id) {
-                    supabase
-                      .from('user_profiles')
-                      .update({ 
-                        notification_preferences: { daily_updates: newValue }
-                      })
-                      .eq('user_id', user.id)
-                      .then(({ error }) => {
-                        if (error) {
-                          console.error('Error updating notification preferences:', error);
-                          Alert.alert('Error', 'Failed to update notification preferences');
-                          setDailyNotificationsEnabled(!newValue); // Revert on error
-                        } else {
-                          Alert.alert(
-                            'Updated', 
-                            `Daily notifications ${newValue ? 'enabled' : 'disabled'}`
-                          );
-                        }
-                      });
-                  }
-                }}         
-                ios_backgroundColor={'rgba(255, 255, 255, 0.2)'}
-                trackColor={{ false: "#67CE67", true: "#67CE67" }}
-                thumbColor={dailyNotificationsEnabled ? "#f4f3f4" : "#f4f3f4"}
-                />
-            </View>
-            <Text style={[
-                styles.label, 
-              ]}>{'A daily summary of your time\nand goals.'}</Text>
-          </View>
-
-
           <View>
             <View style={{
               width: "100%",
