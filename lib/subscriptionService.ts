@@ -11,7 +11,7 @@ import { supabase } from './supabaseClient';
  */
 
 export interface SubscriptionData {
-  planType: 'monthly' | 'yearly' | 'free';
+  planType: 'monthly' | 'yearly' | 'lifetime' | 'free';
   status: 'active' | 'inactive' | 'cancelled' | 'expired';
   price: number;
   currency: string;
@@ -34,7 +34,7 @@ export interface MockSubscriptionData {
 const MOCK_SUBSCRIPTION_DATA: MockSubscriptionData = {
   planType: 'monthly',
   status: 'active',
-  price: 6.99,
+  price: 3.99,
   currency: 'USD',
   renewalDate: '2025-09-08',
   isActive: true,
@@ -107,10 +107,16 @@ export async function getSubscriptionData(userId: string): Promise<SubscriptionD
     const customerId = await getCustomerData(userId);
 
     // Parse subscription data
-    const planType = subscription.price_id?.includes('yearly') ? 'yearly' : 'monthly';
-    const price = planType === 'yearly' ? 59.99 : 6.99; // Default prices, should come from Stripe/Superwall
+    let planType: 'monthly' | 'yearly' | 'lifetime' = 'monthly';
+    if (subscription.price_id?.includes('yearly')) {
+      planType = 'yearly';
+    } else if (subscription.price_id?.includes('lifetime')) {
+      planType = 'lifetime';
+    }
+    
+    const price = planType === 'yearly' ? 19.99 : planType === 'lifetime' ? 39.99 : 3.99; // Updated prices to match App Store Connect
     const renewalDate = subscription.updated_at ? 
-      new Date(new Date(subscription.updated_at).getTime() + (planType === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
+      new Date(new Date(subscription.updated_at).getTime() + (planType === 'yearly' ? 365 : planType === 'lifetime' ? 36500 : 30) * 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
       '';
 
     return {
@@ -212,6 +218,8 @@ export function getPlanDisplayName(planType: string): string {
       return 'Monthly';
     case 'yearly':
       return 'Yearly';
+    case 'lifetime':
+      return 'Lifetime';
     case 'free':
       return 'Free';
     default:
@@ -223,12 +231,29 @@ export function getPlanDisplayName(planType: string): string {
  * Get alternative plan (for upgrade/downgrade)
  */
 export function getAlternativePlan(currentPlan: string): string {
-  return currentPlan === 'monthly' ? 'yearly' : 'monthly';
+  switch (currentPlan) {
+    case 'monthly':
+      return 'yearly';
+    case 'yearly':
+      return 'monthly';
+    case 'lifetime':
+      return 'yearly'; // Show yearly as alternative for lifetime
+    default:
+      return 'monthly';
+  }
 }
 
 /**
  * Get alternative plan price
  */
 export function getAlternativePlanPrice(planType: string): number {
-  return planType === 'yearly' ? 59.99 : 6.99;
+  switch (planType) {
+    case 'yearly':
+      return 19.99;
+    case 'lifetime':
+      return 39.99;
+    case 'monthly':
+    default:
+      return 3.99;
+  }
 }

@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    Linking,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-    formatRenewalDate,
-    getAlternativePlan,
-    getAlternativePlanPrice,
-    getPlanDisplayName,
-    getSubscriptionData,
-    SubscriptionData
+  formatRenewalDate,
+  getAlternativePlan,
+  getAlternativePlanPrice,
+  getPlanDisplayName,
+  getSubscriptionData,
+  SubscriptionData
 } from "@/lib/subscriptionService";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -275,47 +275,125 @@ const ManageSubscriptionScreen = () => {
                           transform: [{ translateY: -scale(3) }],
                         }}
                       >
-                        /{subscriptionData.planType === 'yearly' ? 'yearly' : 'monthly'}
+                        /{subscriptionData.planType === 'yearly' ? 'yearly' : subscriptionData.planType === 'lifetime' ? 'lifetime' : 'monthly'}
                       </Text>
                     </View>
                   </View>
                 </View>
 
-                {subscriptionData.planType !== 'free' && (
-                  <TouchableOpacity
-                    style={[{
-                      flexDirection: "row",
-                      borderRadius: 6,
-                      borderWidth: 1,
-                      borderColor: "rgba(255, 255, 255, 0.2)",
-                      marginTop: scaleVertical(24),
-                    }]}
-                    activeOpacity={0.8}
-                    onPress={handleChangePlan}
-                  >
-                    <View style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}>
+                {subscriptionData.planType !== 'free' && subscriptionData.planType !== 'lifetime' && (
+                  <>
+                    <TouchableOpacity
+                      style={[{
+                        flexDirection: "row",
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: "rgba(255, 255, 255, 0.2)",
+                        marginTop: scaleVertical(24),
+                      }]}
+                      activeOpacity={0.8}
+                      onPress={handleChangePlan}
+                    >
                       <View style={{
                         flex: 1,
-                        alignContent: "center",
+                        flexDirection: "row",
                         alignItems: "center",
-                        justifyContent: "center",
                       }}>
-                        <Text style={[{
-                          color: "#FFF",
-                          fontSize: scale(18),
-                          fontFamily: "ZillaSlab-SemiBold",
-                          letterSpacing: 0,
-                          paddingVertical: scaleVertical(17),
-                        }]}>
-                          {`Change to ${getPlanDisplayName(getAlternativePlan(subscriptionData.planType))}`}
-                        </Text>
+                        <View style={{
+                          flex: 1,
+                          alignContent: "center",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}>
+                          <Text style={[{
+                            color: "#FFF",
+                            fontSize: scale(18),
+                            fontFamily: "ZillaSlab-SemiBold",
+                            letterSpacing: 0,
+                            paddingVertical: scaleVertical(17),
+                          }]}>
+                            {`Change to ${getPlanDisplayName(getAlternativePlan(subscriptionData.planType))}`}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  </TouchableOpacity>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[{
+                        flexDirection: "row",
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: "rgba(255, 255, 255, 0.2)",
+                        marginTop: scaleVertical(12),
+                      }]}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        Alert.alert(
+                          "Change to Lifetime Plan",
+                          "Would you like to upgrade to the Lifetime plan for $39.99 (one-time payment)? This gives you lifetime access to all premium features.",
+                          [
+                            {
+                              text: "Cancel",
+                              style: "cancel"
+                            },
+                            {
+                              text: "Upgrade to Lifetime",
+                              onPress: async () => {
+                                try {
+                                  const platform = Platform.OS;
+                                  
+                                  if (platform === 'ios') {
+                                    // Redirect to App Store subscription management
+                                    Linking.openURL('https://apps.apple.com/account/subscriptions');
+                                  } else if (platform === 'android') {
+                                    // Redirect to Google Play subscription management
+                                    Linking.openURL('https://play.google.com/store/account/subscriptions');
+                                  }
+                                  
+                                  Alert.alert(
+                                    "Subscription Management",
+                                    "You've been redirected to manage your subscription. You can upgrade to the Lifetime plan there.",
+                                    [{ text: "OK" }]
+                                  );
+                                  
+                                } catch (error) {
+                                  console.error('Error managing subscription:', error);
+                                  Alert.alert(
+                                    "Error",
+                                    "There was an error accessing subscription management. Please try again or contact support.",
+                                    [{ text: "OK" }]
+                                  );
+                                }
+                              }
+                            }
+                          ]
+                        );
+                      }}
+                    >
+                      <View style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}>
+                        <View style={{
+                          flex: 1,
+                          alignContent: "center",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}>
+                          <Text style={[{
+                            color: "#FFF",
+                            fontSize: scale(18),
+                            fontFamily: "ZillaSlab-SemiBold",
+                            letterSpacing: 0,
+                            paddingVertical: scaleVertical(17),
+                          }]}>
+                            {"Change to Lifetime"}
+                          </Text>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  </>
                 )}
               </>
             ) : null}
