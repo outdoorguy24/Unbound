@@ -91,6 +91,7 @@ const CampScreen = () => {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
 
+
   // Check if response is valid (not empty and under 100 words)
   const isResponseValid = responseText.trim().length > 0 && getWordCount(responseText) <= 100;
 
@@ -347,6 +348,7 @@ const CampScreen = () => {
     checkFirstTimeUser();
   }, [userStats]);
 
+
   // Fetch app usage data
   useEffect(() => {
     const fetchAppData = async () => {
@@ -555,18 +557,59 @@ const CampScreen = () => {
       { value: 0, label: "Week 4" },
     ]);
 
-    // Animate the sample data
+    // Animate each bar one at a time from left to right
     useEffect(() => {
-      const timer = setTimeout(() => {
-        setAnimatedData([
-          { value: 20, label: "Week 1" },
-          { value: 40, label: "Week 2" },
-          { value: 30, label: "Week 3" },
-          { value: 60, label: "Week 4" },
-        ]);
-      }, 500); // Start animation after 500ms
+      const finalData = [
+        { value: 20, label: "Week 1" },
+        { value: 40, label: "Week 2" },
+        { value: 30, label: "Week 3" },
+        { value: 60, label: "Week 4" },
+      ];
 
-      return () => clearTimeout(timer);
+      // Start animation after 500ms
+      const initialTimer = setTimeout(() => {
+        // Animate Week 1
+        setTimeout(() => {
+          setAnimatedData(prev => [
+            { ...prev[0], value: finalData[0].value },
+            prev[1],
+            prev[2],
+            prev[3]
+          ]);
+        }, 0);
+
+        // Animate Week 2
+        setTimeout(() => {
+          setAnimatedData(prev => [
+            prev[0],
+            { ...prev[1], value: finalData[1].value },
+            prev[2],
+            prev[3]
+          ]);
+        }, 1000);
+
+        // Animate Week 3
+        setTimeout(() => {
+          setAnimatedData(prev => [
+            prev[0],
+            prev[1],
+            { ...prev[2], value: finalData[2].value },
+            prev[3]
+          ]);
+        }, 2000);
+
+        // Animate Week 4
+        setTimeout(() => {
+          setAnimatedData(prev => [
+            prev[0],
+            prev[1],
+            prev[2],
+            { ...prev[3], value: finalData[3].value }
+          ]);
+        }, 3000);
+      }, 500);
+
+      return () => clearTimeout(initialTimer);
     }, []);
 
     // Format improvement options for display
@@ -705,6 +748,7 @@ const CampScreen = () => {
   function StatsCard() {
     return <>
     {/* Grid of small cards */}
+    <View>
         <View style={{ 
             flexDirection: "row", 
             flexWrap: "wrap", 
@@ -834,6 +878,7 @@ const CampScreen = () => {
             />
           </TouchableOpacity>
         </View>
+    </View>
         </>
   }
 
@@ -1567,6 +1612,7 @@ const CampScreen = () => {
       </View>
     );
   }
+
   
   return (
     <View style={styles.safe}>
