@@ -3,7 +3,9 @@ import {
     Alert,
     Dimensions,
     Image,
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -365,7 +367,8 @@ const PersonalInformationScreen = () => {
             intensity={30}
           >
               {/* Sheet */}
-              <View
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{
                   backgroundColor: "#000",
                   borderTopLeftRadius: 18,
@@ -439,6 +442,8 @@ const PersonalInformationScreen = () => {
                   placeholder="Enter your first name"
                   placeholderTextColor="rgba(0, 0, 0, 0.5)"
                   textAlignVertical="top"
+                  returnKeyType="done"
+                  blurOnSubmit={true}
                   style={{
                     marginTop: scaleVertical(8),
                     borderRadius: 6,
@@ -466,7 +471,7 @@ const PersonalInformationScreen = () => {
                 <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.9} onPress={handleCancel}>
                   <Text style={styles.secondaryText}>Cancel</Text>
                 </TouchableOpacity>
-              </View>
+              </KeyboardAvoidingView>
           </BlurView>
         </TouchableWithoutFeedback>
       </Modal>
@@ -489,7 +494,8 @@ const PersonalInformationScreen = () => {
             intensity={30}
           >
               {/* Sheet */}
-              <View
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{
                   backgroundColor: "#000",
                   borderTopLeftRadius: 18,
@@ -563,6 +569,8 @@ const PersonalInformationScreen = () => {
                   placeholder="Enter your location (e.g., Denver, CO)"
                   placeholderTextColor="rgba(0, 0, 0, 0.5)"
                   textAlignVertical="top"
+                  returnKeyType="done"
+                  blurOnSubmit={true}
                   style={{
                     marginTop: scaleVertical(8),
                     borderRadius: 6,
@@ -590,7 +598,7 @@ const PersonalInformationScreen = () => {
                 <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.9} onPress={handleCancelLocation}>
                   <Text style={styles.secondaryText}>Cancel</Text>
                 </TouchableOpacity>
-              </View>
+              </KeyboardAvoidingView>
           </BlurView>
         </TouchableWithoutFeedback>
       </Modal>
