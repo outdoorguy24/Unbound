@@ -132,16 +132,16 @@ const ScreenProfileSetup = () => {
           }</Text>
           <Text style={styles.description}>
             {
-              "Tell us your name and where you’re based. This helps personalize your experience."
+              "Tell us your first name and where you’re based. This helps personalize your experience."
             }
           </Text>
 
           
-          <Text style={[styles.label, { marginTop: scaleVertical(46) }]}>Full name</Text>
+          <Text style={[styles.label, { marginTop: scaleVertical(46) }]}>First name</Text>
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="Please enter your full name"
+            placeholder="Please enter your first name"
             placeholderTextColor="rgba(0, 0, 0, 0.3)"
             autoCapitalize="none"
             style={styles.input}

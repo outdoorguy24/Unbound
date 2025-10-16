@@ -6,12 +6,11 @@ import {
     Modal,
     ScrollView,
     StyleSheet,
-    Switch,
     Text,
     TextInput,
     TouchableOpacity,
     TouchableWithoutFeedback,
-    View,
+    View
 } from "react-native";
 
 import { scale, scaleVertical } from "@/constants/Scale";
@@ -26,10 +25,11 @@ const { width } = Dimensions.get("window");
 const PersonalInformationScreen = () => {
   const insets = useSafeAreaInsets();
   const { user, setUser } = useAuth();
-  const [toggle, setToggle] = useState(false);
 
   const [isEditName, setIsEditName] = useState(false);
+  const [isEditLocation, setIsEditLocation] = useState(false);
   const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +50,8 @@ const PersonalInformationScreen = () => {
         if (isMockUser) {
           // For mock users, use the name from AuthContext
           setName(user.name || "John Muir");
-          setUserProfile({ first_name: user.name || "John Muir" });
+          setLocation("Denver, CO"); // Mock location
+          setUserProfile({ first_name: user.name || "John Muir", city: "Denver, CO" });
         } else {
           // For real users, fetch from Supabase
           const { data, error } = await supabase
@@ -62,16 +63,20 @@ const PersonalInformationScreen = () => {
           if (error && error.code !== 'PGRST116') {
             console.error('Error loading user profile:', error);
             setName("John Muir"); // Fallback
+            setLocation("No location set");
           } else if (data) {
             setName(data.first_name || "John Muir");
+            setLocation(data.city || "No location set");
             setUserProfile(data);
           } else {
             setName("John Muir"); // Fallback
+            setLocation("No location set");
           }
         }
       } catch (error) {
         console.error('Error loading user profile:', error);
         setName("John Muir"); // Fallback
+        setLocation("No location set");
       } finally {
         setLoading(false);
       }
@@ -84,9 +89,18 @@ const PersonalInformationScreen = () => {
     setIsEditName(true);
   };
 
+  const handleEditLocation = () => {
+    setIsEditLocation(true);
+  };
+
   const handleCancel = () => {
     setIsEditName(false);
     setName(userProfile?.first_name || user?.name || "John Muir");
+  };
+
+  const handleCancelLocation = () => {
+    setIsEditLocation(false);
+    setLocation(userProfile?.city || "No location set");
   };
 
   const handleSave = async () => {
@@ -123,6 +137,42 @@ const PersonalInformationScreen = () => {
     } catch (error) {
       console.error('Error saving name:', error);
       Alert.alert("Error", "Failed to update name. Please try again.");
+    }
+  };
+
+  const handleSaveLocation = async () => {
+    if (!location.trim()) {
+      Alert.alert("Error", "Please enter a valid location");
+      return;
+    }
+
+    try {
+      const isMockUser = user?.id && user.id.length <= 10;
+      
+      if (isMockUser) {
+        // For mock users, update local state
+        setUserProfile({ ...userProfile, city: location.trim() });
+        setIsEditLocation(false);
+        Alert.alert("Success", "Location updated successfully");
+      } else {
+        // For real users, update in Supabase
+        const { error } = await supabase
+          .from('user_profiles')
+          .update({ city: location.trim() })
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error updating location:', error);
+          Alert.alert("Error", "Failed to update location. Please try again.");
+        } else {
+          setUserProfile({ ...userProfile, city: location.trim() });
+          setIsEditLocation(false);
+          Alert.alert("Success", "Location updated successfully");
+        }
+      }
+    } catch (error) {
+      console.error('Error saving location:', error);
+      Alert.alert("Error", "Failed to update location. Please try again.");
     }
   };
   
@@ -173,14 +223,14 @@ const PersonalInformationScreen = () => {
           bounces={false}
         >
 
-          {/* Full name field */}
+          {/* First name field */}
           <Text style={{
               color: "rgba(255, 255, 255, 0.5)",
               fontSize: scale(16),
               fontFamily: "ZillaSlab-SemiBold",
               letterSpacing: 0.5,
           }}>
-            {"Full name"}
+            {"First name"}
           </Text>
 
           <View style={{
@@ -200,6 +250,53 @@ const PersonalInformationScreen = () => {
             
 
             <TouchableOpacity onPress={handleEdit} disabled={loading}>  
+              <Image
+                source={require("../../assets/new-images/icon-edit-pen.png")}
+                style={{
+                  height: scale(24),
+                  width: scale(24),
+                  opacity: loading ? 0.5 : 1,
+                }}
+              />
+            </TouchableOpacity>
+
+          </View>
+          
+          <View style={{
+            width: "100%",
+            height: 1, 
+            backgroundColor: "#D9D9D9", 
+            opacity: 0.15,
+            marginVertical: scaleVertical(24),
+          }} />
+
+          {/* Location field */}
+          <Text style={{
+              color: "rgba(255, 255, 255, 0.5)",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-SemiBold",
+              letterSpacing: 0.5,
+          }}>
+            {"Location"}
+          </Text>
+
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: scaleVertical(4),
+          }}>
+            <Text style={{
+                color: "rgba(255, 255, 255, 1)",
+                fontSize: scale(20),
+                fontFamily: "ZillaSlab-SemiBold",
+                letterSpacing: 0.5,
+                flex: 1,
+            }}>
+              {loading ? "Loading..." : (userProfile?.city || "No location set")}
+            </Text>
+            
+
+            <TouchableOpacity onPress={handleEditLocation} disabled={loading}>  
               <Image
                 source={require("../../assets/new-images/icon-edit-pen.png")}
                 style={{
@@ -245,57 +342,6 @@ const PersonalInformationScreen = () => {
               {loading ? "Loading..." : (user?.email || "No email available")}
             </Text>
           </View>
-          
-          <View style={{
-            width: "100%",
-            height: 1, 
-            backgroundColor: "#D9D9D9", 
-            opacity: 0.15,
-            marginVertical: scaleVertical(24),
-          }} />
-
-          {/* Location field */}
-
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-            <Image
-              source={require("../../assets/new-images/icon-location-pin.png")}
-              style={{
-                height: scale(24),
-                width: scale(24),
-                marginRight: scale(10)
-              }}
-            />
-
-            <Text style={{
-              color: "rgba(255, 255, 255, 0.5)",
-              fontSize: scale(16),
-              fontFamily: "ZillaSlab-SemiBold",
-              letterSpacing: 0.5,
-              flex: 1,
-            }}>
-              {"Location"}
-            </Text>
-
-            <Switch value={toggle} onValueChange={(value) => setToggle(value)}         
-              ios_backgroundColor={'rgba(255, 255, 255, 0.2)'}
-              trackColor={{ false: "#67CE67", true: "#67CE67" }}
-              thumbColor={toggle ? "#f4f3f4" : "#f4f3f4"}
-              />
-          </View>
-
-          <Text style={{
-              marginTop: scaleVertical(10),
-              color: "rgba(255, 255, 255, 1)",
-              fontSize: scale(20),
-              fontFamily: "ZillaSlab-SemiBold",
-              letterSpacing: 0.5,
-              flex: 1,
-          }}>
-            {loading ? "Loading..." : (userProfile?.city || "No location set")}
-          </Text>
 
         </ScrollView>
       </View>
@@ -358,7 +404,7 @@ const PersonalInformationScreen = () => {
                       letterSpacing: 0.5,
                     }}
                   >
-                    {"Change full name"}
+                    {"Change first name"}
                   </Text>
 
                   <TouchableOpacity
@@ -384,13 +430,13 @@ const PersonalInformationScreen = () => {
                     letterSpacing: 0.5,
                   }}
                 >
-                  {"Full name"}
+                  {"First name"}
                 </Text>
 
                 <TextInput
                   value={name}
                   onChangeText={setName}
-                  placeholder="Enter your full name"
+                  placeholder="Enter your first name"
                   placeholderTextColor="rgba(0, 0, 0, 0.5)"
                   textAlignVertical="top"
                   style={{
@@ -418,6 +464,130 @@ const PersonalInformationScreen = () => {
 
                 {/* Cancel */}
                 <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.9} onPress={handleCancel}>
+                  <Text style={styles.secondaryText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+          </BlurView>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* ===================== LOCATION EDIT MODAL ===================== */}
+      <Modal
+        transparent
+        visible={isEditLocation}
+        animationType="slide"
+        onRequestClose={handleCancelLocation}
+      >
+        {/* Backdrop */}
+        <TouchableWithoutFeedback onPress={handleCancelLocation}>
+          <BlurView
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+            }} 
+            tint={'dark'}
+            intensity={30}
+          >
+              {/* Sheet */}
+              <View
+                style={{
+                  backgroundColor: "#000",
+                  borderTopLeftRadius: 18,
+                  borderTopRightRadius: 18,
+                  paddingTop: scaleVertical(8),
+                  paddingHorizontal: scale(24),
+                  paddingBottom: insets.bottom + scaleVertical(16),
+                }}
+              >
+                {/* Drag indicator (optional look) */}
+                <View
+                  style={{
+                    alignSelf: "center",
+                    width: scale(76),
+                    height: 5,
+                    borderRadius: 2.5,
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    marginBottom: scaleVertical(20),
+                  }}
+                />
+
+                {/* Header + close */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: scaleVertical(24),
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#FFF",
+                      fontSize: scale(24),
+                      fontFamily: "ZillaSlab-SemiBold",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {"Change location"}
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={handleCancelLocation}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Image
+                      source={require("../../assets/new-images/icon-close-white.png")}
+                      style={{
+                        height: scale(24),
+                        width: scale(24),
+                      }}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Text area */}
+                <Text
+                  style={{
+                    color: "#FFF",
+                    fontSize: scale(16),
+                    fontFamily: "ZillaSlab-Medium",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  {"Location"}
+                </Text>
+
+                <TextInput
+                  value={location}
+                  onChangeText={setLocation}
+                  placeholder="Enter your location (e.g., Denver, CO)"
+                  placeholderTextColor="rgba(0, 0, 0, 0.5)"
+                  textAlignVertical="top"
+                  style={{
+                    marginTop: scaleVertical(8),
+                    borderRadius: 6,
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    padding: scale(20),
+                    color: "rgba(0, 0, 0, 1)",
+                    fontSize: scale(16),
+                    fontFamily: "ZillaSlab-Medium",
+                  }}
+                />
+
+                {/* Save button */}
+                <TouchableOpacity
+                  style={[
+                    styles.primaryBtn,
+                  ]}
+                  onPress={handleSaveLocation}
+                  activeOpacity={0.9}
+                >
+                  <Text style={styles.primaryText}>{"Save"}</Text>
+                </TouchableOpacity>
+                
+
+                {/* Cancel */}
+                <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.9} onPress={handleCancelLocation}>
                   <Text style={styles.secondaryText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
