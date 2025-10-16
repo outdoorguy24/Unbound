@@ -209,7 +209,7 @@ const DeleteAccountScreen = () => {
                   letterSpacing: 0,
                   paddingVertical: scaleVertical(18),
                 }]}>
-                  {"Delete account"}
+                  {"Delete account and all data"}
                 </Text>
               </View>
             </View>
@@ -233,7 +233,7 @@ const DeleteAccountScreen = () => {
                 source={require("../../assets/new-images/icon-delete-account-popup.png")}
                 style={styles.cautionImage}
                 />
-                <Text style={styles.incorrectCode}>{"Delete your account"}</Text>            
+                <Text style={styles.incorrectCode}>{"Delete your account and all data"}</Text>            
                 <Text style={styles.incorrectCodeDesc}>{"This will permanently delete your account, progress, and all saved data. There’s no way back from here."}</Text>            
   
                 <TouchableOpacity

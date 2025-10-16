@@ -218,9 +218,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Update password
   const updatePassword = async (newPassword: string) => {
     try {
-      // Check if this is a mock user (from AsyncStorage) or real Supabase user
-      const storedUser = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      const isMockUser = !!storedUser; // If we have a stored user, it's a mock user
+      // Check if this is a mock user (short ID) or real Supabase user
+      const isMockUser = user?.id && user.id.length <= 10;
       
       if (isMockUser) {
         // For mock users, just simulate success
@@ -228,7 +227,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
         return;
       } else {
-        // For real Supabase users, use the actual API
+        // For real Supabase users, check if they have email/password authentication
+        // OAuth users (Google/Apple) cannot change password through this method
+        const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          throw new Error("Unable to verify user authentication method");
+        }
+        
+        // Check if user has email/password provider (not OAuth)
+        const hasPasswordProvider = supabaseUser?.app_metadata?.providers?.includes('email') || 
+                                   supabaseUser?.identities?.some(identity => identity.provider === 'email');
+        
+        if (!hasPasswordProvider) {
+          throw new Error("Password cannot be changed for accounts signed in with Google or Apple");
+        }
+        
+        // Update password for email/password users
         const { error } = await supabase.auth.updateUser({
           password: newPassword
         });

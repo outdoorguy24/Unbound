@@ -39,9 +39,9 @@ const LoginSecurityScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Check if user signed up with email/password (not OAuth)
-  // We'll check if the user has an email and assume they can change password
-  // In a production app, you'd check user.app_metadata.provider or user.identities
-  const isEmailPasswordUser = !!user?.email;
+  // For Supabase users, we need to check if they have a password provider
+  // For mock users (created via signup function), they can always change password
+  const isEmailPasswordUser = user?.id && user.id.length <= 10; // Mock users have short IDs
   
   // Debug logging
   console.log('Login Security - User:', user);
@@ -210,7 +210,7 @@ const LoginSecurityScreen = () => {
               {"●●●●●●●●●●●●●"}
             </Text>
 
-            {isEmailPasswordUser && (
+            {isEmailPasswordUser ? (
               <TouchableOpacity onPress={handleEditPassword}>  
                 <Image
                   source={require("../../assets/new-images/icon-edit-pen.png")}
@@ -220,6 +220,15 @@ const LoginSecurityScreen = () => {
                   }}
                 />
               </TouchableOpacity>
+            ) : (
+              <Text style={{
+                color: "rgba(255, 255, 255, 0.5)",
+                fontSize: scale(14),
+                fontFamily: "ZillaSlab-Medium",
+                letterSpacing: 0.5,
+              }}>
+                {"Managed by Google/Apple"}
+              </Text>
             )}
           </View>
           
