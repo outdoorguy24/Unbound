@@ -1,27 +1,58 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
+  Alert,
   Dimensions,
+  Image,
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
   TouchableOpacity,
-  ScrollView,
-  Switch,
-  Modal,
-  TouchableWithoutFeedback,
-  TextInput,
+  View
 } from "react-native";
 
-import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scale, scaleVertical } from "@/constants/Scale";
 import { router } from "expo-router";
-import { BlurView } from "expo-blur";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
 const PaymentMethodScreen = () => {
   const insets = useSafeAreaInsets();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleManagePaymentMethods = async () => {
+    setIsLoading(true);
+    try {
+      // Redirect to platform-specific subscription management
+      const platform = Platform.OS;
+      
+      if (platform === 'ios') {
+        // Open App Store subscription management
+        Linking.openURL('https://apps.apple.com/account/subscriptions');
+      } else if (platform === 'android') {
+        // Open Google Play subscription management
+        Linking.openURL('https://play.google.com/store/account/subscriptions');
+      }
+      
+      Alert.alert(
+        "Payment Method Management",
+        "You've been redirected to manage your payment methods. You can update your payment information, add new cards, or change your billing method there.",
+        [{ text: "OK" }]
+      );
+      
+    } catch (error) {
+      console.error('Error managing payment methods:', error);
+      Alert.alert(
+        "Error",
+        "There was an error accessing your payment methods. Please try again or contact support.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   
   return (
     <View style={styles.safe}>
@@ -63,139 +94,19 @@ const PaymentMethodScreen = () => {
           </View>
         </View>
         
-        <ScrollView
-          style={[styles.keyboard, {marginBottom: insets.bottom + scaleVertical(16)}]}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-        >
-
-          <View style={{
-            backgroundColor: '#fff',
-            padding: scale(20),
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderRadius: 6,
-            borderWidth: 2,
-            borderColor: '#BE5E19',
+        <View style={[styles.keyboard, {marginBottom: insets.bottom + scaleVertical(16)}]}>
+          <Text style={{
+            color: "rgba(255, 255, 255, 1)",
+            fontSize: scale(18),
+            fontFamily: "ZillaSlab-Regular",
+            letterSpacing: 0.5,
+            lineHeight: scale(24),
+            textAlign: 'center',
+            marginTop: scaleVertical(40),
           }}>
-            <Image
-              source={require("../../assets/new-images/icon-paypal.png")}
-              style={{
-                height: scale(37),
-                width: scale(30),
-                marginRight: scale(16)
-              }}
-            />
-
-            <View style={{
-              flex: 1,
-              flexDirection: 'row',
-            }}>
-              <View style={{
-                flex: 1,
-              }}>
-                <Text style={{
-                    color: "rgba(0, 0, 0, 1)",
-                    fontSize: scale(14),
-                    fontFamily: "ZillaSlab-SemiBold",
-                    letterSpacing: 0.5,
-                    flex: 1,
-                }}>
-                  {"●●●● ●●●● ●●●● 4473"}
-                </Text>
-
-                <Text style={{
-                    color: "rgba(0, 0, 0, 0.5)",
-                    marginTop: scaleVertical(8),
-                    fontSize: scale(14),
-                    fontFamily: "ZillaSlab-SemiBold",
-                    letterSpacing: 0.5,
-                    flex: 1,
-                }}>
-                  {"Expiration date: 09/25"}
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity>
-              <Text style={{
-                  color: "#BE5E19",
-                  fontSize: scale(16),
-                  fontFamily: "ZillaSlab-SemiBold",
-                  letterSpacing: 0.5,
-                  marginLeft: scale(20)
-              }}>
-                {"Edit"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-
-
-          <View style={{
-            backgroundColor: '#fff',
-            marginTop: scaleVertical(16),
-            padding: scale(20),
-            flexDirection: 'row',
-            alignItems: 'center',
-            borderRadius: 6,
-            borderWidth: 2,
-            borderColor: 'transparent',
-          }}>
-            <Image
-              source={require("../../assets/new-images/icon-mastercard.png")}
-              style={{
-                height: scale(32),
-                width: scale(32),
-                marginRight: scale(14)
-              }}
-            />
-
-            <View style={{
-              flex: 1,
-              flexDirection: 'row',
-            }}>
-              <View style={{
-                flex: 1,
-              }}>
-                <Text style={{
-                    color: "rgba(0, 0, 0, 1)",
-                    fontSize: scale(14),
-                    fontFamily: "ZillaSlab-SemiBold",
-                    letterSpacing: 0.5,
-                    flex: 1,
-                }}>
-                  {"●●●● ●●●● ●●●● 3355"}
-                </Text>
-
-                <Text style={{
-                    color: "rgba(0, 0, 0, 0.5)",
-                    marginTop: scaleVertical(8),
-                    fontSize: scale(14),
-                    fontFamily: "ZillaSlab-SemiBold",
-                    letterSpacing: 0.5,
-                    flex: 1,
-                }}>
-                  {"Expiration date: 02/25"}
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity>
-              <Text style={{
-                  color: "#BE5E19",
-                  fontSize: scale(16),
-                  fontFamily: "ZillaSlab-SemiBold",
-                  letterSpacing: 0.5,
-                  marginLeft: scale(20)
-              }}>
-                {"Edit"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-        </ScrollView>
+            {"Your payment methods are managed through your device's subscription settings. Tap below to update your payment information."}
+          </Text>
+        </View>
 
 
         <TouchableOpacity
@@ -203,11 +114,11 @@ const PaymentMethodScreen = () => {
             styles.primaryBtn,
             {marginBottom: insets.bottom + scaleVertical(16)}
           ]}
-          onPress={() => {
-          }}
+          onPress={handleManagePaymentMethods}
           activeOpacity={0.9}
+          disabled={isLoading}
         >
-          <Text style={styles.primaryText}>{"Add card"}</Text>
+          <Text style={styles.primaryText}>{"Manage Payment Methods"}</Text>
         </TouchableOpacity>
       </View>
 

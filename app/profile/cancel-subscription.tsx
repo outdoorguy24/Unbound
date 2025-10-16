@@ -13,7 +13,6 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import Purchases from "react-native-purchases";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
@@ -50,15 +49,6 @@ const CancelSubscriptionScreen = () => {
           onPress: async () => {
             setIsLoading(true);
             try {
-              // Get current customer info
-              const customerInfo = await Purchases.getCustomerInfo();
-              
-              if (customerInfo.activeSubscriptions.length === 0) {
-                Alert.alert("No Active Subscription", "You don't have an active subscription to cancel.");
-                setIsLoading(false);
-                return;
-              }
-
               // For iOS, redirect to App Store subscription management
               // For Android, redirect to Google Play subscription management
               const platform = Platform.OS;
