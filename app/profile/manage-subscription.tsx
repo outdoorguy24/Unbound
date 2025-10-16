@@ -1,28 +1,111 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
-  Modal,
-  TouchableWithoutFeedback,
-  TextInput,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    Linking,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 
-import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+    formatRenewalDate,
+    getAlternativePlan,
+    getAlternativePlanPrice,
+    getPlanDisplayName,
+    getSubscriptionData,
+    SubscriptionData
+} from "@/lib/subscriptionService";
 import { router } from "expo-router";
-import { BlurView } from "expo-blur";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
 const ManageSubscriptionScreen = () => {
   const insets = useSafeAreaInsets();
-  const [toggle, setToggle] = useState(false);
+  const { user } = useAuth();
+  const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSubscriptionData = async () => {
+      if (!user?.id) {
+        setError('No user found');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getSubscriptionData(user.id);
+        setSubscriptionData(data);
+      } catch (err) {
+        console.error('Error fetching subscription data:', err);
+        setError('Failed to load subscription data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscriptionData();
+  }, [user?.id]);
+
+  const handleChangePlan = async () => {
+    if (!subscriptionData) return;
+    
+    const alternativePlan = getAlternativePlan(subscriptionData.planType);
+    const alternativePrice = getAlternativePlanPrice(alternativePlan);
+    
+    Alert.alert(
+      "Change Subscription Plan",
+      `Would you like to change to the ${alternativePlan} plan for $${alternativePrice}/${alternativePlan === 'yearly' ? 'year' : 'month'}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Change Plan",
+          onPress: async () => {
+            try {
+              const platform = Platform.OS;
+              
+              if (platform === 'ios') {
+                // Redirect to App Store subscription management
+                Linking.openURL('https://apps.apple.com/account/subscriptions');
+              } else if (platform === 'android') {
+                // Redirect to Google Play subscription management
+                Linking.openURL('https://play.google.com/store/account/subscriptions');
+              }
+              
+              Alert.alert(
+                "Subscription Management",
+                "You've been redirected to manage your subscription. You can change your plan, update billing, or cancel your subscription there.",
+                [{ text: "OK" }]
+              );
+              
+            } catch (error) {
+              console.error('Error managing subscription:', error);
+              Alert.alert(
+                "Error",
+                "There was an error accessing subscription management. Please try again or contact support.",
+                [{ text: "OK" }]
+              );
+            }
+          }
+        }
+      ]
+    );
+  };
   
   return (
     <View style={styles.safe}>
@@ -87,123 +170,155 @@ const ManageSubscriptionScreen = () => {
                 borderRadius: 6,
               }}
             >
-            <View
-              style={{
-                flexDirection: "row",
-              }}
-            >
-              <View style={{flex: 1}}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  
-                  <Image
-                    source={require("../../assets/new-images/icon-bill.png")}
-                    style={{
-                      height: scale(16),
-                      width: scale(16),
-                      marginRight: scale(6)
-                    }}
-                  />
-                  <Text style={{
-                    color: "#fff",
-                    fontSize: scale(16),
-                    fontFamily: "ZillaSlab-Medium",
-                  }}>{"Monthly"}</Text>
-                </View>
-                <Text style={ {
-                    color: "rgba(255,255,255,0.5)",
-                    fontSize: scale(12),
-                    fontFamily: "ZillaSlab-Regular",
-                    marginTop: scaleVertical(4),
-                  }}>
-                  {"Renews on 8 Sept 2025"}
+            {loading ? (
+              <View style={{ alignItems: 'center', paddingVertical: scaleVertical(20) }}>
+                <ActivityIndicator color="#FFF" size="small" />
+                <Text style={{
+                  color: "rgba(255,255,255,0.7)",
+                  fontSize: scale(14),
+                  fontFamily: "ZillaSlab-Regular",
+                  marginTop: scaleVertical(8),
+                }}>
+                  {"Loading subscription..."}
                 </Text>
               </View>
-
-              <View style={{ justifyContent: "center" }}>
-                <View style={{ flexDirection: "row" }}>
-                  <Text
-                    style={{
-                      color: "#FFF",
-                      fontFamily: "ZillaSlab-SemiBold",
-                      fontSize: scale(32),
-                      marginRight: scale(4),
-                    }}
-                  >
-                    $
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: "#FFF",
-                      fontFamily: "ZillaSlab-Bold",
-                      fontSize: scale(32),
-                    }}
-                  >
-                    6
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: "#FFF",
-                      fontFamily: "ZillaSlab-Bold",
-                      fontSize: scale(20),
-                      marginLeft: scale(2),
-                      transform: [
-                        { translateY: -Math.round(scale(20) * 0.2) },
-                      ],
-                    }}
-                  >
-                    99
-                  </Text>
-
-                  <Text
-                    style={{
-                      color: "rgba(255,255,255,0.6)",
-                      fontFamily: "ZillaSlab-Regular",
-                      fontSize: scale(14),
-                      alignSelf: "flex-end",
-                      transform: [{ translateY: -scale(3) }],
-                    }}
-                  >
-                    /monthly
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={[{
-                flexDirection: "row",
-                borderRadius: 6,
-                borderWidth: 1,
-                borderColor: "rgba(255, 255, 255, 0.2)",
-                marginTop: scaleVertical(24),
-              }]}
-              activeOpacity={0.8}
-            >
-              <View style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-              }}>
-                <View style={{
-                  flex: 1,
-                  alignContent: "center",
-                  alignItems: "center",
-                  justifyContent: "center",
+            ) : error ? (
+              <View style={{ alignItems: 'center', paddingVertical: scaleVertical(20) }}>
+                <Text style={{
+                  color: "#FF4444",
+                  fontSize: scale(14),
+                  fontFamily: "ZillaSlab-Regular",
+                  textAlign: 'center',
                 }}>
-                  <Text style={[{
-                    color: "#FFF",
-                    fontSize: scale(18),
-                    fontFamily: "ZillaSlab-SemiBold",
-                    letterSpacing: 0,
-                    paddingVertical: scaleVertical(17),
-                  }]}>
-                    {"Change to Yearly"}
-                  </Text>
-                </View>
+                  {error}
+                </Text>
               </View>
-            </TouchableOpacity>
+            ) : subscriptionData ? (
+              <>
+                <View
+                  style={{
+                    flexDirection: "row",
+                  }}
+                >
+                  <View style={{flex: 1}}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                      
+                      <Image
+                        source={require("../../assets/new-images/icon-bill.png")}
+                        style={{
+                          height: scale(16),
+                          width: scale(16),
+                          marginRight: scale(6)
+                        }}
+                      />
+                      <Text style={{
+                        color: "#fff",
+                        fontSize: scale(16),
+                        fontFamily: "ZillaSlab-Medium",
+                      }}>{getPlanDisplayName(subscriptionData.planType)}</Text>
+                    </View>
+                    {subscriptionData.renewalDate && (
+                      <Text style={ {
+                          color: "rgba(255,255,255,0.5)",
+                          fontSize: scale(12),
+                          fontFamily: "ZillaSlab-Regular",
+                          marginTop: scaleVertical(4),
+                        }}>
+                        {`Renews on ${formatRenewalDate(subscriptionData.renewalDate)}`}
+                      </Text>
+                    )}
+                  </View>
+
+                  <View style={{ justifyContent: "center" }}>
+                    <View style={{ flexDirection: "row" }}>
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontFamily: "ZillaSlab-SemiBold",
+                          fontSize: scale(32),
+                          marginRight: scale(4),
+                        }}
+                      >
+                        $
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontFamily: "ZillaSlab-Bold",
+                          fontSize: scale(32),
+                        }}
+                      >
+                        {Math.floor(subscriptionData.price)}
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: "#FFF",
+                          fontFamily: "ZillaSlab-Bold",
+                          fontSize: scale(20),
+                          marginLeft: scale(2),
+                          transform: [
+                            { translateY: -Math.round(scale(20) * 0.2) },
+                          ],
+                        }}
+                      >
+                        {String(Math.round((subscriptionData.price % 1) * 100)).padStart(2, '0')}
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: "rgba(255,255,255,0.6)",
+                          fontFamily: "ZillaSlab-Regular",
+                          fontSize: scale(14),
+                          alignSelf: "flex-end",
+                          transform: [{ translateY: -scale(3) }],
+                        }}
+                      >
+                        /{subscriptionData.planType === 'yearly' ? 'yearly' : 'monthly'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {subscriptionData.planType !== 'free' && (
+                  <TouchableOpacity
+                    style={[{
+                      flexDirection: "row",
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                      marginTop: scaleVertical(24),
+                    }]}
+                    activeOpacity={0.8}
+                    onPress={handleChangePlan}
+                  >
+                    <View style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}>
+                      <View style={{
+                        flex: 1,
+                        alignContent: "center",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}>
+                        <Text style={[{
+                          color: "#FFF",
+                          fontSize: scale(18),
+                          fontFamily: "ZillaSlab-SemiBold",
+                          letterSpacing: 0,
+                          paddingVertical: scaleVertical(17),
+                        }]}>
+                          {`Change to ${getPlanDisplayName(getAlternativePlan(subscriptionData.planType))}`}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+              </>
+            ) : null}
           </View>
 
           {/* Payment method */}
