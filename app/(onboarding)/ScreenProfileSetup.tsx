@@ -5,18 +5,18 @@ import { saveUserProfile } from "@/lib/supabaseUserProfile";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Dimensions,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -34,7 +34,7 @@ const ScreenProfileSetup = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { traps, scrollTimes, concerns } = useOnboarding();
+  const { traps, scrollTimes, concerns, improvementOptions } = useOnboarding();
   const { user } = useAuth();
 
   const isValidName = (name: string) => {
@@ -71,12 +71,13 @@ const ScreenProfileSetup = () => {
           traps,
           scrollTimes,
           concerns,
+          improvementOptions,
         }, toggle);
         
         console.log('Profile setup completed for real user:', user.id);
         console.log('Name:', name.trim(), 'City:', city.trim());
         console.log('Email subscription enabled:', toggle);
-        console.log('Onboarding data:', { traps, scrollTimes, concerns });
+        console.log('Onboarding data:', { traps, scrollTimes, concerns, improvementOptions });
       }
       
       // Navigate to Screen Time permission screen

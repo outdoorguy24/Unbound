@@ -4,6 +4,7 @@ import { CommunityResponse, getMockCommunityResponses, getRecentCommunityRespons
 import { getCommunityStats } from "@/lib/communityStats";
 import { getMonthlyProgress, getWeeklyProgress } from "@/lib/progressData";
 import { getSetupCompletion, SetupCompletion } from "@/lib/setupCompletion";
+import { supabase } from "@/lib/supabaseClient";
 import { testDatabaseConnection } from "@/lib/testDatabaseConnection";
 import { saveUserResponse } from "@/lib/userResponses";
 import { getUserStats } from "@/lib/userStats";
@@ -12,20 +13,20 @@ import { Feather } from "@expo/vector-icons"; // expo install @expo/vector-icons
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Linking,
-    Platform,
-    Pressable,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Dimensions,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import RenderHTML, { defaultSystemFonts } from "react-native-render-html";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -80,6 +81,10 @@ const CampScreen = () => {
   // Community responses state
   const [communityResponses, setCommunityResponses] = useState<CommunityResponse[]>([]);
   const [communityResponsesLoading, setCommunityResponsesLoading] = useState(true);
+  
+  // Welcome screen state
+  const [improvementOptions, setImprovementOptions] = useState<string[]>([]);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
   // Helper function to count words
   const getWordCount = (text: string) => {
@@ -88,6 +93,46 @@ const CampScreen = () => {
 
   // Check if response is valid (not empty and under 100 words)
   const isResponseValid = responseText.trim().length > 0 && getWordCount(responseText) <= 100;
+
+  // Fetch improvement options from Supabase
+  const fetchImprovementOptions = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('improvement_options')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching improvement options:', error);
+        return;
+      }
+
+      if (data?.improvement_options) {
+        setImprovementOptions(data.improvement_options);
+      }
+    } catch (error) {
+      console.error('Error fetching improvement options:', error);
+    }
+  };
+
+  // Check if user is first-time (all stats are 0)
+  const checkFirstTimeUser = () => {
+    const isFirstTime = userStats.monthlyHours === 0 && 
+                       userStats.allTimeHours === 0 && 
+                       userStats.totalSaved === 0 && 
+                       userStats.savedToday === 0;
+    console.log('First-time user check:', {
+      monthlyHours: userStats.monthlyHours,
+      allTimeHours: userStats.allTimeHours,
+      totalSaved: userStats.totalSaved,
+      savedToday: userStats.savedToday,
+      isFirstTime
+    });
+    setIsFirstTimeUser(isFirstTime);
+  };
 
   // Simple onChangeText function
   const handleResponseTextChange = (text: string) => {
@@ -119,7 +164,7 @@ const CampScreen = () => {
     if (!user?.id) return;
     
     try {
-      const setupData = await getSetupCompletion(user.id);
+      const setupData = await getSetupCompletion(user?.id);
       setSetupCompletion(setupData);
     } catch (error) {
       console.error('Error refreshing setup completion:', error);
@@ -136,12 +181,12 @@ const CampScreen = () => {
       
       if (isMockUser) {
         // For mock users, use mock data
-        console.log('Loading mock community responses for user:', user.id);
+        console.log('Loading mock community responses for user:', user?.id);
         const mockResponses = getMockCommunityResponses();
         setCommunityResponses(mockResponses);
       } else {
         // For real Supabase users, fetch real data
-        console.log('Loading real community responses for user:', user.id);
+        console.log('Loading real community responses for user:', user?.id);
         const responses = await getRecentCommunityResponses(3);
         setCommunityResponses(responses);
       }
@@ -162,12 +207,12 @@ const CampScreen = () => {
     setIsSubmittingResponse(true);
     try {
       // Check if this is a mock user (from AuthContext) or real Supabase user
-      const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
+      const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
       
       if (isMockUser) {
         // For mock users, just log the response
         console.log('Mock user response submitted:', {
-          userId: user.id,
+          userId: user?.id,
           responseText: responseText.trim(),
           wordCount: getWordCount(responseText),
           timestamp: new Date().toISOString()
@@ -180,8 +225,8 @@ const CampScreen = () => {
         }));
       } else {
         // For real Supabase users, save to database
-        await saveUserResponse(user.id, responseText.trim());
-        console.log('Response saved to Supabase for user:', user.id);
+        await saveUserResponse(user?.id, responseText.trim());
+        console.log('Response saved to Supabase for user:', user?.id);
         
         // Refresh setup completion to reflect the new milestone
         await refreshSetupCompletion();
@@ -224,20 +269,20 @@ const CampScreen = () => {
 
       try {
         // Check if this is a mock user (from AsyncStorage) or real Supabase user
-        const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
+        const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
         
         if (isMockUser) {
           // For mock users, use mock data
-          console.log('Loading dashboard with mock data for user:', user.id);
+          console.log('Loading dashboard with mock data for user:', user?.id);
           
           setUserStats({
-            savedToday: 2.5,
-            totalSaved: 45.2,
-            daysWithoutPorn: 7,
-            streakDays: 3,
-            monthlyHours: 12.8,
-            allTimeHours: 45.2,
-            phoneUsageReduction: 25,
+            savedToday: 0,
+            totalSaved: 0,
+            daysWithoutPorn: 0,
+            streakDays: 0,
+            monthlyHours: 0,
+            allTimeHours: 0,
+            phoneUsageReduction: 0,
           });
           
           setCommunityStats({
@@ -248,20 +293,9 @@ const CampScreen = () => {
             goalHitRate: 80,
           });
 
-          // Set mock progress data
-          setWeeklyProgressData([
-            { value: 3.2, label: "Week 1" },
-            { value: 4.5, label: "Week 2" },
-            { value: 2.6, label: "Week 3" },
-            { value: 2.5, label: "Week 4" },
-          ]);
-
-          setMonthlyProgressData([
-            { value: 11.3, label: "Oct 24" },
-            { value: 9.0, label: "Nov 24" },
-            { value: 12.8, label: "Dec 24" },
-            { value: 2.5, label: "Jan 25" },
-          ]);
+          // Set mock progress data (empty for first-time user testing)
+          setWeeklyProgressData([]);
+          setMonthlyProgressData([]);
 
           // Set mock setup completion
           setSetupCompletion({
@@ -272,14 +306,14 @@ const CampScreen = () => {
           });
         } else {
           // For real Supabase users, fetch real data
-          console.log('Loading dashboard with real data for user:', user.id);
+          console.log('Loading dashboard with real data for user:', user?.id);
           
           const [userStatsData, communityStatsData, weeklyData, monthlyData, setupData] = await Promise.all([
-            getUserStats(user.id),
+            getUserStats(user?.id),
             getCommunityStats(),
-            getWeeklyProgress(user.id),
-            getMonthlyProgress(user.id),
-            getSetupCompletion(user.id)
+            getWeeklyProgress(user?.id),
+            getMonthlyProgress(user?.id),
+            getSetupCompletion(user?.id)
           ]);
           
           setUserStats(userStatsData);
@@ -287,6 +321,14 @@ const CampScreen = () => {
           setWeeklyProgressData(weeklyData);
           setMonthlyProgressData(monthlyData);
           setSetupCompletion(setupData);
+        }
+        
+        // Fetch improvement options for welcome screen
+        if (isMockUser) {
+          // Set mock improvement options for testing
+          setImprovementOptions(['fitness', 'learn']);
+        } else {
+          await fetchImprovementOptions();
         }
         
       } catch (error) {
@@ -300,6 +342,11 @@ const CampScreen = () => {
     fetchData();
   }, [user?.id]);
 
+  // Check if user is first-time whenever userStats change
+  useEffect(() => {
+    checkFirstTimeUser();
+  }, [userStats]);
+
   // Fetch app usage data
   useEffect(() => {
     const fetchAppData = async () => {
@@ -312,11 +359,11 @@ const CampScreen = () => {
         setAppDataLoading(true);
         
         // Check if this is a mock user (from AsyncStorage) or real Supabase user
-        const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
+        const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
         
         if (isMockUser) {
           // For mock users, use mock app data
-          console.log('Loading mock app data for user:', user.id);
+          console.log('Loading mock app data for user:', user?.id);
           
           const mockApps = [
             {
@@ -354,11 +401,11 @@ const CampScreen = () => {
           setAppData(mockApps);
         } else {
           // For real Supabase users, fetch real app usage data
-          console.log('Loading real app usage data for user:', user.id);
+          console.log('Loading real app usage data for user:', user?.id);
           
           try {
             // First, try to get stored app usage data from Supabase
-            const storedApps = await getMostUsedApps(user.id, 10);
+            const storedApps = await getMostUsedApps(user?.id, 10);
             
             if (storedApps && storedApps.length > 0) {
               // Use stored data
@@ -497,6 +544,162 @@ const CampScreen = () => {
             />
           </View>
       )
+  }
+
+  // Welcome screen component for first-time users
+  function WelcomeScreen() {
+    const [animatedData, setAnimatedData] = useState([
+      { value: 0, label: "Week 1" },
+      { value: 0, label: "Week 2" },
+      { value: 0, label: "Week 3" },
+      { value: 0, label: "Week 4" },
+    ]);
+
+    // Animate the sample data
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setAnimatedData([
+          { value: 20, label: "Week 1" },
+          { value: 40, label: "Week 2" },
+          { value: 30, label: "Week 3" },
+          { value: 60, label: "Week 4" },
+        ]);
+      }, 500); // Start animation after 500ms
+
+      return () => clearTimeout(timer);
+    }, []);
+
+    // Format improvement options for display
+    const formatImprovementOptions = (options: string[]) => {
+      if (!options || options.length === 0) return "";
+      
+      const optionLabels: { [key: string]: string } = {
+        fitness: "Fitness",
+        outdoor: "Getting outdoors",
+        learn: "Learning",
+        time: "Time with friends & family",
+        enjoy: "Enjoying the present moment"
+      };
+
+      const formattedOptions = options.map(option => optionLabels[option] || option);
+      
+      if (formattedOptions.length === 1) {
+        return formattedOptions[0];
+      } else if (formattedOptions.length === 2) {
+        return `${formattedOptions[0]} and ${formattedOptions[1]}`;
+      } else {
+        const lastOption = formattedOptions.pop();
+        return `${formattedOptions.join(", ")}, and ${lastOption}`;
+      }
+    };
+
+    const goalText = formatImprovementOptions(improvementOptions);
+
+    return (
+      <View style={{ margin: scaleVertical(16), overflow: 'hidden' }}>
+        {/* Welcome Title */}
+        <Text style={{
+          color: "#FFF",
+          fontSize: scale(24),
+          fontFamily: "ZillaSlab-SemiBold",
+          textAlign: "center",
+          marginBottom: scaleVertical(16),
+        }}>
+          Welcome to Your Journey!
+        </Text>
+
+        {/* Goal Reference - Option 1: Card Style */}
+        {goalText && (
+          <View style={{
+            backgroundColor: "rgba(255, 255, 255, 0.05)",
+            borderRadius: scale(12),
+            borderWidth: 1,
+            borderColor: "rgba(255, 202, 145, 0.3)",
+            paddingVertical: scaleVertical(16),
+            paddingHorizontal: scale(20),
+            marginBottom: scaleVertical(24),
+            marginHorizontal: scale(20),
+            flexDirection: "row",
+            alignItems: "center",
+          }}>
+            <View style={{
+              width: scale(40),
+              height: scale(40),
+              borderRadius: scale(20),
+              backgroundColor: "rgba(255, 202, 145, 0.2)",
+              justifyContent: "center",
+              alignItems: "center",
+              marginRight: scale(12),
+            }}>
+              <Text style={{
+                fontSize: scale(18),
+                color: "#FFCA91",
+              }}>🎯</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{
+                color: "rgba(255, 255, 255, 0.9)",
+                fontSize: scale(16),
+                fontFamily: "ZillaSlab-SemiBold",
+                marginBottom: scaleVertical(2),
+              }}>
+                Your Goals
+              </Text>
+              <Text style={{
+                color: "rgba(255, 255, 255, 0.8)",
+                fontSize: scale(14),
+                fontFamily: "ZillaSlab-Medium",
+              }}>
+                {goalText}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Sample Data Chart */}
+        <View style={{ marginBottom: scaleVertical(16) }}>
+          <BarChart
+            data={animatedData}
+            barWidth={15}
+            initialSpacing={40}
+            spacing={50}
+            barBorderRadius={3}
+            frontColor={"#BE5E19"}
+            yAxisTextStyle={{ 
+              color: "rgba(255, 255, 255, 0.2)",
+              fontSize: 12,
+              fontFamily: "ZillaSlab-Regular",
+            }}
+            xAxisLabelTextStyle={{
+              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: 14,
+              fontFamily: "ZillaSlab-Medium",
+            }}
+            yAxisColor={"rgba(255, 255, 255, 0.2)"}
+            xAxisColor={"rgba(255, 255, 255, 0.2)"}
+            maxValue={80}
+            stepValue={20}
+            hideRules={false}
+            rulesType="dashed"
+            rulesColor={"rgba(255, 255, 255, 0.2)"}
+            formatYLabel={(val) => (val === '0' ? `${val} hr` : `${val}`)}
+            isAnimated={true}
+            animationDuration={3000}
+          />
+        </View>
+
+        {/* Sample Data Label */}
+        <Text style={{
+          color: "rgba(255, 255, 255, 0.6)",
+          fontSize: scale(14),
+          fontFamily: "ZillaSlab-Medium",
+          textAlign: "center",
+          fontStyle: "italic",
+        }}>
+          Sample Data - Start tracking to see your real progress
+        </Text>
+      </View>
+    );
   }
 
   function StatsCard() {
@@ -1455,7 +1658,7 @@ const CampScreen = () => {
             </Text>
           </View>
 
-          {viewType === ViewTypes.Monthly ? <ChartsCard /> : <ChartsAllTimeCard />}
+          {isFirstTimeUser ? <WelcomeScreen /> : (viewType === ViewTypes.Monthly ? <ChartsCard /> : <ChartsAllTimeCard />)}
         </View>
 
         <StatsCard />
