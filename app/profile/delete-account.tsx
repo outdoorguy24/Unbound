@@ -1,15 +1,18 @@
 import { scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 import { BlurView } from "expo-blur";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  Text,
-  Share,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -17,7 +20,107 @@ const { width } = Dimensions.get("window");
 
 const DeleteAccountScreen = () => {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [showAlert, setShowAlert] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (!user?.id) {
+      Alert.alert("Error", "No user found");
+      return;
+    }
+
+    setIsDeleting(true);
+    setShowAlert(false);
+
+    try {
+      // Check if this is a mock user
+      const isMockUser = user.id.length > 10; // Mock UUIDs are longer
+      
+      if (isMockUser) {
+        // For mock users, just show success message
+        Alert.alert(
+          "Account Deleted",
+          "Your mock account has been deleted successfully.",
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                // Navigate to login screen
+                router.replace("/(auth)/login");
+              }
+            }
+          ]
+        );
+      } else {
+        // For real users, call the Supabase Edge Function
+        try {
+          const { data, error } = await supabase.functions.invoke('delete-account', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (error) {
+            console.error('Error deleting account:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            
+            // Check if it's a function not found error
+            if (error.message?.includes('Function not found') || error.message?.includes('non-2xx')) {
+              Alert.alert(
+                "Function Not Available",
+                "The account deletion service is temporarily unavailable. Please contact support to delete your account.",
+                [{ text: "OK" }]
+              );
+            } else {
+              Alert.alert(
+                "Error",
+                `Failed to delete account: ${error.message || 'Unknown error'}. Please try again or contact support.`,
+                [{ text: "OK" }]
+              );
+            }
+          } else if (data?.success) {
+            Alert.alert(
+              "Account Deleted",
+              "Your account and all associated data have been permanently deleted.",
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    // Navigate to login screen
+                    router.replace("/(auth)/login");
+                  }
+                }
+              ]
+            );
+          } else {
+            Alert.alert(
+              "Error",
+              data?.error || "Failed to delete account. Please try again.",
+              [{ text: "OK" }]
+            );
+          }
+        } catch (functionError) {
+          console.error('Function call error:', functionError);
+          Alert.alert(
+            "Service Unavailable",
+            "The account deletion service is temporarily unavailable. Please contact support to delete your account.",
+            [{ text: "OK" }]
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      Alert.alert(
+        "Error",
+        "An unexpected error occurred. Please try again or contact support.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <View style={styles.safe}>
@@ -70,9 +173,7 @@ const DeleteAccountScreen = () => {
             style={[
               styles.primaryBtn,
             ]}
-            onPress={async () => {
-              
-            }}
+            onPress={() => router.back()}
             activeOpacity={0.9}
           >
             <Text style={styles.primaryText}>{"No, do not delete"}</Text>
@@ -138,20 +239,32 @@ const DeleteAccountScreen = () => {
                 <TouchableOpacity
                   style={[
                     styles.retryBtn,
+                    isDeleting && { opacity: 0.6 }
                   ]}
                   activeOpacity={0.9}
+                  onPress={handleDeleteAccount}
+                  disabled={isDeleting}
                 >
-                  <Text style={styles.retryText}>{"Delete account"}</Text>
+                  {isDeleting ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <ActivityIndicator color="#FFFFFF" size="small" style={{ marginRight: scale(8) }} />
+                      <Text style={styles.retryText}>{"Deleting..."}</Text>
+                    </View>
+                  ) : (
+                    <Text style={styles.retryText}>{"Delete account"}</Text>
+                  )}
                 </TouchableOpacity>
   
                 <TouchableOpacity
                   style={[
                     styles.resendBtn,
+                    isDeleting && { opacity: 0.6 }
                   ]}
                   onPress={() => {
                     setShowAlert(false);
                   }}
                   activeOpacity={0.9}
+                  disabled={isDeleting}
                 >
                   <Text style={styles.resendText}>{"Cancel"}</Text>
                 </TouchableOpacity>

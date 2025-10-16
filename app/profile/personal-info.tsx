@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
 } from "react-native";
 
 import { scale, scaleVertical } from "@/constants/Scale";
@@ -111,8 +111,13 @@ const PersonalInformationScreen = () => {
       return;
     }
 
+    if (!user?.id) {
+      Alert.alert("Error", "User not found. Please try again.");
+      return;
+    }
+
     try {
-      const isMockUser = user?.id && user.id.length <= 10;
+      const isMockUser = user.id.length <= 10;
       
       if (isMockUser) {
         // For mock users, update local state and AuthContext
@@ -125,7 +130,7 @@ const PersonalInformationScreen = () => {
         const { error } = await supabase
           .from('user_profiles')
           .update({ first_name: name.trim() })
-          .eq('user_id', user.id);
+          .eq('user_id', user?.id);
 
         if (error) {
           console.error('Error updating name:', error);
@@ -148,8 +153,13 @@ const PersonalInformationScreen = () => {
       return;
     }
 
+    if (!user?.id) {
+      Alert.alert("Error", "User not found. Please try again.");
+      return;
+    }
+
     try {
-      const isMockUser = user?.id && user.id.length <= 10;
+      const isMockUser = user.id.length <= 10;
       
       if (isMockUser) {
         // For mock users, update local state
