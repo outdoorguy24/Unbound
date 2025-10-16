@@ -89,23 +89,20 @@ const NotificationScreen = () => {
         <View style={styles.content}>
           <Text style={{
             color: "rgba(255, 255, 255, 0.7)",
-            fontSize: scale(16),
+            fontSize: scale(18),
             fontFamily: "ZillaSlab-Regular",
             letterSpacing: 0.5,
             marginTop: scaleVertical(8),
-            lineHeight: scale(22),
+            lineHeight: scale(26),
           }}>
-            {"This app is about spending less time on your phone and more time building the life you want. With that in mind, the only notification we send is a simple yet powerful recap every Sunday evening to help you stay motivated and on track. We recommend turning it on but that's up to you."}
+            <Text style={{ fontFamily: "ZillaSlab-SemiBold" }}>
+              {"This app is about spending less time on your phone and more time building the life you want. "}
+            </Text>
+            {"With that in mind, the only notification we send is a simple yet powerful recap every Sunday evening to help you stay motivated and on track. We recommend turning it on but that's up to you."}
           </Text>
           
           
           <View>
-            <View style={{
-              width: "100%",
-              height: 1, 
-              backgroundColor: "#D9D9D9", 
-              opacity: 0.15,
-            }} />
             <View style={styles.unboundToggleView}>
               <Text style={[
                 styles.label3, 
