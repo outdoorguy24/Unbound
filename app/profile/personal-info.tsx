@@ -1,38 +1,130 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
-  Modal,
-  TouchableWithoutFeedback,
-  TextInput,
+    Alert,
+    Dimensions,
+    Image,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
 } from "react-native";
 
-import { height, scale, scaleVertical } from "@/constants/Scale";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
+import { scale, scaleVertical } from "@/constants/Scale";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 import { BlurView } from "expo-blur";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
 const PersonalInformationScreen = () => {
   const insets = useSafeAreaInsets();
+  const { user, setUser } = useAuth();
   const [toggle, setToggle] = useState(false);
 
   const [isEditName, setIsEditName] = useState(false);
-  const [name, setName] = useState("John Adams");
+  const [name, setName] = useState("");
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load user profile data
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        
+        // Check if this is a mock user
+        const isMockUser = user.id.length <= 10;
+        
+        if (isMockUser) {
+          // For mock users, use the name from AuthContext
+          setName(user.name || "John Muir");
+          setUserProfile({ first_name: user.name || "John Muir" });
+        } else {
+          // For real users, fetch from Supabase
+          const { data, error } = await supabase
+            .from('user_profiles')
+            .select('first_name, city')
+            .eq('user_id', user.id)
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error loading user profile:', error);
+            setName("John Muir"); // Fallback
+          } else if (data) {
+            setName(data.first_name || "John Muir");
+            setUserProfile(data);
+          } else {
+            setName("John Muir"); // Fallback
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+        setName("John Muir"); // Fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserProfile();
+  }, [user?.id, user?.name]);
 
   const handleEdit = () => {
     setIsEditName(true);
-    setName("");
   };
 
-  const handleCancel = () => setIsEditName(false);
+  const handleCancel = () => {
+    setIsEditName(false);
+    setName(userProfile?.first_name || user?.name || "John Muir");
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) {
+      Alert.alert("Error", "Please enter a valid name");
+      return;
+    }
+
+    try {
+      const isMockUser = user?.id && user.id.length <= 10;
+      
+      if (isMockUser) {
+        // For mock users, update local state and AuthContext
+        setUserProfile({ ...userProfile, first_name: name.trim() });
+        setUser({ ...user, name: name.trim() });
+        setIsEditName(false);
+        Alert.alert("Success", "Name updated successfully");
+      } else {
+        // For real users, update in Supabase
+        const { error } = await supabase
+          .from('user_profiles')
+          .update({ first_name: name.trim() })
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Error updating name:', error);
+          Alert.alert("Error", "Failed to update name. Please try again.");
+        } else {
+          setUserProfile({ ...userProfile, first_name: name.trim() });
+          setIsEditName(false);
+          Alert.alert("Success", "Name updated successfully");
+        }
+      }
+    } catch (error) {
+      console.error('Error saving name:', error);
+      Alert.alert("Error", "Failed to update name. Please try again.");
+    }
+  };
   
   return (
     <View style={styles.safe}>
@@ -103,16 +195,17 @@ const PersonalInformationScreen = () => {
                 letterSpacing: 0.5,
                 flex: 1,
             }}>
-              {"John Adams"}
+              {loading ? "Loading..." : (userProfile?.first_name || user?.name || "John Muir")}
             </Text>
             
 
-            <TouchableOpacity onPress={handleEdit}>  
+            <TouchableOpacity onPress={handleEdit} disabled={loading}>  
               <Image
                 source={require("../../assets/new-images/icon-edit-pen.png")}
                 style={{
                   height: scale(24),
                   width: scale(24),
+                  opacity: loading ? 0.5 : 1,
                 }}
               />
             </TouchableOpacity>
@@ -149,7 +242,7 @@ const PersonalInformationScreen = () => {
                 letterSpacing: 0.5,
                 flex: 1,
             }}>
-              {"jordan.adams@gmail.com"}
+              {loading ? "Loading..." : (user?.email || "No email available")}
             </Text>
           </View>
           
@@ -201,7 +294,7 @@ const PersonalInformationScreen = () => {
               letterSpacing: 0.5,
               flex: 1,
           }}>
-            {"123 Main St, Springfield, IL 62704"}
+            {loading ? "Loading..." : (userProfile?.city || "No location set")}
           </Text>
 
         </ScrollView>
@@ -298,27 +391,25 @@ const PersonalInformationScreen = () => {
                   value={name}
                   onChangeText={setName}
                   placeholder="Enter your full name"
-                  placeholderTextColor="#rgba(0, 0, 0, 0.5)"
+                  placeholderTextColor="rgba(0, 0, 0, 0.5)"
                   textAlignVertical="top"
                   style={{
                     marginTop: scaleVertical(8),
                     borderRadius: 6,
-                    backgroundColor: "#rgba(255, 255, 255, 0.8)",
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
                     padding: scale(20),
-                    color: "#rgba(0, 0, 0, 1)",
+                    color: "rgba(0, 0, 0, 1)",
                     fontSize: scale(16),
                     fontFamily: "ZillaSlab-Medium",
                   }}
                 />
 
-                {/* Send button */}
+                {/* Save button */}
                 <TouchableOpacity
                   style={[
                     styles.primaryBtn,
                   ]}
-                  onPress={() => {
-                    
-                  }}
+                  onPress={handleSave}
                   activeOpacity={0.9}
                 >
                   <Text style={styles.primaryText}>{"Save"}</Text>
@@ -326,7 +417,7 @@ const PersonalInformationScreen = () => {
                 
 
                 {/* Cancel */}
-                <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.9}>
+                <TouchableOpacity style={styles.secondaryBtn} activeOpacity={0.9} onPress={handleCancel}>
                   <Text style={styles.secondaryText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
