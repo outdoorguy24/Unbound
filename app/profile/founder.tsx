@@ -183,7 +183,7 @@ const FounderScreen = () => {
               marginTop: scaleVertical(8),
               lineHeight: scale(20),
             }}>
-              {"I built Unbound because I was tired of billion-dollar tech companies stealing my time and attention for profit.\n\nWith a young family and real goals to chase, I refused to let algorithms designed to addict me dictate how I spend this one life I get. Every existing app was overpriced, overcomplicated, or easily bypassed.\n\nSo I built what actually works for guys. Hit me up with feedback, questions, or your best joke."}
+              {"I built Unbound because I was tired of my phone winning. Like you, I have real goals and people who matter but I kept losing hours to scrolling & distractions.\n\nYou're here because you refuse to let another year slip by. Good. I'm building this for guys like us. The ones ready to take our time back and live the life we keep planning.\n\nYour feedback shapes where this goes so reach out anytime. This is your app & I'm commited to making it the best tool possible for our community."}
           </Text>
 
           <Text style={{
