@@ -1441,6 +1441,32 @@ const CampScreen = () => {
             </View>
           </TouchableOpacity>
           
+          {/* Disclaimer text */}
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            marginTop: scale(6),
+            marginHorizontal: scale(46), // Match the Submit button's horizontal margins
+          }}>
+            <Text style={{
+              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: scale(12),
+              fontFamily: "ZillaSlab-Medium",
+              marginRight: scale(4),
+            }}>
+              *
+            </Text>
+            <Text style={{
+              color: "rgba(255, 255, 255, 0.6)",
+              fontSize: scale(12),
+              fontFamily: "ZillaSlab-Medium",
+              flex: 1,
+              lineHeight: scale(16),
+            }}>
+              Your submission may be selected to be featured in the community response section below.
+            </Text>
+          </View>
+          
           {/* Connection opening at bottom */}
           <View style={{
             alignItems: 'center',
