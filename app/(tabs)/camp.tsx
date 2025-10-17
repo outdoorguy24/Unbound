@@ -1679,7 +1679,7 @@ const CampScreen = () => {
               marginTop: scaleVertical(16),
               marginHorizontal: scaleVertical(16),
             }}>
-            Your focus progress
+            Your time reclaimed
           </Text>
 
           <View style={{
