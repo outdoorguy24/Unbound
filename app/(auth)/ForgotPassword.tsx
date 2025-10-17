@@ -1,22 +1,20 @@
+import { scale, scaleVertical } from "@/constants/Scale";
+import { supabase } from "@/lib/supabaseClient";
+import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Dimensions,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  TextInput,
-  Alert,
+    Alert,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { scale, scaleVertical } from "@/constants/Scale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
-import { BlurView } from 'expo-blur';
 
 const { width } = Dimensions.get("window");
 
@@ -137,21 +135,23 @@ const ForgotPasswordScreen = () => {
               <Text style={styles.error} numberOfLines={2}>{error}</Text>
           </View>
         }
+          {/* Button moved inside KeyboardAvoidingView */}
+          <TouchableOpacity
+            activeOpacity={0.9}
+            disabled={!isEmailValid || isLoading}
+            style={[
+              styles.primaryBtn,
+              {marginTop: scaleVertical(32)},
+              isEmailValid ? styles.btnEnabled : styles.btnDisabled,
+            ]}
+            onPress={handleForgotPassword}
+          >
+            <Text style={[styles.primaryText, {opacity: isEmailValid ? 1 : 0.5}]}>
+              {isLoading ? "Sending..." : "Send email"}
+            </Text>
+          </TouchableOpacity>
         </KeyboardAvoidingView>
       </View>
-      
-      <TouchableOpacity
-        activeOpacity={0.9}
-        disabled={!isEmailValid}
-        style={[
-          styles.primaryBtn,
-          {bottom: insets.bottom + scaleVertical(16)},
-          isEmailValid ? styles.btnEnabled : styles.btnDisabled,
-        ]}
-        onPress={handleForgotPassword}
-      >
-        <Text style={[styles.primaryText, {opacity: isEmailValid ? 1 : 0.5}]}>Send email</Text>
-      </TouchableOpacity>
       
     </View>
   );
@@ -240,12 +240,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   primaryBtn: {
-    position: 'absolute',
     backgroundColor: '#BE5E19',
     borderRadius: 6,
     paddingVertical: scaleVertical(20),
-    right: scale(24),
-    left: scale(24),
+    marginHorizontal: scale(24),
   },
   primaryText: {
     color: "#FFFFFF",
