@@ -566,7 +566,7 @@ const CampScreen = () => {
         { value: 60, label: "Week 4" },
       ];
 
-      // Start animation after 500ms
+      // Start animation after 300ms
       const initialTimer = setTimeout(() => {
         // Animate Week 1
         setTimeout(() => {
@@ -586,7 +586,7 @@ const CampScreen = () => {
             prev[2],
             prev[3]
           ]);
-        }, 1000);
+        }, 300);
 
         // Animate Week 3
         setTimeout(() => {
@@ -596,7 +596,7 @@ const CampScreen = () => {
             { ...prev[2], value: finalData[2].value },
             prev[3]
           ]);
-        }, 2000);
+        }, 600);
 
         // Animate Week 4
         setTimeout(() => {
@@ -606,8 +606,8 @@ const CampScreen = () => {
             prev[2],
             { ...prev[3], value: finalData[3].value }
           ]);
-        }, 3000);
-      }, 500);
+        }, 900);
+      }, 300);
 
       return () => clearTimeout(initialTimer);
     }, []);
@@ -648,7 +648,7 @@ const CampScreen = () => {
           textAlign: "center",
           marginBottom: scaleVertical(16),
         }}>
-          Welcome to Your Journey!
+          Your new life starts right now
         </Text>
 
         {/* Goal Reference - Option 1: Card Style */}
