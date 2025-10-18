@@ -55,9 +55,13 @@ export async function loginWithGoogle() {
     }
 
     console.log("OAuth URL:", data.url);
-    const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUri, {
-      showInRecents: false,
-    });
+    const result = await WebBrowser.openAuthSessionAsync(
+      data.url,
+      redirectUri,
+      {
+        showInRecents: false,
+      }
+    );
 
     console.log("WebBrowser result:", result);
 
@@ -83,14 +87,18 @@ export async function loginWithGoogle() {
       const accessToken = params.get("access_token");
       const refreshToken = params.get("refresh_token");
 
-      console.log("Extracted tokens:", { accessToken: !!accessToken, refreshToken: !!refreshToken });
+      console.log("Extracted tokens:", {
+        accessToken: !!accessToken,
+        refreshToken: !!refreshToken,
+      });
 
       if (accessToken) {
         // Set the session manually
-        const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken || "",
-        });
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken || "",
+          });
 
         if (sessionError) {
           console.error("Session error:", sessionError);
