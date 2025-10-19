@@ -1,7 +1,7 @@
 import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -23,6 +23,10 @@ const { width } = Dimensions.get("window");
 const SignupScreen = () => {
   const insets = useSafeAreaInsets();
   const { signup } = useAuth();
+
+  // Refs for TextInputs
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -137,6 +141,9 @@ const SignupScreen = () => {
                   placeholderTextColor="rgba(0, 0, 0, 0.3)"
                   autoCapitalize="none"
                   keyboardType="email-address"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  blurOnSubmit={false}
                   style={styles.input}
                 />
 
@@ -146,11 +153,15 @@ const SignupScreen = () => {
                 </Text>
                 <View style={{ justifyContent: "center" }}>
                   <TextInput
+                    ref={passwordRef}
                     value={pass}
                     onChangeText={setPass}
                     placeholder="Minimum of 8 characters"
                     placeholderTextColor="rgba(0, 0, 0, 0.3)"
                     secureTextEntry={!showPass}
+                    returnKeyType="next"
+                    onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+                    blurOnSubmit={false}
                     style={styles.input}
                   />
                   <TouchableOpacity
@@ -174,11 +185,19 @@ const SignupScreen = () => {
 
                 <View style={{ justifyContent: "center" }}>
                   <TextInput
+                    ref={confirmPasswordRef}
                     value={confirm}
                     onChangeText={setConfirm}
                     placeholder="Same password as above"
                     placeholderTextColor="rgba(0, 0, 0, 0.3)"
                     secureTextEntry={!showConfirmPass}
+                    returnKeyType="done"
+                    onSubmitEditing={() => {
+                      Keyboard.dismiss();
+                      if (canSubmit) {
+                        handleSignup();
+                      }
+                    }}
                     style={styles.input}
                   />
                   <TouchableOpacity
