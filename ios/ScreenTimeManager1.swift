@@ -67,12 +67,23 @@ class ScreenTimeManager: NSObject, UIAdaptivePresentationControllerDelegate {
                                 resolver: @escaping RCTPromiseResolveBlock,
                                 rejecter reject: @escaping RCTPromiseRejectBlock) {
         if #available(iOS 16.0, *) {
-            do {
-                store.webContent.blockedByFilter = enabled ? .auto(except: Set<WebDomain>()) : .none
-                resolver(["success": true, "enabled": enabled])
-            } catch {
-                reject("FILTER_ERROR", "Failed to set adult content filter", error)
+            if enabled {
+                // Set the web content filter
+                store.webContent.blockedByFilter = .auto(except: Set<WebDomain>())
+                
+                // Also set some additional restrictions to ensure Content & Privacy Restrictions toggle is enabled
+                // This helps iOS automatically enable the master toggle
+                store.media.denyExplicitContent = true
+                
+                print("[ScreenTimeManager] Adult content filter enabled")
+                print("[ScreenTimeManager] NOTE: Ensure 'Content & Privacy Restrictions' toggle is ON in Settings")
+            } else {
+                // Remove all restrictions
+                store.webContent.blockedByFilter = .none
+                store.media.denyExplicitContent = false
+                print("[ScreenTimeManager] Adult content filter disabled")
             }
+            resolver(["success": true, "enabled": enabled])
         } else {
             reject("VERSION_ERROR", "iOS 16.0 or later is required", nil)
         }

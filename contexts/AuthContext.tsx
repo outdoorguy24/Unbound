@@ -1,7 +1,5 @@
 import { loginWithGoogle, supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
-import { getStoredPushToken } from "@/utils/notifications";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSegments } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -146,34 +144,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Simulate signup
+  // Signup with Supabase
   const signup = async (email: string, password: string, name: string) => {
     setIsLoadingAuth(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const pushToken = await getStoredPushToken();
+      // Create user in Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+          },
+        },
+      });
 
-      // Generate a proper UUID for the user
-      const generateUUID = () => {
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-          /[xy]/g,
-          function (c) {
-            const r = (Math.random() * 16) | 0;
-            const v = c == "x" ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-          }
-        );
-      };
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
 
-      const userData: User = {
-        id: generateUUID(),
-        email,
-        name,
-        pushToken: pushToken || undefined,
-      };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      setUser(userData);
-      router.replace("/(onboarding)/ScreenProfileSetup");
+      if (data.user) {
+        // User will be set automatically by the auth state listener
+        console.log("Signup successful", data);
+        // Navigation will be handled by the useEffect that listens to auth state changes
+      }
     } catch (error) {
       console.error("Error signing up:", error);
       throw error;

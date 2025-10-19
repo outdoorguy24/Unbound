@@ -1,6 +1,10 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
-import { CommunityResponse, getMockCommunityResponses, getRecentCommunityResponses } from "@/lib/communityResponses";
+import {
+  CommunityResponse,
+  getMockCommunityResponses,
+  getRecentCommunityResponses,
+} from "@/lib/communityResponses";
 import { getCommunityStats } from "@/lib/communityStats";
 import { getMonthlyProgress, getWeeklyProgress } from "@/lib/progressData";
 import { getSetupCompletion, SetupCompletion } from "@/lib/setupCompletion";
@@ -26,7 +30,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import RenderHTML, { defaultSystemFonts } from "react-native-render-html";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,15 +39,14 @@ import { BarChart } from "react-native-gifted-charts";
 const { width } = Dimensions.get("window");
 enum ViewTypes {
   Monthly = "Monthly",
-  AllTime = "All Time"
+  AllTime = "All Time",
 }
-
 
 const CampScreen = () => {
   const [viewType, setViewType] = useState(ViewTypes.Monthly);
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  
+
   // Real data state
   const [userStats, setUserStats] = useState({
     savedToday: 0,
@@ -72,42 +75,48 @@ const CampScreen = () => {
     startFirstFocus: false,
     shareFirstMilestone: false,
   });
-  
+
   // User response state
   const [responseText, setResponseText] = useState("");
   const [isSubmittingResponse, setIsSubmittingResponse] = useState(false);
   const responseInputRef = useRef<TextInput>(null);
-  
+
   // Community responses state
-  const [communityResponses, setCommunityResponses] = useState<CommunityResponse[]>([]);
-  const [communityResponsesLoading, setCommunityResponsesLoading] = useState(true);
-  
+  const [communityResponses, setCommunityResponses] = useState<
+    CommunityResponse[]
+  >([]);
+  const [communityResponsesLoading, setCommunityResponsesLoading] =
+    useState(true);
+
   // Welcome screen state
   const [improvementOptions, setImprovementOptions] = useState<string[]>([]);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
   // Helper function to count words
   const getWordCount = (text: string) => {
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
   };
 
-
   // Check if response is valid (not empty and under 100 words)
-  const isResponseValid = responseText.trim().length > 0 && getWordCount(responseText) <= 100;
+  const isResponseValid =
+    responseText.trim().length > 0 && getWordCount(responseText) <= 100;
 
   // Fetch improvement options from Supabase
   const fetchImprovementOptions = async () => {
     if (!user?.id) return;
-    
+
     try {
       const { data, error } = await supabase
-        .from('user_profiles')
-        .select('improvement_options')
-        .eq('user_id', user?.id)
+        .from("user_profiles")
+        .select("improvement_options")
+        .eq("user_id", user?.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching improvement options:', error);
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching improvement options:", error);
         return;
       }
 
@@ -115,29 +124,30 @@ const CampScreen = () => {
         setImprovementOptions(data.improvement_options);
       }
     } catch (error) {
-      console.error('Error fetching improvement options:', error);
+      console.error("Error fetching improvement options:", error);
     }
   };
 
   // Check if user is first-time (all stats are 0)
   const checkFirstTimeUser = () => {
-    const isFirstTime = userStats.monthlyHours === 0 && 
-                       userStats.allTimeHours === 0 && 
-                       userStats.totalSaved === 0 && 
-                       userStats.savedToday === 0;
-    console.log('First-time user check:', {
+    const isFirstTime =
+      userStats.monthlyHours === 0 &&
+      userStats.allTimeHours === 0 &&
+      userStats.totalSaved === 0 &&
+      userStats.savedToday === 0;
+    console.log("First-time user check:", {
       monthlyHours: userStats.monthlyHours,
       allTimeHours: userStats.allTimeHours,
       totalSaved: userStats.totalSaved,
       savedToday: userStats.savedToday,
-      isFirstTime
+      isFirstTime,
     });
     setIsFirstTimeUser(isFirstTime);
   };
 
   // Simple onChangeText function
   const handleResponseTextChange = (text: string) => {
-    console.log('TextInput onChangeText:', text);
+    console.log("TextInput onChangeText:", text);
     setResponseText(text);
   };
 
@@ -145,30 +155,29 @@ const CampScreen = () => {
   const handlePhoneUsageShare = async () => {
     try {
       const shareMessage = `I've reduced my phone usage by ${userStats.phoneUsageReduction}% since downloading Unbound! 🚀\n\nDownload Unbound to start your own journey: https://apps.apple.com/app/unbound`;
-      
+
       const result = await Share.share({
         message: shareMessage,
-        title: 'My Unbound Progress',
+        title: "My Unbound Progress",
       });
 
       if (result.action === Share.sharedAction) {
-        console.log('Phone usage stat shared successfully');
+        console.log("Phone usage stat shared successfully");
       }
     } catch (error) {
-      console.error('Error sharing phone usage stat:', error);
+      console.error("Error sharing phone usage stat:", error);
     }
   };
-
 
   // Refresh setup completion data
   const refreshSetupCompletion = async () => {
     if (!user?.id) return;
-    
+
     try {
       const setupData = await getSetupCompletion(user?.id);
       setSetupCompletion(setupData);
     } catch (error) {
-      console.error('Error refreshing setup completion:', error);
+      console.error("Error refreshing setup completion:", error);
     }
   };
 
@@ -176,23 +185,23 @@ const CampScreen = () => {
   const fetchCommunityResponses = async () => {
     try {
       setCommunityResponsesLoading(true);
-      
+
       // Check if this is a mock user (from AsyncStorage) or real Supabase user
       const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
-      
+
       if (isMockUser) {
         // For mock users, use mock data
-        console.log('Loading mock community responses for user:', user?.id);
+        console.log("Loading mock community responses for user:", user?.id);
         const mockResponses = getMockCommunityResponses();
         setCommunityResponses(mockResponses);
       } else {
         // For real Supabase users, fetch real data
-        console.log('Loading real community responses for user:', user?.id);
+        console.log("Loading real community responses for user:", user?.id);
         const responses = await getRecentCommunityResponses(3);
         setCommunityResponses(responses);
       }
     } catch (error) {
-      console.error('Error fetching community responses:', error);
+      console.error("Error fetching community responses:", error);
       // Fallback to mock data on error
       const mockResponses = getMockCommunityResponses();
       setCommunityResponses(mockResponses);
@@ -209,38 +218,37 @@ const CampScreen = () => {
     try {
       // Check if this is a mock user (from AuthContext) or real Supabase user
       const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
-      
+
       if (isMockUser) {
         // For mock users, just log the response
-        console.log('Mock user response submitted:', {
+        console.log("Mock user response submitted:", {
           userId: user?.id,
           responseText: responseText.trim(),
           wordCount: getWordCount(responseText),
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
-        
+
         // Update mock setup completion to show milestone shared
-        setSetupCompletion(prev => ({
+        setSetupCompletion((prev) => ({
           ...prev,
-          shareFirstMilestone: true
+          shareFirstMilestone: true,
         }));
       } else {
         // For real Supabase users, save to database
         await saveUserResponse(user?.id, responseText.trim());
-        console.log('Response saved to Supabase for user:', user?.id);
-        
+        console.log("Response saved to Supabase for user:", user?.id);
+
         // Refresh setup completion to reflect the new milestone
         await refreshSetupCompletion();
       }
-      
+
       // Refresh community responses to show the new response
       await fetchCommunityResponses();
-      
+
       // Clear the input after successful submission
       setResponseText("");
-      
     } catch (error) {
-      console.error('Error submitting response:', error);
+      console.error("Error submitting response:", error);
       // You could add error handling here (show alert, etc.)
     } finally {
       setIsSubmittingResponse(false);
@@ -253,10 +261,13 @@ const CampScreen = () => {
       try {
         await testDatabaseConnection();
       } catch (error) {
-        console.log('Database connection test failed (expected for mock users):', error);
+        console.log(
+          "Database connection test failed (expected for mock users):",
+          error
+        );
       }
     };
-    
+
     testConnection();
   }, []);
 
@@ -271,11 +282,11 @@ const CampScreen = () => {
       try {
         // Check if this is a mock user (from AsyncStorage) or real Supabase user
         const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
-        
+
         if (isMockUser) {
           // For mock users, use mock data
-          console.log('Loading dashboard with mock data for user:', user?.id);
-          
+          console.log("Loading dashboard with mock data for user:", user?.id);
+
           setUserStats({
             savedToday: 0,
             totalSaved: 0,
@@ -285,7 +296,7 @@ const CampScreen = () => {
             allTimeHours: 0,
             phoneUsageReduction: 0,
           });
-          
+
           setCommunityStats({
             totalUsers: 1000,
             totalTimeSaved: 50000,
@@ -307,33 +318,42 @@ const CampScreen = () => {
           });
         } else {
           // For real Supabase users, fetch real data
-          console.log('Loading dashboard with real data for user:', user?.id);
-          
-          const [userStatsData, communityStatsData, weeklyData, monthlyData, setupData] = await Promise.all([
+          console.log("Loading dashboard with real data for user:", user?.id);
+
+          const [
+            userStatsData,
+            communityStatsData,
+            weeklyData,
+            monthlyData,
+            setupData,
+          ] = await Promise.all([
             getUserStats(user?.id),
             getCommunityStats(),
             getWeeklyProgress(user?.id),
             getMonthlyProgress(user?.id),
-            getSetupCompletion(user?.id)
+            getSetupCompletion(user?.id),
           ]);
-          
+
+          console.log(
+            "📈 EXACT USER STATS BEING SHOWN:",
+            JSON.stringify(userStatsData, null, 2)
+          );
           setUserStats(userStatsData);
           setCommunityStats(communityStatsData);
           setWeeklyProgressData(weeklyData);
           setMonthlyProgressData(monthlyData);
           setSetupCompletion(setupData);
         }
-        
+
         // Fetch improvement options for welcome screen
         if (isMockUser) {
           // Set mock improvement options for testing
-          setImprovementOptions(['fitness', 'learn']);
+          setImprovementOptions(["fitness", "learn"]);
         } else {
           await fetchImprovementOptions();
         }
-        
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error("Error fetching dashboard data:", error);
         // Keep fallback values on error
       } finally {
         setLoading(false);
@@ -348,7 +368,6 @@ const CampScreen = () => {
     checkFirstTimeUser();
   }, [userStats]);
 
-
   // Fetch app usage data
   useEffect(() => {
     const fetchAppData = async () => {
@@ -359,80 +378,87 @@ const CampScreen = () => {
 
       try {
         setAppDataLoading(true);
-        
+
         // Check if this is a mock user (from AsyncStorage) or real Supabase user
         const isMockUser = user?.id && user.id.length > 10; // Mock UUIDs are longer
-        
+
         if (isMockUser) {
           // For mock users, use mock app data
-          console.log('Loading mock app data for user:', user?.id);
-          
+          console.log("Loading mock app data for user:", user?.id);
+
           const mockApps = [
             {
-              id: 'com.facebook.Facebook',
-              name: 'Facebook',
-              icon: getAppIcon('facebook-icon'),
+              id: "com.facebook.Facebook",
+              name: "Facebook",
+              icon: getAppIcon("facebook-icon"),
               minutes: 180,
             },
             {
-              id: 'com.google.ios.youtube',
-              name: 'YouTube',
-              icon: getAppIcon('youtube-icon'),
+              id: "com.google.ios.youtube",
+              name: "YouTube",
+              icon: getAppIcon("youtube-icon"),
               minutes: 120,
             },
             {
-              id: 'com.instagram.instagram',
-              name: 'Instagram',
-              icon: getAppIcon('instagram-icon'),
+              id: "com.instagram.instagram",
+              name: "Instagram",
+              icon: getAppIcon("instagram-icon"),
               minutes: 90,
             },
             {
-              id: 'com.linkedin.LinkedIn',
-              name: 'LinkedIn',
-              icon: getAppIcon('linkedin-icon'),
+              id: "com.linkedin.LinkedIn",
+              name: "LinkedIn",
+              icon: getAppIcon("linkedin-icon"),
               minutes: 60,
             },
             {
-              id: 'ph.telegra.Telegraph',
-              name: 'Telegram',
-              icon: getAppIcon('telegram-icon'),
+              id: "ph.telegra.Telegraph",
+              name: "Telegram",
+              icon: getAppIcon("telegram-icon"),
               minutes: 45,
             },
           ];
-          
+
           setAppData(mockApps);
         } else {
           // For real Supabase users, fetch real app usage data
-          console.log('Loading real app usage data for user:', user?.id);
-          
+          console.log("Loading real app usage data for user:", user?.id);
+
           try {
             // First, try to get stored app usage data from Supabase
             const storedApps = await getMostUsedApps(user?.id, 10);
-            
+
             if (storedApps && storedApps.length > 0) {
               // Use stored data
               const formattedApps = storedApps.map((app: any) => ({
                 id: app.app_id,
                 name: app.app_name,
-                icon: getAppIcon(app.app_name.toLowerCase().replace(/\s+/g, '-') + '-icon'),
+                icon: getAppIcon(
+                  app.app_name.toLowerCase().replace(/\s+/g, "-") + "-icon"
+                ),
                 minutes: app.usage_minutes || 0,
               }));
+              console.log(
+                "📱 EXACT APP DATA BEING SHOWN:",
+                JSON.stringify(formattedApps, null, 2)
+              );
               setAppData(formattedApps);
             } else {
               // No stored data, try to fetch from ScreenTime API
               // TODO: Implement real ScreenTime API data fetching when available
               // For now, fall back to empty state
-              console.log('No stored app data found, ScreenTime API integration needed');
+              console.log(
+                "No stored app data found, ScreenTime API integration needed"
+              );
               setAppData([]);
             }
           } catch (error) {
-            console.error('Error fetching real app usage data:', error);
+            console.error("Error fetching real app usage data:", error);
             setAppData([]);
           }
         }
-        
       } catch (error) {
-        console.error('Error fetching app usage data:', error);
+        console.error("Error fetching app usage data:", error);
         setAppData([]);
       } finally {
         setAppDataLoading(false);
@@ -450,29 +476,37 @@ const CampScreen = () => {
   // Helper function to get app icon
   const getAppIcon = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
-      'facebook-icon': require("../../assets/new-images/facebook-icon.png"),
-      'youtube-icon': require("../../assets/new-images/youtube-icon.png"),
-      'telegram-icon': require("../../assets/new-images/telegram-icon.png"),
-      'linkedin-icon': require("../../assets/new-images/linkedin-icon.png"),
-      'instagram-icon': require("../../assets/new-images/instagram.png"),
+      "facebook-icon": require("../../assets/new-images/facebook-icon.png"),
+      "youtube-icon": require("../../assets/new-images/youtube-icon.png"),
+      "telegram-icon": require("../../assets/new-images/telegram-icon.png"),
+      "linkedin-icon": require("../../assets/new-images/linkedin-icon.png"),
+      "instagram-icon": require("../../assets/new-images/instagram.png"),
     };
-    return iconMap[iconName] || require("../../assets/new-images/facebook-icon.png"); // fallback
+    return (
+      iconMap[iconName] || require("../../assets/new-images/facebook-icon.png")
+    ); // fallback
   };
 
   // Use real progress data if available, otherwise fallback to calculated data
-  const data = weeklyProgressData.length > 0 ? weeklyProgressData : [
-    { value: Math.round(userStats.monthlyHours * 0.25), label: "Week 1" },
-    { value: Math.round(userStats.monthlyHours * 0.35), label: "Week 2" },
-    { value: Math.round(userStats.monthlyHours * 0.20), label: "Week 3" },
-    { value: Math.round(userStats.monthlyHours * 0.20), label: "Week 4" },
-  ];
+  const data =
+    weeklyProgressData.length > 0
+      ? weeklyProgressData
+      : [
+          { value: Math.round(userStats.monthlyHours * 0.25), label: "Week 1" },
+          { value: Math.round(userStats.monthlyHours * 0.35), label: "Week 2" },
+          { value: Math.round(userStats.monthlyHours * 0.2), label: "Week 3" },
+          { value: Math.round(userStats.monthlyHours * 0.2), label: "Week 4" },
+        ];
 
-  const dataAllTime = monthlyProgressData.length > 0 ? monthlyProgressData : [
-    { value: Math.round(userStats.allTimeHours * 0.30), label: "Oct 24" },
-    { value: Math.round(userStats.allTimeHours * 0.25), label: "Nov 24" },
-    { value: Math.round(userStats.allTimeHours * 0.25), label: "Dec 24" },
-    { value: Math.round(userStats.allTimeHours * 0.20), label: "Jan 25" },
-  ];
+  const dataAllTime =
+    monthlyProgressData.length > 0
+      ? monthlyProgressData
+      : [
+          { value: Math.round(userStats.allTimeHours * 0.3), label: "Oct 24" },
+          { value: Math.round(userStats.allTimeHours * 0.25), label: "Nov 24" },
+          { value: Math.round(userStats.allTimeHours * 0.25), label: "Dec 24" },
+          { value: Math.round(userStats.allTimeHours * 0.2), label: "Jan 25" },
+        ];
 
   type Stat = { label: string; value: string };
   const SMALL_CARDS: Stat[] = [
@@ -483,69 +517,69 @@ const CampScreen = () => {
   ];
 
   function ChartsCard() {
-      return (
-        <View style={{ margin: scaleVertical(16), overflow: 'hidden' }}>
-            <BarChart
-              data={data}
-              barWidth={15}
-              initialSpacing={40}
-              spacing={50}
-              barBorderRadius={3}
-              frontColor={"#FFD099"}
-              yAxisTextStyle={{ 
-                color: "rgba(255, 255, 255, 0.2)",
-                fontSize: 12,
-                fontFamily: "ZillaSlab-Regular",
-              }}
-              xAxisLabelTextStyle={{
-                color: "rgba(255, 255, 255, 0.6)",
-                fontSize: 14,
-                fontFamily: "ZillaSlab-Medium",
-              }}
-              yAxisColor={"rgba(255, 255, 255, 0.2)"}
-              xAxisColor={"rgba(255, 255, 255, 0.2)"}
-              maxValue={100}
-              stepValue={20}
-              hideRules={false}
-              rulesType="dashed"
-              rulesColor={"rgba(255, 255, 255, 0.2)"}
-              formatYLabel={(val) => (val === '0' ? `${val} hr` : `${val}`)}
-            />
-          </View>
-      )
+    return (
+      <View style={{ margin: scaleVertical(16), overflow: "hidden" }}>
+        <BarChart
+          data={data}
+          barWidth={15}
+          initialSpacing={40}
+          spacing={50}
+          barBorderRadius={3}
+          frontColor={"#FFD099"}
+          yAxisTextStyle={{
+            color: "rgba(255, 255, 255, 0.2)",
+            fontSize: 12,
+            fontFamily: "ZillaSlab-Regular",
+          }}
+          xAxisLabelTextStyle={{
+            color: "rgba(255, 255, 255, 0.6)",
+            fontSize: 14,
+            fontFamily: "ZillaSlab-Medium",
+          }}
+          yAxisColor={"rgba(255, 255, 255, 0.2)"}
+          xAxisColor={"rgba(255, 255, 255, 0.2)"}
+          maxValue={100}
+          stepValue={20}
+          hideRules={false}
+          rulesType="dashed"
+          rulesColor={"rgba(255, 255, 255, 0.2)"}
+          formatYLabel={(val) => (val === "0" ? `${val} hr` : `${val}`)}
+        />
+      </View>
+    );
   }
 
   function ChartsAllTimeCard() {
-      return (
-        <View style={{ margin: scaleVertical(16), overflow: 'hidden' }}>
-            <BarChart
-              data={dataAllTime}
-              barWidth={15}
-              initialSpacing={40}
-              spacing={50}
-              barBorderRadius={3}
-              frontColor={"#FFD099"}
-              yAxisTextStyle={{ 
-                color: "rgba(255, 255, 255, 0.2)",
-                fontSize: 12,
-                fontFamily: "ZillaSlab-Regular",
-              }}
-              xAxisLabelTextStyle={{
-                color: "rgba(255, 255, 255, 0.6)",
-                fontSize: 14,
-                fontFamily: "ZillaSlab-Medium",
-              }}
-              yAxisColor={"rgba(255, 255, 255, 0.2)"}
-              xAxisColor={"rgba(255, 255, 255, 0.2)"}
-              maxValue={100}
-              stepValue={20}
-              hideRules={false}
-              rulesType="dashed"
-              rulesColor={"rgba(255, 255, 255, 0.2)"}
-              formatYLabel={(val) => (val === '0' ? `${val} hr` : `${val}`)}
-            />
-          </View>
-      )
+    return (
+      <View style={{ margin: scaleVertical(16), overflow: "hidden" }}>
+        <BarChart
+          data={dataAllTime}
+          barWidth={15}
+          initialSpacing={40}
+          spacing={50}
+          barBorderRadius={3}
+          frontColor={"#FFD099"}
+          yAxisTextStyle={{
+            color: "rgba(255, 255, 255, 0.2)",
+            fontSize: 12,
+            fontFamily: "ZillaSlab-Regular",
+          }}
+          xAxisLabelTextStyle={{
+            color: "rgba(255, 255, 255, 0.6)",
+            fontSize: 14,
+            fontFamily: "ZillaSlab-Medium",
+          }}
+          yAxisColor={"rgba(255, 255, 255, 0.2)"}
+          xAxisColor={"rgba(255, 255, 255, 0.2)"}
+          maxValue={100}
+          stepValue={20}
+          hideRules={false}
+          rulesType="dashed"
+          rulesColor={"rgba(255, 255, 255, 0.2)"}
+          formatYLabel={(val) => (val === "0" ? `${val} hr` : `${val}`)}
+        />
+      </View>
+    );
   }
 
   // Welcome screen component for first-time users
@@ -570,41 +604,41 @@ const CampScreen = () => {
       const initialTimer = setTimeout(() => {
         // Animate Week 1
         setTimeout(() => {
-          setAnimatedData(prev => [
+          setAnimatedData((prev) => [
             { ...prev[0], value: finalData[0].value },
             prev[1],
             prev[2],
-            prev[3]
+            prev[3],
           ]);
         }, 0);
 
         // Animate Week 2
         setTimeout(() => {
-          setAnimatedData(prev => [
+          setAnimatedData((prev) => [
             prev[0],
             { ...prev[1], value: finalData[1].value },
             prev[2],
-            prev[3]
+            prev[3],
           ]);
         }, 300);
 
         // Animate Week 3
         setTimeout(() => {
-          setAnimatedData(prev => [
+          setAnimatedData((prev) => [
             prev[0],
             prev[1],
             { ...prev[2], value: finalData[2].value },
-            prev[3]
+            prev[3],
           ]);
         }, 600);
 
         // Animate Week 4
         setTimeout(() => {
-          setAnimatedData(prev => [
+          setAnimatedData((prev) => [
             prev[0],
             prev[1],
             prev[2],
-            { ...prev[3], value: finalData[3].value }
+            { ...prev[3], value: finalData[3].value },
           ]);
         }, 900);
       }, 300);
@@ -615,17 +649,19 @@ const CampScreen = () => {
     // Format improvement options for display
     const formatImprovementOptions = (options: string[]) => {
       if (!options || options.length === 0) return "";
-      
+
       const optionLabels: { [key: string]: string } = {
         fitness: "Fitness",
         outdoor: "Getting outdoors",
         learn: "Learning",
         time: "Time with friends & family",
-        enjoy: "Enjoying the present moment"
+        enjoy: "Enjoying the present moment",
       };
 
-      const formattedOptions = options.map(option => optionLabels[option] || option);
-      
+      const formattedOptions = options.map(
+        (option) => optionLabels[option] || option
+      );
+
       if (formattedOptions.length === 1) {
         return formattedOptions[0];
       } else if (formattedOptions.length === 2) {
@@ -639,60 +675,74 @@ const CampScreen = () => {
     const goalText = formatImprovementOptions(improvementOptions);
 
     return (
-      <View style={{ margin: scaleVertical(16), overflow: 'hidden' }}>
+      <View style={{ margin: scaleVertical(16), overflow: "hidden" }}>
         {/* Welcome Title */}
-        <Text style={{
-          color: "#FFF",
-          fontSize: scale(24),
-          fontFamily: "ZillaSlab-SemiBold",
-          textAlign: "center",
-          marginBottom: scaleVertical(16),
-        }}>
+        <Text
+          style={{
+            color: "#FFF",
+            fontSize: scale(24),
+            fontFamily: "ZillaSlab-SemiBold",
+            textAlign: "center",
+            marginBottom: scaleVertical(16),
+          }}
+        >
           Your new life starts right now
         </Text>
 
         {/* Goal Reference - Option 1: Card Style */}
         {goalText && (
-          <View style={{
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            borderRadius: scale(12),
-            borderWidth: 1,
-            borderColor: "rgba(255, 202, 145, 0.3)",
-            paddingVertical: scaleVertical(16),
-            paddingHorizontal: scale(20),
-            marginBottom: scaleVertical(24),
-            marginHorizontal: scale(20),
-            flexDirection: "row",
-            alignItems: "center",
-          }}>
-            <View style={{
-              width: scale(40),
-              height: scale(40),
-              borderRadius: scale(20),
-              backgroundColor: "rgba(255, 202, 145, 0.2)",
-              justifyContent: "center",
+          <View
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              borderRadius: scale(12),
+              borderWidth: 1,
+              borderColor: "rgba(255, 202, 145, 0.3)",
+              paddingVertical: scaleVertical(16),
+              paddingHorizontal: scale(20),
+              marginBottom: scaleVertical(24),
+              marginHorizontal: scale(20),
+              flexDirection: "row",
               alignItems: "center",
-              marginRight: scale(12),
-            }}>
-              <Text style={{
-                fontSize: scale(18),
-                color: "#FFCA91",
-              }}>🎯</Text>
+            }}
+          >
+            <View
+              style={{
+                width: scale(40),
+                height: scale(40),
+                borderRadius: scale(20),
+                backgroundColor: "rgba(255, 202, 145, 0.2)",
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: scale(12),
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: scale(18),
+                  color: "#FFCA91",
+                }}
+              >
+                🎯
+              </Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={{
-                color: "rgba(255, 255, 255, 0.9)",
-                fontSize: scale(16),
-                fontFamily: "ZillaSlab-SemiBold",
-                marginBottom: scaleVertical(2),
-              }}>
+              <Text
+                style={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontSize: scale(16),
+                  fontFamily: "ZillaSlab-SemiBold",
+                  marginBottom: scaleVertical(2),
+                }}
+              >
                 Your Goals
               </Text>
-              <Text style={{
-                color: "rgba(255, 255, 255, 0.8)",
-                fontSize: scale(14),
-                fontFamily: "ZillaSlab-Medium",
-              }}>
+              <Text
+                style={{
+                  color: "rgba(255, 255, 255, 0.8)",
+                  fontSize: scale(14),
+                  fontFamily: "ZillaSlab-Medium",
+                }}
+              >
                 {goalText}
               </Text>
             </View>
@@ -708,7 +758,7 @@ const CampScreen = () => {
             spacing={50}
             barBorderRadius={3}
             frontColor={"#BE5E19"}
-            yAxisTextStyle={{ 
+            yAxisTextStyle={{
               color: "rgba(255, 255, 255, 0.2)",
               fontSize: 12,
               fontFamily: "ZillaSlab-Regular",
@@ -725,20 +775,22 @@ const CampScreen = () => {
             hideRules={false}
             rulesType="dashed"
             rulesColor={"rgba(255, 255, 255, 0.2)"}
-            formatYLabel={(val) => (val === '0' ? `${val} hr` : `${val}`)}
+            formatYLabel={(val) => (val === "0" ? `${val} hr` : `${val}`)}
             isAnimated={true}
             animationDuration={3000}
           />
         </View>
 
         {/* Sample Data Label */}
-        <Text style={{
-          color: "rgba(255, 255, 255, 0.6)",
-          fontSize: scale(14),
-          fontFamily: "ZillaSlab-Medium",
-          textAlign: "center",
-          fontStyle: "italic",
-        }}>
+        <Text
+          style={{
+            color: "rgba(255, 255, 255, 0.6)",
+            fontSize: scale(14),
+            fontFamily: "ZillaSlab-Medium",
+            textAlign: "center",
+            fontStyle: "italic",
+          }}
+        >
           Sample Data - Start tracking to see your real progress
         </Text>
       </View>
@@ -746,140 +798,165 @@ const CampScreen = () => {
   }
 
   function StatsCard() {
-    return <>
-    {/* Grid of small cards */}
-    <View>
-        <View style={{ 
-            flexDirection: "row", 
-            flexWrap: "wrap", 
-            justifyContent: "space-between", 
-            marginTop: scale(20) 
-          }}>
-          {SMALL_CARDS.map((item) => (
+    return (
+      <>
+        {/* Grid of small cards */}
+        <View>
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent: "space-between",
+              marginTop: scale(20),
+            }}
+          >
+            {SMALL_CARDS.map((item) => (
+              <View
+                key={item.label}
+                style={{
+                  width: "48%",
+                  borderRadius: 6,
+                  padding: scale(16),
+                  marginBottom: scale(8),
+                  borderWidth: 1,
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                }}
+              >
+                <View
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                  }}
+                >
+                  <Image
+                    source={require("../../assets/new-images/stats-bg.png")}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  />
+                </View>
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,0.6)",
+                    fontSize: scale(15),
+                    fontFamily: "ZillaSlab-Bold",
+                  }}
+                >
+                  {item.label}
+                </Text>
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: scale(20),
+                    fontFamily: "ZillaSlab-SemiBold",
+                    marginTop: scale(2),
+                  }}
+                >
+                  {item.value}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Large card */}
+          <View
+            style={{
+              borderRadius: 6,
+              padding: scale(16),
+              marginTop: scale(4),
+              justifyContent: "center",
+              borderWidth: 1,
+              borderColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          >
             <View
-              key={item.label}
               style={{
-                width: "48%",
-                borderRadius: 6,
-                padding: scale(16),
-                marginBottom: scale(8),
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              <View style={{
-                position: 'absolute',
+                position: "absolute",
                 left: 0,
                 right: 0,
                 top: 0,
                 bottom: 0,
-              }}>
-                <Image source={require("../../assets/new-images/stats-bg.png")} 
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                  }} />
-              </View>
-              <Text
-                style={{
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: scale(15),
-                  fontFamily: "ZillaSlab-Bold",
-                }}
-              >
-                {item.label}
-              </Text>
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: scale(20),
-                  fontFamily: "ZillaSlab-SemiBold",
-                  marginTop: scale(2),
-                }}
-              >
-                {item.value}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Large card */}
-        <View
-          style={{
-            borderRadius: 6,
-            padding: scale(16),
-            marginTop: scale(4),
-            justifyContent: "center",
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.2)',
-          }}
-        >
-          <View style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-          }}>
-            <Image source={require("../../assets/new-images/stats-bg.png")} 
-              style={{
-                width: '100%',
-                height: '100%',
-              }} />
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <Text
-              style={{
-                color: "rgba(255,255,255,0.75)",
-                fontSize: scale(14),
-                fontFamily: "ZillaSlab-Bold",
               }}
             >
-              Phone use since downloading Unbound
-            </Text>
-          </View>
-          <View style={{ flexDirection: "row", alignItems: "center", marginTop: scale(2), justifyContent: 'space-between' }}>
-            <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: scale(20),
-                  fontFamily: "ZillaSlab-SemiBold",
-                }}
-              >
-                {userStats.phoneUsageReduction}%
-              </Text>
-              
               <Image
-                source={require("../../assets/new-images/dashboard-green-down-arrow.png")}
+                source={require("../../assets/new-images/stats-bg.png")}
                 style={{
-                  width: scale(16),
-                  height: scale(16),
-                  marginLeft: scaleVertical(6),
+                  width: "100%",
+                  height: "100%",
                 }}
               />
             </View>
-          </View>
-          <TouchableOpacity
-            onPress={handlePhoneUsageShare}
-            style={{
-              position: 'absolute',
-              right: scale(16),
-              padding: scale(4),
-            }}
-            activeOpacity={0.7}
-          >
-            <Image
-              source={require("../../assets/new-images/dashboard-share.png")}
+            <View
               style={{
-                width: scale(16),
-                height: scale(16),
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
-            />
-          </TouchableOpacity>
+            >
+              <Text
+                style={{
+                  color: "rgba(255,255,255,0.75)",
+                  fontSize: scale(14),
+                  fontFamily: "ZillaSlab-Bold",
+                }}
+              >
+                Phone use since downloading Unbound
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: scale(2),
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: scale(20),
+                    fontFamily: "ZillaSlab-SemiBold",
+                  }}
+                >
+                  {userStats.phoneUsageReduction}%
+                </Text>
+
+                <Image
+                  source={require("../../assets/new-images/dashboard-green-down-arrow.png")}
+                  style={{
+                    width: scale(16),
+                    height: scale(16),
+                    marginLeft: scaleVertical(6),
+                  }}
+                />
+              </View>
+            </View>
+            <TouchableOpacity
+              onPress={handlePhoneUsageShare}
+              style={{
+                position: "absolute",
+                right: scale(16),
+                padding: scale(4),
+              }}
+              activeOpacity={0.7}
+            >
+              <Image
+                source={require("../../assets/new-images/dashboard-share.png")}
+                style={{
+                  width: scale(16),
+                  height: scale(16),
+                }}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-    </View>
-        </>
+      </>
+    );
   }
 
   type Row = {
@@ -892,14 +969,14 @@ const CampScreen = () => {
     const handleTurnNotificationsOn = () => {
       // Navigate to device settings for notifications
       // This will open the iOS Settings app to the Notifications section
-      if (Platform.OS === 'ios') {
-        Linking.openURL('app-settings:');
+      if (Platform.OS === "ios") {
+        Linking.openURL("app-settings:");
       }
     };
 
     const handleStartFirstFocus = () => {
       // Navigate to the defend screen
-      router.push('/(tabs)/defend');
+      router.push("/(tabs)/defend");
     };
 
     const handleShareFirstMilestone = () => {
@@ -912,31 +989,38 @@ const CampScreen = () => {
 
     const rows: Row[] = [
       { label: "Set location", done: setupCompletion.setLocation },
-      { 
-        label: "Turn notifications on", 
-        done: setupCompletion.turnNotificationsOn, 
-        onPress: setupCompletion.turnNotificationsOn ? undefined : handleTurnNotificationsOn 
+      {
+        label: "Turn notifications on",
+        done: setupCompletion.turnNotificationsOn,
+        onPress: setupCompletion.turnNotificationsOn
+          ? undefined
+          : handleTurnNotificationsOn,
       },
-      { 
-        label: "Start your first focus", 
+      {
+        label: "Start your first focus",
         done: setupCompletion.startFirstFocus,
-        onPress: setupCompletion.startFirstFocus ? undefined : handleStartFirstFocus
+        onPress: setupCompletion.startFirstFocus
+          ? undefined
+          : handleStartFirstFocus,
       },
-      { 
-        label: "Share your first milestone", 
+      {
+        label: "Share your first milestone",
         done: setupCompletion.shareFirstMilestone,
-        onPress: setupCompletion.shareFirstMilestone ? undefined : handleShareFirstMilestone
+        onPress: setupCompletion.shareFirstMilestone
+          ? undefined
+          : handleShareFirstMilestone,
       },
     ];
 
     return (
       <>
-        <View style={{
-          flexDirection: 'row', 
-          alignItems: 'center',
-          marginTop: scale(20)
-        }}>
-
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: scale(20),
+          }}
+        >
           <Image
             source={require("../../assets/new-images/shield-done.png")}
             style={{
@@ -946,40 +1030,41 @@ const CampScreen = () => {
             }}
             resizeMode={"contain"}
           />
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(22),
-            fontFamily: "ZillaSlab-Medium",
-          }}>
-          {"Finish Your Setup"}
-          </Text> 
+          <Text
+            style={{
+              color: "#FFFFFF",
+              fontSize: scale(22),
+              fontFamily: "ZillaSlab-Medium",
+            }}
+          >
+            {"Finish Your Setup"}
+          </Text>
         </View>
 
-
-      <ImageBackground
-        source={require("../../assets/new-images/finish-setup-bg.png")}
-        style={{
-          marginTop: scale(16),
-          padding: scale(24),
-          borderRadius: 6,
-          borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.2)",
-          overflow: "hidden",
-          // alignContent: 'center',
-          // justifyContent: 'center',
-        }}
-        resizeMode={"cover"}
-      >
+        <ImageBackground
+          source={require("../../assets/new-images/finish-setup-bg.png")}
+          style={{
+            marginTop: scale(16),
+            padding: scale(24),
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: "rgba(255,255,255,0.2)",
+            overflow: "hidden",
+            // alignContent: 'center',
+            // justifyContent: 'center',
+          }}
+          resizeMode={"cover"}
+        >
           <View
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 15,
               bottom: 10,
               width: scale(193),
               right: 13,
               // backgroundColor: 'red'
-            }}>
-
+            }}
+          >
             <Image
               source={require("../../assets/new-images/finish-setup-bg-pattern.png")}
               style={{
@@ -989,84 +1074,86 @@ const CampScreen = () => {
               resizeMode={"contain"}
             />
           </View>
-          
-        {/* Background layer with subtle vignette + badges */}
-        <View
-          style={{
-            // backgroundColor: "blue",
-          }}
-        >
-          {rows.map((r, idx) => {
 
-            return (
-              <Pressable
-                key={r.label}
-                onPress={r.onPress}
-                disabled={!r.onPress}
-                style={({ pressed }) => ({
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: scale(10),
-                  borderRadius: r.onPress ? scale(6) : 0,
-                  backgroundColor: r.onPress 
-                    ? pressed 
-                      ? 'rgba(255, 255, 255, 0.1)' 
-                      : 'rgba(255, 255, 255, 0.05)'
-                    : 'transparent',
-                  opacity: r.onPress ? 1 : 1,
-                })}
-              >
-                {/* check bubble */}
-                <View
-                  style={{
-                    width: scale(24),
-                    height: scale(24),
-                    borderRadius: scale(12),
-                    backgroundColor: r.done ? '#0AB337' : 'transparent',
-                    borderWidth: 2,
-                    borderColor: r.done ? '#0AB337' : 'rgba(255, 255, 255, 0.3)',
+          {/* Background layer with subtle vignette + badges */}
+          <View
+            style={
+              {
+                // backgroundColor: "blue",
+              }
+            }
+          >
+            {rows.map((r, idx) => {
+              return (
+                <Pressable
+                  key={r.label}
+                  onPress={r.onPress}
+                  disabled={!r.onPress}
+                  style={({ pressed }) => ({
+                    flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: scale(12),
-                  }}
+                    paddingVertical: scale(10),
+                    borderRadius: r.onPress ? scale(6) : 0,
+                    backgroundColor: r.onPress
+                      ? pressed
+                        ? "rgba(255, 255, 255, 0.1)"
+                        : "rgba(255, 255, 255, 0.05)"
+                      : "transparent",
+                    opacity: r.onPress ? 1 : 1,
+                  })}
                 >
-                  {r.done && (
-                    <Feather name="check" size={16} color="#FFFFFF" />
+                  {/* check bubble */}
+                  <View
+                    style={{
+                      width: scale(24),
+                      height: scale(24),
+                      borderRadius: scale(12),
+                      backgroundColor: r.done ? "#0AB337" : "transparent",
+                      borderWidth: 2,
+                      borderColor: r.done
+                        ? "#0AB337"
+                        : "rgba(255, 255, 255, 0.3)",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: scale(12),
+                    }}
+                  >
+                    {r.done && (
+                      <Feather name="check" size={16} color="#FFFFFF" />
+                    )}
+                  </View>
+
+                  {/* label */}
+                  <Text
+                    style={{
+                      color: r.onPress ? "#fff" : "rgba(255, 255, 255, 0.7)",
+                      fontSize: scale(14),
+                      fontFamily: "ZillaSlab-Medium",
+                      flex: 1,
+                    }}
+                  >
+                    {r.label}
+                  </Text>
+
+                  {/* Arrow icon for clickable items */}
+                  {r.onPress && (
+                    <Feather
+                      name="chevron-right"
+                      size={16}
+                      color="rgba(255, 255, 255, 0.6)"
+                      style={{ marginLeft: scale(8) }}
+                    />
                   )}
-                </View>
-
-                {/* label */}
-                <Text
-                  style={{
-                    color: r.onPress ? '#fff' : 'rgba(255, 255, 255, 0.7)',
-                    fontSize: scale(14),
-                    fontFamily: "ZillaSlab-Medium",
-                    flex: 1,
-                  }}
-                >
-                  {r.label}
-                </Text>
-
-                {/* Arrow icon for clickable items */}
-                {r.onPress && (
-                  <Feather 
-                    name="chevron-right" 
-                    size={16} 
-                    color="rgba(255, 255, 255, 0.6)" 
-                    style={{ marginLeft: scale(8) }}
-                  />
-                )}
-              </Pressable>
-            );
-          })}
-        </View>
-      </ImageBackground>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ImageBackground>
       </>
     );
   }
 
   function MostUsedAppsCard() {
-
     type AppItem = {
       id: string;
       name: string;
@@ -1087,12 +1174,23 @@ const CampScreen = () => {
       return `${h}h ${m}m`;
     };
 
-    const maxMinutes = DATA.reduce((max, a) => (a.minutes > max ? a.minutes : max), 1);
+    const maxMinutes = DATA.reduce(
+      (max, a) => (a.minutes > max ? a.minutes : max),
+      1
+    );
 
-    const UsageRow = ({ item, maxMinutes }: { item: AppItem; maxMinutes: number }) => {
+    const UsageRow = ({
+      item,
+      maxMinutes,
+    }: {
+      item: AppItem;
+      maxMinutes: number;
+    }) => {
       const pct = Math.max(2, Math.round((item.minutes / maxMinutes) * 70));
       return (
-        <View style={{ paddingHorizontal: CARD_PADDING, paddingVertical: scale(8) }}>
+        <View
+          style={{ paddingHorizontal: CARD_PADDING, paddingVertical: scale(8) }}
+        >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {/* Icon circle */}
             <Image
@@ -1124,8 +1222,8 @@ const CampScreen = () => {
                   marginTop: scale(3),
                   borderRadius: BAR_HEIGHT,
                   overflow: "hidden",
-                  flexDirection: 'row',
-                  alignItems: 'center'
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
                 <View
@@ -1168,11 +1266,13 @@ const CampScreen = () => {
     };
     return (
       <>
-        <View style={{
-          flexDirection: 'row', 
-          alignItems: 'center',
-          marginTop: scale(36),
-        }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: scale(36),
+          }}
+        >
           <Image
             source={require("../../assets/new-images/most-used-apps.png")}
             style={{
@@ -1182,62 +1282,77 @@ const CampScreen = () => {
             }}
             resizeMode={"contain"}
           />
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(22),
-            fontFamily: "ZillaSlab-Medium",
-            flex: 1,
-          }}>
-          {"Most used apps"}
+          <Text
+            style={{
+              color: "#FFFFFF",
+              fontSize: scale(22),
+              fontFamily: "ZillaSlab-Medium",
+              flex: 1,
+            }}
+          >
+            {"Most used apps"}
           </Text>
         </View>
 
-      <ImageBackground
-        source={require('../../assets/new-images/most-used-app-bg.png')}
-        style={{
-          marginTop: scale(16),
-          borderRadius: 6,
-          borderWidth: 1,
-          borderColor: "rgba(255,255,255,0.2)",
-          overflow: "hidden",
-        }}
-      >
-
-        <View style={{marginVertical: scale(20)}}>
-          {appDataLoading ? (
-            <View style={{ padding: scale(20), alignItems: 'center' }}>
-              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
-                Loading app usage data...
-              </Text>
-            </View>
-          ) : DATA.length === 0 ? (
-            <View style={{ padding: scale(20), alignItems: 'center' }}>
-              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
-                No data available
-              </Text>
-            </View>
-          ) : (
-            <>
-              {DATA.map((item) => (
-                <UsageRow key={item.id} item={item} maxMinutes={maxMinutes} />
-              ))}
-            </>
-          )}
-        </View>
-
-
-      </ImageBackground>
+        <ImageBackground
+          source={require("../../assets/new-images/most-used-app-bg.png")}
+          style={{
+            marginTop: scale(16),
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: "rgba(255,255,255,0.2)",
+            overflow: "hidden",
+          }}
+        >
+          <View style={{ marginVertical: scale(20) }}>
+            {appDataLoading ? (
+              <View style={{ padding: scale(20), alignItems: "center" }}>
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,0.7)",
+                    fontSize: scale(16),
+                  }}
+                >
+                  Loading app usage data...
+                </Text>
+              </View>
+            ) : DATA.length === 0 ? (
+              <View style={{ padding: scale(20), alignItems: "center" }}>
+                <Text
+                  style={{
+                    color: "rgba(255,255,255,0.7)",
+                    fontSize: scale(16),
+                  }}
+                >
+                  No data available
+                </Text>
+              </View>
+            ) : (
+              <>
+                {DATA.map((item) => (
+                  <UsageRow key={item.id} item={item} maxMinutes={maxMinutes} />
+                ))}
+              </>
+            )}
+          </View>
+        </ImageBackground>
       </>
     );
   }
 
   function CommunityStatsCard() {
-    const systemFonts = [...defaultSystemFonts, 'ZillaSlab-Medium', 'ZillaSlab-Bold']
+    const systemFonts = [
+      ...defaultSystemFonts,
+      "ZillaSlab-Medium",
+      "ZillaSlab-Bold",
+    ];
 
     const data = [
       {
         id: "1",
-        html: `<span> <strong>${communityStats.totalUsers}</strong> guys reclaimed over <strong>${communityStats.weeklyHours.toLocaleString()}</strong> hours of their time this week</span>`,
+        html: `<span> <strong>${
+          communityStats.totalUsers
+        }</strong> guys reclaimed over <strong>${communityStats.weeklyHours.toLocaleString()}</strong> hours of their time this week</span>`,
       },
       {
         id: "2",
@@ -1250,8 +1365,8 @@ const CampScreen = () => {
     ];
 
     const StatCard = ({ item }: any) => (
-      <ImageBackground 
-        source={require('../../assets/new-images/stats-bg.png')}
+      <ImageBackground
+        source={require("../../assets/new-images/stats-bg.png")}
         style={{
           borderWidth: 1,
           borderColor: "rgba(255, 255, 255, 0.2)",
@@ -1259,28 +1374,32 @@ const CampScreen = () => {
           paddingHorizontal: scale(12),
           paddingVertical: scale(16),
           width: scale(200),
-        }}>
-
-        <View style={{
-          // backgroundColor: 'pink'
-        }}>
+        }}
+      >
+        <View
+          style={
+            {
+              // backgroundColor: 'pink'
+            }
+          }
+        >
           <RenderHTML
             source={{ html: item.html }}
             contentWidth={width}
-            systemFonts={systemFonts} 
+            systemFonts={systemFonts}
             tagsStyles={{
-              span: { 
-                fontFamily: "ZillaSlab-Medium", 
-                fontSize: scale(14), 
+              span: {
+                fontFamily: "ZillaSlab-Medium",
+                fontSize: scale(14),
                 color: "#fff",
                 margin: 0,
                 padding: 0,
-                textAlign: 'left',
-                width: '100%',
+                textAlign: "left",
+                width: "100%",
               },
-              strong: { 
-                fontFamily: "ZillaSlab-Bold", 
-                fontSize: scale(16), 
+              strong: {
+                fontFamily: "ZillaSlab-Bold",
+                fontSize: scale(16),
                 color: "#fff",
                 margin: 0,
                 padding: 0,
@@ -1298,15 +1417,15 @@ const CampScreen = () => {
       </ImageBackground>
     );
 
-
-
     return (
       <>
-      <View style={{
-          flexDirection: 'row', 
-          alignItems: 'center',
-          marginTop: scale(50),
-        }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: scale(50),
+          }}
+        >
           <Image
             source={require("../../assets/new-images/community-stats.png")}
             style={{
@@ -1316,24 +1435,31 @@ const CampScreen = () => {
             }}
             resizeMode={"contain"}
           />
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(22),
-            fontFamily: "ZillaSlab-Medium",
-            flex: 1,
-          }}>
-          {"Community Stats & Inspiration"}
+          <Text
+            style={{
+              color: "#FFFFFF",
+              fontSize: scale(22),
+              fontFamily: "ZillaSlab-Medium",
+              flex: 1,
+            }}
+          >
+            {"Community Stats & Inspiration"}
           </Text>
-
         </View>
 
-        <ScrollView 
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{marginTop: scale(16), paddingRight: scale(24)}}
+          contentContainerStyle={{
+            marginTop: scale(16),
+            paddingRight: scale(24),
+          }}
         >
           {data.map((item, index) => (
-            <View key={item.id} style={{ marginRight: index < data.length - 1 ? scale(12) : 0 }}>
+            <View
+              key={item.id}
+              style={{ marginRight: index < data.length - 1 ? scale(12) : 0 }}
+            >
               <StatCard item={item} />
             </View>
           ))}
@@ -1353,158 +1479,181 @@ const CampScreen = () => {
           marginTop: scale(16),
         }}
       >
-          <View style={{
-            flexDirection: 'row', 
-            alignItems: 'center',
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
             marginBottom: scale(28),
-          }}>
-            <Text style={{
+          }}
+        >
+          <Text
+            style={{
               color: "#FFFFFF",
               fontSize: scale(22),
               fontFamily: "ZillaSlab-Medium",
               flex: 1,
-            }}>
-              {"What have you replaced screen time with?"}
-            </Text>
-          </View>
-          
-          {/* Response box */}
-          <View>
-            <TextInput
-              ref={responseInputRef}
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.7)", 
-                borderRadius: 6,
-                paddingVertical: scale(18),
-                paddingHorizontal: scale(20),
-                color: "#000",
-                fontSize: scale(16),
-                fontFamily: "ZillaSlab-Medium",
-                minHeight: scale(80),
-              }}
-              placeholder="Share what you've been doing instead..."
-              placeholderTextColor="rgba(0,0,0,0.4)"
-              value={responseText}
-              onChangeText={handleResponseTextChange}
-              multiline
-              maxLength={500}
-              editable={!isSubmittingResponse}
-              autoCorrect={false}
-              autoCapitalize="sentences"
-              blurOnSubmit={false}
-              returnKeyType="default"
-              textAlignVertical="top"
-              onFocus={() => {
-                console.log('TextInput focused');
-              }}
-              onBlur={() => {
-                console.log('TextInput blurred');
-              }}
-            />
-          </View>
-          
-          {/* Word count indicator */}
-          <Text style={{
-            color: getWordCount(responseText) > 100 ? "#FF4444" : "rgba(255, 255, 255, 0.6)",
+            }}
+          >
+            {"What have you replaced screen time with?"}
+          </Text>
+        </View>
+
+        {/* Response box */}
+        <View>
+          <TextInput
+            ref={responseInputRef}
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.7)",
+              borderRadius: 6,
+              paddingVertical: scale(18),
+              paddingHorizontal: scale(20),
+              color: "#000",
+              fontSize: scale(16),
+              fontFamily: "ZillaSlab-Medium",
+              minHeight: scale(80),
+            }}
+            placeholder="Share what you've been doing instead..."
+            placeholderTextColor="rgba(0,0,0,0.4)"
+            value={responseText}
+            onChangeText={handleResponseTextChange}
+            multiline
+            maxLength={500}
+            editable={!isSubmittingResponse}
+            autoCorrect={false}
+            autoCapitalize="sentences"
+            blurOnSubmit={false}
+            returnKeyType="default"
+            textAlignVertical="top"
+            onFocus={() => {
+              console.log("TextInput focused");
+            }}
+            onBlur={() => {
+              console.log("TextInput blurred");
+            }}
+          />
+        </View>
+
+        {/* Word count indicator */}
+        <Text
+          style={{
+            color:
+              getWordCount(responseText) > 100
+                ? "#FF4444"
+                : "rgba(255, 255, 255, 0.6)",
             fontSize: scale(12),
             fontFamily: "ZillaSlab-Medium",
             textAlign: "right",
             marginTop: scale(4),
-          }}>
-            {getWordCount(responseText)}/100 words
-          </Text>
+          }}
+        >
+          {getWordCount(responseText)}/100 words
+        </Text>
 
-          <TouchableOpacity
-            style={[
-              styles.primaryRespBtn,
-              !isResponseValid && { opacity: 0.5 }
-            ]}
-            onPress={handleSubmitResponse}
-            activeOpacity={0.9}
-            disabled={!isResponseValid || isSubmittingResponse}
+        <TouchableOpacity
+          style={[styles.primaryRespBtn, !isResponseValid && { opacity: 0.5 }]}
+          onPress={handleSubmitResponse}
+          activeOpacity={0.9}
+          disabled={!isResponseValid || isSubmittingResponse}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+            }}
           >
-            <View style={{
-              flexDirection: 'row', 
-              alignItems: 'center',
-            }}>
-              <Image
-                source={require('../../assets/new-images/send-icon.png')}
-                style={{
-                  width: scale(16),
-                  height: scale(16),
-                  marginRight: scale(12),
-                }}
-              />
-              <Text style={styles.primaryText}>
-                {isSubmittingResponse ? "Submitting..." : "Submit"}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          
-          {/* Disclaimer text */}
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'flex-start',
+            <Image
+              source={require("../../assets/new-images/send-icon.png")}
+              style={{
+                width: scale(16),
+                height: scale(16),
+                marginRight: scale(12),
+              }}
+            />
+            <Text style={styles.primaryText}>
+              {isSubmittingResponse ? "Submitting..." : "Submit"}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Disclaimer text */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
             marginTop: scale(6),
             marginHorizontal: scale(46), // Match the Submit button's horizontal margins
-          }}>
-            <Text style={{
+          }}
+        >
+          <Text
+            style={{
               color: "rgba(255, 255, 255, 0.6)",
               fontSize: scale(12),
               fontFamily: "ZillaSlab-Medium",
               marginRight: scale(4),
-            }}>
-              *
-            </Text>
-            <Text style={{
+            }}
+          >
+            *
+          </Text>
+          <Text
+            style={{
               color: "rgba(255, 255, 255, 0.6)",
               fontSize: scale(12),
               fontFamily: "ZillaSlab-Medium",
               flex: 1,
               lineHeight: scale(16),
-            }}>
-              Your submission may be selected to be featured in the community response section below.
-            </Text>
-          </View>
-          
-          {/* Connection opening at bottom */}
-          <View style={{
-            alignItems: 'center',
+            }}
+          >
+            Your submission may be selected to be featured in the community
+            response section below.
+          </Text>
+        </View>
+
+        {/* Connection opening at bottom */}
+        <View
+          style={{
+            alignItems: "center",
             marginTop: scale(16),
-          }}>
-            <View style={{
+          }}
+        >
+          <View
+            style={{
               width: scale(40),
               height: scale(8),
-              backgroundColor: 'transparent',
+              backgroundColor: "transparent",
               borderBottomWidth: 2,
-              borderBottomColor: 'rgba(255, 255, 255, 0.4)',
+              borderBottomColor: "rgba(255, 255, 255, 0.4)",
               borderLeftWidth: 2,
-              borderLeftColor: 'rgba(255, 255, 255, 0.4)',
+              borderLeftColor: "rgba(255, 255, 255, 0.4)",
               borderRightWidth: 2,
-              borderRightColor: 'rgba(255, 255, 255, 0.4)',
+              borderRightColor: "rgba(255, 255, 255, 0.4)",
               borderBottomLeftRadius: scale(4),
               borderBottomRightRadius: scale(4),
-            }} />
-          </View>
+            }}
+          />
         </View>
+      </View>
     );
   }
 
   function VisualBridge() {
     return (
-      <View style={{
-        alignItems: 'center',
-        marginVertical: 0,
-        height: scale(16),
-        justifyContent: 'center',
-      }}>
-        {/* Connecting line that links the notches */}
-        <View style={{
-          width: scale(6),
+      <View
+        style={{
+          alignItems: "center",
+          marginVertical: 0,
           height: scale(16),
-          backgroundColor: 'rgba(255, 255, 255, 0.4)',
-          borderRadius: scale(3),
-        }} />
+          justifyContent: "center",
+        }}
+      >
+        {/* Connecting line that links the notches */}
+        <View
+          style={{
+            width: scale(6),
+            height: scale(16),
+            backgroundColor: "rgba(255, 255, 255, 0.4)",
+            borderRadius: scale(3),
+          }}
+        />
       </View>
     );
   }
@@ -1520,8 +1669,8 @@ const CampScreen = () => {
     // Function to get a random profile photo based on response ID
     const getRandomProfilePhoto = (responseId: string) => {
       // Use the response ID to generate a consistent "random" assignment
-      const hash = responseId.split('').reduce((a, b) => {
-        a = ((a << 5) - a) + b.charCodeAt(0);
+      const hash = responseId.split("").reduce((a, b) => {
+        a = (a << 5) - a + b.charCodeAt(0);
         return a & a;
       }, 0);
       const index = Math.abs(hash) % profilePhotos.length;
@@ -1539,66 +1688,92 @@ const CampScreen = () => {
         }}
       >
         {/* Connection opening at top */}
-        <View style={{
-          alignItems: 'center',
-          marginBottom: scale(16),
-        }}>
-          <View style={{
-            width: scale(40),
-            height: scale(8),
-            backgroundColor: 'transparent',
-            borderTopWidth: 2,
-            borderTopColor: 'rgba(255, 255, 255, 0.4)',
-            borderLeftWidth: 2,
-            borderLeftColor: 'rgba(255, 255, 255, 0.4)',
-            borderRightWidth: 2,
-            borderRightColor: 'rgba(255, 255, 255, 0.4)',
-            borderTopLeftRadius: scale(4),
-            borderTopRightRadius: scale(4),
-          }} />
+        <View
+          style={{
+            alignItems: "center",
+            marginBottom: scale(16),
+          }}
+        >
+          <View
+            style={{
+              width: scale(40),
+              height: scale(8),
+              backgroundColor: "transparent",
+              borderTopWidth: 2,
+              borderTopColor: "rgba(255, 255, 255, 0.4)",
+              borderLeftWidth: 2,
+              borderLeftColor: "rgba(255, 255, 255, 0.4)",
+              borderRightWidth: 2,
+              borderRightColor: "rgba(255, 255, 255, 0.4)",
+              borderTopLeftRadius: scale(4),
+              borderTopRightRadius: scale(4),
+            }}
+          />
         </View>
-        <View style={{
-          flexDirection: 'row', 
-          alignItems: 'center',
-          marginBottom: scale(20),
-        }}>
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(22),
-            fontFamily: "ZillaSlab-Medium",
-            flex: 1,
-          }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: scale(20),
+          }}
+        >
+          <Text
+            style={{
+              color: "#FFFFFF",
+              fontSize: scale(22),
+              fontFamily: "ZillaSlab-Medium",
+              flex: 1,
+            }}
+          >
             {"Community Responses"}
           </Text>
         </View>
 
         {communityResponsesLoading ? (
-          <View style={{ padding: scale(20), alignItems: 'center' }}>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
+          <View style={{ padding: scale(20), alignItems: "center" }}>
+            <Text
+              style={{ color: "rgba(255,255,255,0.7)", fontSize: scale(16) }}
+            >
               Loading community responses...
             </Text>
           </View>
         ) : communityResponses.length === 0 ? (
-          <View style={{ padding: scale(20), alignItems: 'center' }}>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: scale(16) }}>
+          <View style={{ padding: scale(20), alignItems: "center" }}>
+            <Text
+              style={{ color: "rgba(255,255,255,0.7)", fontSize: scale(16) }}
+            >
               No responses yet. Be the first to share!
             </Text>
           </View>
         ) : (
           <>
             {communityResponses.map((response, index) => (
-              <View key={response.id} style={{ marginBottom: index < communityResponses.length - 1 ? scaleVertical(24) : 0 }}>
+              <View
+                key={response.id}
+                style={{
+                  marginBottom:
+                    index < communityResponses.length - 1
+                      ? scaleVertical(24)
+                      : 0,
+                }}
+              >
                 {/* User info */}
-                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: scaleVertical(12) }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: scaleVertical(12),
+                  }}
+                >
                   <View
                     style={{
                       width: scale(40),
                       height: scale(40),
                       borderRadius: scale(20),
-                      overflow: 'hidden',
+                      overflow: "hidden",
                       marginRight: scale(12),
                       borderWidth: 1,
-                      borderColor: 'rgba(255, 255, 255, 0.3)',
+                      borderColor: "rgba(255, 255, 255, 0.3)",
                     }}
                   >
                     <Image
@@ -1612,23 +1787,30 @@ const CampScreen = () => {
                     />
                   </View>
                   <View>
-                    <Text style={{ 
-                      color: "#fff", 
-                      fontSize: scale(18),
-                      fontFamily: "ZillaSlab-Medium",
-                    }}>
-                      {response.user_name}{response.user_location ? ` in ${response.user_location}` : ''}
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontSize: scale(18),
+                        fontFamily: "ZillaSlab-Medium",
+                      }}
+                    >
+                      {response.user_name}
+                      {response.user_location
+                        ? ` in ${response.user_location}`
+                        : ""}
                     </Text>
                   </View>
                 </View>
 
                 {/* Response text */}
-                <Text style={{ 
-                  color: "#fff", 
-                  fontSize: scale(16),
-                  fontFamily: "ZillaSlab-Medium", 
-                  marginBottom: scaleVertical(10),
-                }}>
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: scale(16),
+                    fontFamily: "ZillaSlab-Medium",
+                    marginBottom: scaleVertical(10),
+                  }}
+                >
                   "{response.response_text}"
                 </Text>
               </View>
@@ -1639,7 +1821,6 @@ const CampScreen = () => {
     );
   }
 
-  
   return (
     <View style={styles.safe}>
       <Image
@@ -1651,12 +1832,12 @@ const CampScreen = () => {
         style={styles.overlayImage}
       />
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
-        <ScrollView 
+        <ScrollView
           style={{
             marginTop: insets.top + scaleVertical(24),
             marginHorizontal: scale(24),
@@ -1667,94 +1848,123 @@ const CampScreen = () => {
           keyboardDismissMode="none"
           nestedScrollEnabled={true}
         >
-        <TouchableOpacity style={{
-            flexDirection: 'row', 
-            alignItems: 'center',
-            alignSelf: 'flex-start',
-          }}
-          onPress={() => setViewType(viewType === ViewTypes.Monthly ? ViewTypes.AllTime : ViewTypes.Monthly)}
-          >
-          <Text style={{
-            color: "#FFFFFF",
-            fontSize: scale(24),
-            fontFamily: "ZillaSlab-Medium",
-          }}>
-          {viewType === ViewTypes.Monthly ? "This month" : "Your all-time progress"}
-          </Text>
-            
-          <Image
-            source={require("../../assets/new-images/dashboard-down-arrow.png")}
+          <TouchableOpacity
             style={{
-              width: scale(24),
-              height: scale(24),
-              marginLeft: scaleVertical(8),
+              flexDirection: "row",
+              alignItems: "center",
+              alignSelf: "flex-start",
             }}
-            resizeMode={"contain"}
-          />
-        </TouchableOpacity>
-
-        <View style={{
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            borderRadius: 8,
-            marginTop: scaleVertical(8),
-          }}>
-          <Text style={{
-              color: "rgba(255, 255, 255, 0.5)",
-              fontSize: scale(16),
-              fontFamily: "ZillaSlab-Medium",
-              marginTop: scaleVertical(16),
-              marginHorizontal: scaleVertical(16),
-            }}>
-            Your time reclaimed
-          </Text>
-
-          <View style={{
-              flexDirection: 'row', 
-              alignItems: 'center',
-            }}>
-            <Text style={{
-              color: "#FFFFFF",
-              fontSize: scale(18),
-              fontFamily: "ZillaSlab-Bold",
-              marginLeft: scaleVertical(16),
-            }}>
-            {viewType === ViewTypes.Monthly ? `${userStats.monthlyHours} hrs` : `${userStats.allTimeHours} hrs`}
+            onPress={() =>
+              setViewType(
+                viewType === ViewTypes.Monthly
+                  ? ViewTypes.AllTime
+                  : ViewTypes.Monthly
+              )
+            }
+          >
+            <Text
+              style={{
+                color: "#FFFFFF",
+                fontSize: scale(24),
+                fontFamily: "ZillaSlab-Medium",
+              }}
+            >
+              {viewType === ViewTypes.Monthly
+                ? "This month"
+                : "Your all-time progress"}
             </Text>
-            <Text style={{
-              color: "rgba(255, 255, 255, 0.5)",
-                fontSize: scale(12),
-                fontFamily: "ZillaSlab-Bold",
-                marginLeft: scaleVertical(6),
-              }}>
-              {viewType === ViewTypes.Monthly ? "reclaimed this month" : "total focused time since joining"}
+
+            <Image
+              source={require("../../assets/new-images/dashboard-down-arrow.png")}
+              style={{
+                width: scale(24),
+                height: scale(24),
+                marginLeft: scaleVertical(8),
+              }}
+              resizeMode={"contain"}
+            />
+          </TouchableOpacity>
+
+          <View
+            style={{
+              backgroundColor: "rgba(0,0,0,0.3)",
+              borderRadius: 8,
+              marginTop: scaleVertical(8),
+            }}
+          >
+            <Text
+              style={{
+                color: "rgba(255, 255, 255, 0.5)",
+                fontSize: scale(16),
+                fontFamily: "ZillaSlab-Medium",
+                marginTop: scaleVertical(16),
+                marginHorizontal: scaleVertical(16),
+              }}
+            >
+              Your time reclaimed
             </Text>
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontSize: scale(18),
+                  fontFamily: "ZillaSlab-Bold",
+                  marginLeft: scaleVertical(16),
+                }}
+              >
+                {viewType === ViewTypes.Monthly
+                  ? `${userStats.monthlyHours} hrs`
+                  : `${userStats.allTimeHours} hrs`}
+              </Text>
+              <Text
+                style={{
+                  color: "rgba(255, 255, 255, 0.5)",
+                  fontSize: scale(12),
+                  fontFamily: "ZillaSlab-Bold",
+                  marginLeft: scaleVertical(6),
+                }}
+              >
+                {viewType === ViewTypes.Monthly
+                  ? "reclaimed this month"
+                  : "total focused time since joining"}
+              </Text>
+            </View>
+
+            {isFirstTimeUser ? (
+              <WelcomeScreen />
+            ) : viewType === ViewTypes.Monthly ? (
+              <ChartsCard />
+            ) : (
+              <ChartsAllTimeCard />
+            )}
           </View>
 
-          {isFirstTimeUser ? <WelcomeScreen /> : (viewType === ViewTypes.Monthly ? <ChartsCard /> : <ChartsAllTimeCard />)}
-        </View>
-
-        <StatsCard />
-        <ChecklistCard />
-        <MostUsedAppsCard />
-        <CommunityStatsCard />
-        <ResponseInputCard />
-        <VisualBridge />
-        <CommunityResponsesCard />
-
+          <StatsCard />
+          <ChecklistCard />
+          <MostUsedAppsCard />
+          <CommunityStatsCard />
+          <ResponseInputCard />
+          <VisualBridge />
+          <CommunityResponsesCard />
         </ScrollView>
       </KeyboardAvoidingView>
-      
+
       <TouchableOpacity
-        style={[
-          styles.primaryBtn,
-        ]}
-        onPress={() => { router.navigate('/defend'); }}
+        style={[styles.primaryBtn]}
+        onPress={() => {
+          router.navigate("/defend");
+        }}
         activeOpacity={0.9}
       >
-
-        <View style={{flexDirection: 'row'}}>
+        <View style={{ flexDirection: "row" }}>
           <Image
-            source={require('../../assets/new-images/start-focus-icon.png')}
+            source={require("../../assets/new-images/start-focus-icon.png")}
             style={{
               width: scale(24),
               height: scale(24),
@@ -1768,33 +1978,32 @@ const CampScreen = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  safe: { 
-    flex: 1, 
-    backgroundColor: "#000" 
+  safe: {
+    flex: 1,
+    backgroundColor: "#000",
   },
-  image: { 
-    position: "absolute", 
-    width: "100%", 
-    height: width * 0.939 
+  image: {
+    position: "absolute",
+    width: "100%",
+    height: width * 0.939,
   },
-  overlayImage: { 
-    position: "absolute", 
-    width: "100%", 
-    height: "100%" 
+  overlayImage: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
   },
   primaryBtn: {
-    alignItems: 'center',
-    backgroundColor: '#BE5E19',
+    alignItems: "center",
+    backgroundColor: "#BE5E19",
     borderRadius: 6,
     paddingVertical: scaleVertical(20),
     marginVertical: scale(24),
     marginHorizontal: scale(24),
   },
   primaryRespBtn: {
-    alignItems: 'center',
-    backgroundColor: '#BE5E19',
+    alignItems: "center",
+    backgroundColor: "#BE5E19",
     borderRadius: 6,
     paddingVertical: scaleVertical(12),
     marginTop: scale(16),
@@ -1810,7 +2019,6 @@ const styles = StyleSheet.create({
 });
 
 export default CampScreen;
-
 
 // import AchievementLevel from "@/components/AchievementLevel";
 // import { ScreenContainer } from "@/components/ui/ScreenContainer";
@@ -1921,7 +2129,7 @@ export default CampScreen;
 //       const startOfWeek = new Date(now);
 //       startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
 //       startOfWeek.setHours(0, 0, 0, 0);
-      
+
 //       const timeSavedThisWeek = await getTotalBlockedTime(supaUser.id, startOfWeek, now) || 0;
 
 //       // Calculate all-time total blocked time (in minutes)
@@ -1939,7 +2147,7 @@ export default CampScreen;
 
 //       // Get real partner data
 //       const partnerData = await getPartnerData(supaUser.id);
-      
+
 //       if (partnerData) {
 //         setPartner({
 //           ...partnerData,

@@ -1,39 +1,54 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import ScreenTimeManager from "@/lib/ScreenTime";
-import { AppData, getMockAppData, loadUserAppSelection, parseScreenTimeSelection, saveUserAppSelection } from "@/lib/screenTimeApps";
+import {
+  AppData,
+  getMockAppData,
+  loadUserAppSelection,
+  parseScreenTimeSelection,
+  saveUserAppSelection,
+} from "@/lib/screenTimeApps";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    ImageBackground,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window"); 
+const { width } = Dimensions.get("window");
 
 const NUM_COLUMNS = 4;
 
 const DefendScreen = () => {
   const insets = useSafeAreaInsets();
-  const [data, setData] = useState([{ id: "add", name: "Add", type: "add", icon: require('../../../assets/new-images/defend-plus.png') }])
+  const [data, setData] = useState([
+    {
+      id: "add",
+      name: "Add",
+      type: "add",
+      icon: require("../../../assets/new-images/defend-plus.png"),
+    },
+  ]);
   const [userSelectedApps, setUserSelectedApps] = useState<AppData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [blockPorn, setBlockPorn] = useState(false);
 
   const SELECTION_STORAGE_KEY = "UNBOUND_SELECTION_KEY";
 
   // const [showModal, setShowModal] = useState(false);
   // const [showScheduleModal, setShowScheduleModal] = useState(false);
-  
+
   // const [blocked, setBlocked] = useState<{ [key: string]: boolean }>(
   //   Object.fromEntries(DATA.map((app) => [app.id, false]))
   // );
@@ -49,12 +64,38 @@ const DefendScreen = () => {
 
   useEffect(() => {
     loadPreviousSelections();
+    checkAdultContentFilterStatus();
   }, []);
+
+  const checkAdultContentFilterStatus = async () => {
+    if (Platform.OS !== "ios") return;
+
+    try {
+      const authStatus = await ScreenTimeManager.getAuthorizationStatus();
+      if (authStatus.isAuthorized) {
+        // Check adult content filter status
+        const filterStatus =
+          await ScreenTimeManager.getAdultContentFilterStatus();
+        setBlockPorn(filterStatus.enabled);
+        console.log("✅ Adult content filter status:", filterStatus.enabled);
+        console.log("📱 To verify it's working:");
+        console.log(
+          "   1. Check Settings → Screen Time → Content Restrictions → Web Content"
+        );
+        console.log("   2. Should show 'Limit Adult Websites' selected");
+        console.log(
+          "   3. Try visiting an adult site in Safari - should be blocked"
+        );
+      }
+    } catch (error) {
+      console.error("Error checking adult content filter status:", error);
+    }
+  };
 
   const loadPreviousSelections = async () => {
     try {
       setIsLoading(true);
-      
+
       // Load previously selected apps
       const previousApps = await loadUserAppSelection();
       if (previousApps.length > 0) {
@@ -62,15 +103,20 @@ const DefendScreen = () => {
         updateDisplayData(previousApps);
       }
     } catch (error) {
-      console.error('Error loading previous selections:', error);
+      console.error("Error loading previous selections:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const updateDisplayData = (apps: AppData[]) => {
-    const addButton = { id: "add", name: "Add", type: "add", icon: require('../../../assets/new-images/defend-plus.png') };
-    const appItems = apps.map(app => ({
+    const addButton = {
+      id: "add",
+      name: "Add",
+      type: "add",
+      icon: require("../../../assets/new-images/defend-plus.png"),
+    };
+    const appItems = apps.map((app) => ({
       id: app.id,
       name: app.name,
       icon: app.icon,
@@ -90,9 +136,11 @@ const DefendScreen = () => {
 
     try {
       setIsLoading(true);
-      const { selection } = await ScreenTimeManager.displayFamilyActivityPicker({
-        headerText: "Choose Apps to Block",
-      });
+      const { selection } = await ScreenTimeManager.displayFamilyActivityPicker(
+        {
+          headerText: "Choose Apps to Block",
+        }
+      );
 
       console.log("ScreenTime selection ===>", selection);
       console.log("Selection type:", typeof selection);
@@ -108,14 +156,20 @@ const DefendScreen = () => {
           // Update state with user-selected apps
           setUserSelectedApps(selectedApps);
           updateDisplayData(selectedApps);
-          
+
           // Save to AsyncStorage for persistence
           await saveUserAppSelection(selectedApps);
           await AsyncStorage.setItem(SELECTION_STORAGE_KEY, selection);
-          
-          console.log("Successfully saved", selectedApps.length, "user-selected apps");
+
+          console.log(
+            "Successfully saved",
+            selectedApps.length,
+            "user-selected apps"
+          );
         } else {
-          console.log("No apps parsed from selection, using mock data for testing");
+          console.log(
+            "No apps parsed from selection, using mock data for testing"
+          );
           // For testing purposes, let's use mock data when parsing fails
           const mockApps = getMockAppData();
           setUserSelectedApps(mockApps);
@@ -125,11 +179,17 @@ const DefendScreen = () => {
         }
       } else {
         console.log("No selection returned from ScreenTime");
-        Alert.alert("Selection Cancelled", "You didn't select any apps. Please try again to complete the setup.");
+        Alert.alert(
+          "Selection Cancelled",
+          "You didn't select any apps. Please try again to complete the setup."
+        );
       }
     } catch (error) {
       console.error("Error with Apple Picker:", error);
-      Alert.alert("Error", "Could not complete app selection. Please try again.");
+      Alert.alert(
+        "Error",
+        "Could not complete app selection. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +197,7 @@ const DefendScreen = () => {
 
   const removeApp = async (appId: string) => {
     try {
-      const updatedApps = userSelectedApps.filter(app => app.id !== appId);
+      const updatedApps = userSelectedApps.filter((app) => app.id !== appId);
       setUserSelectedApps(updatedApps);
       updateDisplayData(updatedApps);
       await saveUserAppSelection(updatedApps);
@@ -187,12 +247,14 @@ const DefendScreen = () => {
                 // resizeMode={"center"}
               />
             </View>
-            <Text style={{ 
-              marginTop: 8, 
-              color: "#FFCA91", 
-              fontSize: scale(12), 
-              fontFamily: "ZillaSlab-Medium"
-            }}>
+            <Text
+              style={{
+                marginTop: 8,
+                color: "#FFCA91",
+                fontSize: scale(12),
+                fontFamily: "ZillaSlab-Medium",
+              }}
+            >
               Add
             </Text>
           </TouchableOpacity>
@@ -208,7 +270,6 @@ const DefendScreen = () => {
           }}
           onPress={() => removeApp(item.id)}
         >
-          
           <Image
             source={item.icon}
             style={{
@@ -216,25 +277,27 @@ const DefendScreen = () => {
               height: TILE,
             }}
           />
-          <Text style={{ 
-            marginTop: 8, 
-            color: "rgba(255, 255, 255, 0.7)", 
-            fontSize: scale(12), 
-            fontFamily: "ZillaSlab-Regular"
-          }}>
+          <Text
+            style={{
+              marginTop: 8,
+              color: "rgba(255, 255, 255, 0.7)",
+              fontSize: scale(12),
+              fontFamily: "ZillaSlab-Regular",
+            }}
+          >
             {item.name}
           </Text>
 
           <TouchableOpacity
             onPress={() => removeApp(item.id)}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: -scale(8),
               left: -scale(8),
             }}
           >
             <Image
-              source={require('../../../assets/new-images/remove-app-icon.png')}
+              source={require("../../../assets/new-images/remove-app-icon.png")}
               style={{
                 width: scale(24),
                 height: scale(24),
@@ -246,15 +309,17 @@ const DefendScreen = () => {
     };
 
     return (
-      <View style={{
-        paddingHorizontal: PADDING,
-        paddingVertical: scale(24),
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        borderRadius: 6,
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-      }}>
+      <View
+        style={{
+          paddingHorizontal: PADDING,
+          paddingVertical: scale(24),
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          borderRadius: 6,
+          flexDirection: "row",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
         {data.map((item) => (
           <View key={item.id} style={{ width: TILE, marginBottom: SPACING }}>
             {renderItem({ item })}
@@ -264,9 +329,115 @@ const DefendScreen = () => {
     );
   };
 
-  const BlockPornToggle = () => {
-    const [enabled, setEnabled] = useState(true);
+  const handleTogglePorn = async () => {
+    if (Platform.OS !== "ios") return;
 
+    // First check if we have Screen Time authorization
+    const authStatus = await ScreenTimeManager.getAuthorizationStatus();
+
+    if (!authStatus.isAuthorized) {
+      Alert.alert(
+        "Screen Time Required",
+        "Please enable Screen Time permissions to use adult content blocking.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Enable",
+            onPress: async () => {
+              try {
+                await ScreenTimeManager.requestAuthorization("individual");
+                // After authorization, try the toggle again
+                const newAuthStatus =
+                  await ScreenTimeManager.getAuthorizationStatus();
+                if (newAuthStatus.isAuthorized) {
+                  handleTogglePorn(); // Retry
+                }
+              } catch (error) {
+                Alert.alert(
+                  "Error",
+                  "Failed to enable Screen Time permissions"
+                );
+              }
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    // Toggle the adult content filter
+    try {
+      const newValue = !blockPorn;
+      const result = await ScreenTimeManager.setAdultContentFilter(newValue);
+
+      if (result.success) {
+        setBlockPorn(newValue);
+
+        if (newValue) {
+          Alert.alert(
+            "Adult Content Filter Enabled",
+            "Filter is now active!\n\nIMPORTANT: Go to Settings → Screen Time → Content & Privacy Restrictions and ensure the toggle at the top is ON (green).\n\nThen test in Safari by visiting an adult website.",
+            [
+              {
+                text: "Open Settings",
+                onPress: () => {
+                  // Open iOS Settings
+                  Linking.openURL("app-settings:");
+                },
+              },
+              { text: "OK" },
+            ]
+          );
+        } else {
+          Alert.alert(
+            "Adult Content Filter Disabled",
+            "Adult content filtering has been turned off."
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling adult content filter:", error);
+      Alert.alert(
+        "Error",
+        "Failed to update adult content filter. Please try again."
+      );
+    }
+  };
+
+  const verifyFilterStatus = async () => {
+    try {
+      // Check authorization status
+      const authStatus = await ScreenTimeManager.getAuthorizationStatus();
+      const filterStatus =
+        await ScreenTimeManager.getAdultContentFilterStatus();
+
+      const debugInfo = `
+Authorization: ${authStatus.isAuthorized ? "✅ GRANTED" : "❌ DENIED"}
+Auth Status: ${authStatus.status}
+
+Filter Status: ${filterStatus.enabled ? "✅ ENABLED" : "❌ DISABLED"}
+
+Next Steps:
+1. Check Settings → Screen Time → Content & Privacy Restrictions
+2. Ensure "Content & Privacy Restrictions" toggle is ON
+3. Go to Content Restrictions → Web Content
+4. Should show "Limit Adult Websites" selected
+
+Test: Open Safari and visit reddit.com/r/nsfw
+Should show iOS restriction message if working.
+      `.trim();
+
+      console.log("🔍 DEBUG - Authorization:", authStatus);
+      console.log("🔍 DEBUG - Filter Status:", filterStatus);
+
+      Alert.alert("Debug: Adult Content Filter", debugInfo, [{ text: "OK" }]);
+    } catch (error) {
+      console.error("Verification error:", error);
+      Alert.alert("Error", `Could not check filter status: ${error}`);
+    }
+  };
+
+  const BlockPornToggle = () => {
     return (
       <ImageBackground
         source={require("../../../assets/new-images/block-porn.png")}
@@ -286,22 +457,41 @@ const DefendScreen = () => {
             justifyContent: "space-between",
           }}
         >
-          <Text
-            style={{
-              color: "#fff",
-              fontSize: scale(16), 
-              fontFamily: "ZillaSlab-SemiBold"
-            }}
-          >
-            Block porn 💦
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: scale(16),
+                fontFamily: "ZillaSlab-SemiBold",
+              }}
+            >
+              Block porn 💦
+            </Text>
+            {blockPorn && (
+              <TouchableOpacity
+                onPress={verifyFilterStatus}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={{
+                    color: "rgba(255, 255, 255, 0.6)",
+                    fontSize: scale(12),
+                    fontFamily: "ZillaSlab-Regular",
+                    marginTop: scale(4),
+                  }}
+                >
+                  Tap to verify it's working →
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
-          <Switch 
-            value={enabled} 
-            onValueChange={(value) => setEnabled(value)}         
-            ios_backgroundColor={'rgba(255, 255, 255, 0.2)'}
+          <Switch
+            value={blockPorn}
+            onValueChange={handleTogglePorn}
+            ios_backgroundColor={"rgba(255, 255, 255, 0.2)"}
             trackColor={{ false: "#67CE67", true: "#67CE67" }}
-            thumbColor={enabled ? "#f4f3f4" : "#f4f3f4"}
+            thumbColor={blockPorn ? "#f4f3f4" : "#f4f3f4"}
           />
         </View>
       </ImageBackground>
@@ -319,42 +509,55 @@ const DefendScreen = () => {
         style={styles.overlayImage}
       />
 
-      <View style={[styles.mainContainer, { marginTop: insets.top + scaleVertical(16) }]}>
-
+      <View
+        style={[
+          styles.mainContainer,
+          { marginTop: insets.top + scaleVertical(16) },
+        ]}
+      >
         <Text style={styles.slogan}>Choose what to block</Text>
-        <Text style={styles.description}>Apps & websites you block won't be available until your session ends.</Text>
-        
+        <Text style={styles.description}>
+          Apps & websites you block won't be available until your session ends.
+        </Text>
+
         {isLoading && (
-          <View style={{
-            alignItems: 'center',
-            marginTop: scale(16),
-          }}>
-            <Text style={{
-              color: 'rgba(255, 255, 255, 0.7)',
-              fontSize: scale(14),
-              fontFamily: 'ZillaSlab-Medium',
-            }}>
+          <View
+            style={{
+              alignItems: "center",
+              marginTop: scale(16),
+            }}
+          >
+            <Text
+              style={{
+                color: "rgba(255, 255, 255, 0.7)",
+                fontSize: scale(14),
+                fontFamily: "ZillaSlab-Medium",
+              }}
+            >
               Loading app selection...
             </Text>
           </View>
         )}
 
-          
-        <ScrollView style={{
+        <ScrollView
+          style={{
             marginTop: scale(32),
             marginBottom: scale(24),
           }}
           showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}>
+          showsHorizontalScrollIndicator={false}
+        >
           <AppGrid />
           <BlockPornToggle />
         </ScrollView>
-        <View style={{
-        }}>
+        <View style={{}}>
           <TouchableOpacity
             style={[
               styles.primaryBtn,
-              {backgroundColor: userSelectedApps.length === 0 ? '#312B27' : '#BE5E19'}
+              {
+                backgroundColor:
+                  userSelectedApps.length === 0 ? "#312B27" : "#BE5E19",
+              },
             ]}
             onPress={() => {
               router.push("/defend/ChooseSchedule");
@@ -362,40 +565,40 @@ const DefendScreen = () => {
             activeOpacity={0.9}
             disabled={userSelectedApps.length === 0 || isLoading}
           >
-            <Text style={[styles.primaryText, 
-              {color: userSelectedApps.length === 0 ? '#4D4743' : '#fff'}
-            ]}>{"Continue"}</Text>
+            <Text
+              style={[
+                styles.primaryText,
+                { color: userSelectedApps.length === 0 ? "#4D4743" : "#fff" },
+              ]}
+            >
+              {"Continue"}
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.backBtn]}
-            activeOpacity={0.9}
-          >
+          <TouchableOpacity style={[styles.backBtn]} activeOpacity={0.9}>
             <Text style={styles.backText}>{"Back"}</Text>
           </TouchableOpacity>
         </View>
-      </View>      
-      
-
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#000" },
-  image: { 
-    position: "absolute", 
-    width: "100%", 
-    height: width * 0.939 
-  },
-  overlayImage: { 
+  image: {
     position: "absolute",
-    width: "100%", 
-    height: "120%" 
+    width: "100%",
+    height: width * 0.939,
+  },
+  overlayImage: {
+    position: "absolute",
+    width: "100%",
+    height: "120%",
   },
   mainContainer: {
     flex: 1,
-    marginHorizontal: scale(24), 
+    marginHorizontal: scale(24),
   },
   slogan: {
     marginTop: scale(24),
@@ -410,12 +613,12 @@ const styles = StyleSheet.create({
     fontFamily: "ZillaSlab-Medium",
   },
   primaryBtn: {
-    backgroundColor: '#BE5E19',
+    backgroundColor: "#BE5E19",
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(20),
-    width: '100%',
+    width: "100%",
   },
   primaryText: {
     color: "#FFFFFF",
@@ -426,8 +629,8 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(8),
     paddingHorizontal: scaleVertical(20),
     marginVertical: scaleVertical(8),
@@ -537,7 +740,7 @@ export default DefendScreen;
 //         // Check adult content filter status
 //         const filterStatus = await ScreenTimeManager.getAdultContentFilterStatus();
 //         setBlockPorn(filterStatus.enabled);
-        
+
 //         // Your existing code...
 //         const selection = await AsyncStorage.getItem(SELECTION_STORAGE_KEY);
 //         if (!selection) {
@@ -556,7 +759,7 @@ export default DefendScreen;
 //     };
 //     checkStatus();
 //   }, []);
-  
+
 //   const handleEnableBlocking = async () => {
 //     if (Platform.OS !== "ios") return;
 //     try {
@@ -575,7 +778,7 @@ export default DefendScreen;
 //   const handleTogglePorn = async () => {
 //     // First check if we have Screen Time authorization
 //     const authStatus = await ScreenTimeManager.getAuthorizationStatus();
-    
+
 //     if (!authStatus.isAuthorized) {
 //       Alert.alert(
 //         'Screen Time Required',
@@ -601,15 +804,15 @@ export default DefendScreen;
 //       );
 //       return;
 //     }
-  
+
 //     // Toggle the adult content filter
 //     try {
 //       const newValue = !blockPorn;
 //       const result = await ScreenTimeManager.setAdultContentFilter(newValue);
-      
+
 //       if (result.success) {
 //         setBlockPorn(newValue);
-        
+
 //         if (newValue) {
 //           // Show the porn modal when enabling
 //           setPornModalVariant(2);
@@ -626,7 +829,7 @@ export default DefendScreen;
 //       Alert.alert('Error', 'Failed to update adult content filter. Please try again.');
 //     }
 //   };
-  
+
 //   const handleScheduleSaved = (savedSchedule: { days: string[]; start_time: string; end_time: string }) => {
 //     setSchedule(savedSchedule);
 //   };
@@ -635,12 +838,12 @@ export default DefendScreen;
 //     try {
 //       // Get the stored selection from AsyncStorage
 //       const storedSelection = await AsyncStorage.getItem(SELECTION_STORAGE_KEY);
-      
+
 //       if (storedSelection) {
 //         // Set it as the current selection before showing the picker
 //         await ScreenTimeManager.setCurrentSelection(storedSelection);
 //       }
-      
+
 //       // Pre-select the apps that were previously confirmed
 //       const currentSelection = Object.fromEntries(
 //         SOCIAL_APPS.map(app => [app.key, confirmedApps.includes(app.key)])
@@ -670,7 +873,7 @@ export default DefendScreen;
 //     // Calculate the differences
 //     const addedApps = newSelection.filter((key) => !previouslyConfirmed.includes(key));
 //     const removedApps = previouslyConfirmed.filter((key) => !newSelection.includes(key));
-    
+
 //     const getName = (key: string) => SOCIAL_APPS.find((a) => a.key === key)?.name || key;
 //     const addedAppNames = addedApps.map(getName);
 //     const removedAppNames = removedApps.map(getName);
@@ -693,10 +896,10 @@ export default DefendScreen;
 //   const handleModalConfirm = () => {
 //     // Capture the selection before any state changes
 //     const selectionToApply = [...modalData.selectionToConfirm]; // Create a copy of the array
-    
+
 //     // Close the modal
 //     setModalData(prev => ({ ...prev, visible: false }));
-    
+
 //     // Use a longer delay to ensure modal is fully gone
 //     setTimeout(() => {
 //       // Double-check the selection exists and has items
@@ -796,7 +999,7 @@ export default DefendScreen;
 //                   while the block is active. No workarounds, no funny business.
 //                 </Text>
 //               </View>
-              
+
 //               {isBlockingEnabled && !isSelectionMode && (
 //                 <TouchableOpacity onPress={handleEditSelection} style={styles.changeSelectionButton}>
 //                   <Text style={styles.actionButtonText} numberOfLines={1}>Change App Selection</Text>
@@ -824,7 +1027,7 @@ export default DefendScreen;
 //                   />
 //                 </View>
 //               ))}
-              
+
 //               <View style={[styles.appRow, blockPorn && styles.appRowActive, styles.pornRow]}>
 //                 <Image source={APP_ICONS.porn} style={styles.appIcon} />
 //                 <View style={styles.appTextContainer}>
@@ -846,7 +1049,7 @@ export default DefendScreen;
 //               </View>
 //             </>
 //           )}
-          
+
 //           <View style={{ marginBottom: SPACING.sm, marginTop: SPACING.md }}>
 //             <View style={styles.stepPillHeader}>
 //               <View style={styles.pillNumber}>
@@ -864,8 +1067,8 @@ export default DefendScreen;
 //                 <Text style={styles.scheduleName} numberOfLines={2}>Set up your blocking schedule to automate your focus time</Text>
 //               </View>
 //             </View>
-//             <TouchableOpacity 
-//               style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+//             <TouchableOpacity
+//               style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]}
 //               onPress={() => setShowScheduleModal(true)}
 //               disabled={!isBlockingEnabled && Platform.OS === 'ios'}
 //             >
@@ -900,8 +1103,8 @@ export default DefendScreen;
 //                 <Text style={styles.scheduleName} numberOfLines={1}>Defend Your Time</Text>
 //               </View>
 //             </View>
-//             <TouchableOpacity 
-//               style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]} 
+//             <TouchableOpacity
+//               style={[styles.actionButton, (!isBlockingEnabled && Platform.OS === 'ios') && styles.disabledButton]}
 //               onPress={() => setShowModal(true)}
 //               disabled={!isBlockingEnabled && Platform.OS === 'ios'}
 //             >
@@ -911,9 +1114,9 @@ export default DefendScreen;
 //         </ScrollView>
 //         {showModal && <DefendModal onClose={() => setShowModal(false)} schedule={schedule} />}
 //         <PornBlockModal visible={showPornModal} onClose={() => setShowPornModal(false)} variant={pornModalVariant} />
-//         <ScheduleModal 
-//           visible={showScheduleModal} 
-//           onClose={() => setShowScheduleModal(false)} 
+//         <ScheduleModal
+//           visible={showScheduleModal}
+//           onClose={() => setShowScheduleModal(false)}
 //           onScheduleSaved={handleScheduleSaved}
 //         />
 //         <ConfirmBattlePlanModal
@@ -1186,4 +1389,3 @@ export default DefendScreen;
 //     opacity: 0.5,
 //   },
 // });
-
