@@ -1,19 +1,14 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { recordPornBlockingSession } from "@/lib/userTracking";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    View
-} from "react-native";
+import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ScreenTimeManager from "../../services/ScreenTimeManager";
 
-const { width } = Dimensions.get("window"); 
+const { width } = Dimensions.get("window");
 
 const FocusSessionScreen = () => {
   const insets = useSafeAreaInsets();
@@ -29,48 +24,119 @@ const FocusSessionScreen = () => {
           // Screen Time permissions should already be granted from onboarding
           setIsBlocking(true);
         }
-        
+
         // Track porn blocking session if enabled
-        if (pornBlocking === 'true' && user?.id) {
+        if (pornBlocking === "true" && user?.id) {
           try {
             await recordPornBlockingSession(user.id);
-            console.log('Porn blocking session recorded');
+            console.log("Porn blocking session recorded");
           } catch (error) {
-            console.error('Failed to record porn blocking session:', error);
+            console.error("Failed to record porn blocking session:", error);
           }
         }
       } catch (error) {
-        console.error('Failed to start blocking:', error);
+        console.error("Failed to start blocking:", error);
       }
     };
-    
+
     startBlocking();
-  }, [pornBlocking, user?.id])
-  
+  }, [pornBlocking, user?.id]);
+
   const FocusTimer = () => {
     const totalHours = duration ? parseInt(duration as string) : 2; // Default to 2 hours if no duration
     const totalSeconds = totalHours * 60 * 60;
     const [remaining, setRemaining] = useState(totalSeconds);
+    const [isInitialized, setIsInitialized] = useState(false);
     const timerRef = useRef<NodeJS.Timer | null>(null);
+    const TIMER_STORAGE_KEY = "UNBOUND_TIMER_SESSION";
+
+    // Load or initialize timer session
+    useEffect(() => {
+      const initializeTimer = async () => {
+        try {
+          const savedSession = await AsyncStorage.getItem(TIMER_STORAGE_KEY);
+
+          if (savedSession) {
+            const { startTime, durationInSeconds } = JSON.parse(savedSession);
+
+            // Check if this is a new session with different duration
+            // If so, clear old session and start fresh
+            if (durationInSeconds !== totalSeconds) {
+              console.log(
+                "New session with different duration, clearing old session"
+              );
+              await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+              const sessionData = {
+                startTime: Date.now(),
+                durationInSeconds: totalSeconds,
+              };
+              await AsyncStorage.setItem(
+                TIMER_STORAGE_KEY,
+                JSON.stringify(sessionData)
+              );
+              setRemaining(totalSeconds);
+              setIsInitialized(true);
+              return;
+            }
+
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const remainingTime = Math.max(durationInSeconds - elapsed, 0);
+
+            if (remainingTime > 0) {
+              setRemaining(remainingTime);
+              setIsInitialized(true);
+            } else {
+              // Timer already finished, clean up and redirect
+              await AsyncStorage.removeItem(TIMER_STORAGE_KEY);
+              setIsBlocking(false);
+              router.push("/FocusSessionCompleted");
+            }
+          } else {
+            // New session - save start time
+            const sessionData = {
+              startTime: Date.now(),
+              durationInSeconds: totalSeconds,
+            };
+            await AsyncStorage.setItem(
+              TIMER_STORAGE_KEY,
+              JSON.stringify(sessionData)
+            );
+            setRemaining(totalSeconds);
+            setIsInitialized(true);
+          }
+        } catch (error) {
+          console.error("Error initializing timer:", error);
+          setRemaining(totalSeconds);
+          setIsInitialized(true);
+        }
+      };
+
+      initializeTimer();
+    }, []);
 
     useEffect(() => {
+      // Only start the timer after initialization is complete
+      if (!isInitialized) return;
+
+      // Start the countdown timer
       timerRef.current = setInterval(() => {
         setRemaining((s) => {
           if (s <= 1) {
             // Timer finished - stop blocking and navigate to completion
             if (timerRef.current) clearInterval(timerRef.current);
+            AsyncStorage.removeItem(TIMER_STORAGE_KEY).catch(console.error);
             setIsBlocking(false);
-            router.push('/FocusSessionCompleted');
+            router.push("/FocusSessionCompleted");
             return 0;
           }
           return s - 1;
         });
       }, 1000);
-      
+
       return () => {
         if (timerRef.current) clearInterval(timerRef.current);
       };
-    }, [totalSeconds]);
+    }, [isInitialized]);
 
     const pad = (n: number) => String(n).padStart(2, "0");
     const hrs = Math.floor(remaining / 3600);
@@ -82,9 +148,11 @@ const FocusSessionScreen = () => {
     const barWidth = width - 32; // 16px side margins
 
     return (
-      <View style={{ 
-        marginTop: scale(82)
-      }}>
+      <View
+        style={{
+          marginTop: scale(82),
+        }}
+      >
         {/* Timer Card */}
         <View
           style={{
@@ -136,18 +204,22 @@ const FocusSessionScreen = () => {
             alignItems: "center",
           }}
         >
-          <Text style={{ 
-            color: "#fff", 
-            fontSize: scale(16), 
-            fontFamily: "Geist-Black" 
-          }}>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: scale(16),
+              fontFamily: "Geist-Black",
+            }}
+          >
             0 hrs
           </Text>
-          <Text style={{ 
-            color: "#fff", 
-            fontSize: scale(16), 
-            fontFamily: "Geist-Black" 
-          }}>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: scale(16),
+              fontFamily: "Geist-Black",
+            }}
+          >
             {totalHours} hrs
           </Text>
         </View>
@@ -169,10 +241,17 @@ const FocusSessionScreen = () => {
         style={styles.doingGreatImage}
       />
 
-      <View style={[styles.mainContainer, { marginTop: insets.top + scaleVertical(100) }]}>  
+      <View
+        style={[
+          styles.mainContainer,
+          { marginTop: insets.top + scaleVertical(100) },
+        ]}
+      >
         <Text style={styles.slogan}>You’re CRUSHING IT</Text>
-        <Text style={styles.description}>{"The distractions are blocked.\nNow get outside."}</Text>
-        
+        <Text style={styles.description}>
+          {"The distractions are blocked.\nNow get outside."}
+        </Text>
+
         <FocusTimer />
       </View>
     </View>
@@ -180,29 +259,29 @@ const FocusSessionScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  safe: { 
-    flex: 1, 
-    backgroundColor: "#000" 
+  safe: {
+    flex: 1,
+    backgroundColor: "#000",
   },
-  image: { 
-    position: "absolute", 
-    width: "100%", 
-    height: width * 0.939
-  },
-  doingGreatImage: { 
+  image: {
     position: "absolute",
-    width: "100%", 
-    height: "100%" 
+    width: "100%",
+    height: width * 0.939,
   },
-  overlayImage: { 
+  doingGreatImage: {
     position: "absolute",
-    width: "100%", 
-    height: "120%" 
+    width: "100%",
+    height: "100%",
+  },
+  overlayImage: {
+    position: "absolute",
+    width: "100%",
+    height: "120%",
   },
   mainContainer: {
     flex: 1,
     marginHorizontal: scale(24),
-    alignItems: 'center',
+    alignItems: "center",
   },
   slogan: {
     marginTop: scale(24),
@@ -215,16 +294,16 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.7)",
     fontSize: scale(16),
     fontFamily: "ZillaSlab-Medium",
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   primaryBtn: {
-    backgroundColor: '#BE5E19',
+    backgroundColor: "#BE5E19",
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(20),
-    width: '100%',
+    width: "100%",
     marginBottom: scaleVertical(24),
   },
   primaryText: {

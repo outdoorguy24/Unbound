@@ -1,6 +1,6 @@
-import { supabase } from '@/lib/supabaseClient';
-import { getUserProfile } from '@/lib/supabaseUserProfile';
-import { useEffect, useState } from 'react';
+import { supabase } from "@/lib/supabaseClient";
+import { getUserProfile } from "@/lib/supabaseUserProfile";
+import { useEffect, useState } from "react";
 
 export function useProfileCheck() {
   const [profile, setProfile] = useState<any>(null);
@@ -24,7 +24,7 @@ export function useProfileCheck() {
         const prof = await getUserProfile(data.user.id);
         setProfile(prof);
       } catch (e: any) {
-        setError(e.message || 'Error checking profile');
+        setError(e.message || "Error checking profile");
       } finally {
         setLoading(false);
       }
@@ -33,4 +33,4 @@ export function useProfileCheck() {
   }, []);
 
   return { user, profile, loading, error };
-} 
+}
