@@ -97,7 +97,7 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
             }}
           />
         </TouchableOpacity>
-        <Text style={styles.slogan}>{"Create an account"}</Text>
+        {/* <Text style={styles.slogan}>{"Create an account"}</Text> */}
 
         {error && (
           <View style={styles.errorContainer}>
