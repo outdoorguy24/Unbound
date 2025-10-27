@@ -50,8 +50,11 @@ RCT_EXTERN_METHOD(getWeeklyScreenTimeUsage:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(getDailyScreenTimeUsage:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-@end
+RCT_EXTERN_METHOD(getMostUsedApps:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 
-// // This is required for the module to be properly registered
-// @interface RCT_EXTERN_MODULE(ScreenTimeManagerModule, NSObject)
-// @end 
+RCT_EXTERN_METHOD(setAppDeletionProtection:(BOOL)enabled
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+@end 

@@ -1,6 +1,6 @@
-import { recordPhoneUsageData } from '@/lib/userTracking';
-import { AppState, AppStateStatus } from 'react-native';
-import ScreenTimeManager from './ScreenTimeManager';
+import { recordPhoneUsageData } from "@/lib/userTracking";
+import { AppState, AppStateStatus } from "react-native";
+import ScreenTimeManager from "./ScreenTimeManager";
 
 class PhoneUsageTrackerService {
   private static instance: PhoneUsageTrackerService;
@@ -18,16 +18,16 @@ class PhoneUsageTrackerService {
 
   async startTracking(userId: string) {
     if (this.isTracking) {
-      console.log('Phone usage tracking already started');
+      console.log("Phone usage tracking already started");
       return;
     }
 
     this.isTracking = true;
     this.currentUserId = userId;
-    console.log('Starting phone usage tracking for user:', userId);
+    console.log("Starting phone usage tracking for user:", userId);
 
     // Set up app state listener to collect data when app becomes active
-    AppState.addEventListener('change', this.handleAppStateChange);
+    AppState.addEventListener("change", this.handleAppStateChange);
 
     // Set up weekly collection interval (check every day at 9 AM)
     this.setupWeeklyCollection(userId);
@@ -43,10 +43,10 @@ class PhoneUsageTrackerService {
 
     this.isTracking = false;
     this.currentUserId = null;
-    console.log('Stopping phone usage tracking');
+    console.log("Stopping phone usage tracking");
 
     // Remove app state listener
-    AppState.removeEventListener('change', this.handleAppStateChange);
+    AppState.removeEventListener("change", this.handleAppStateChange);
 
     // Clear collection interval
     if (this.collectionInterval) {
@@ -56,9 +56,9 @@ class PhoneUsageTrackerService {
   }
 
   private handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    if (nextAppState === 'active' && this.currentUserId) {
+    if (nextAppState === "active" && this.currentUserId) {
       // App became active, check if we need to collect data
-      console.log('App became active, checking for data collection');
+      console.log("App became active, checking for data collection");
       await this.collectWeeklyData(this.currentUserId);
     }
   };
@@ -68,7 +68,7 @@ class PhoneUsageTrackerService {
     this.collectionInterval = setInterval(async () => {
       const now = new Date();
       const currentHour = now.getHours();
-      const currentDate = now.toISOString().split('T')[0];
+      const currentDate = now.toISOString().split("T")[0];
 
       // Collect data once per day at 9 AM
       if (currentHour === 9 && this.lastCollectionDate !== currentDate) {
@@ -80,24 +80,28 @@ class PhoneUsageTrackerService {
 
   private async collectWeeklyData(userId: string) {
     try {
-      console.log('Collecting weekly phone usage data for user:', userId);
+      console.log("Collecting weekly phone usage data for user:", userId);
 
       // Check if Screen Time is available
       if (!ScreenTimeManager.isAvailable()) {
-        console.log('Screen Time not available, skipping data collection');
+        console.log("Screen Time not available, skipping data collection");
         return;
       }
 
       // Check authorization status
       const authStatus = await ScreenTimeManager.getAuthorizationStatus();
       if (!authStatus.isAuthorized) {
-        console.log('Screen Time not authorized, skipping data collection');
+        console.log("Screen Time not authorized, skipping data collection");
         return;
       }
 
       // Fetch weekly usage data
       const weeklyData = await ScreenTimeManager.getWeeklyScreenTimeUsage();
-      
+      console.log(
+        "📊 RAW NATIVE MODULE DATA:",
+        JSON.stringify(weeklyData, null, 2)
+      );
+
       const usageData = {
         totalScreenTimeMinutes: weeklyData.totalScreenTimeMinutes || 0,
         socialMediaMinutes: weeklyData.socialMediaMinutes || 0,
@@ -109,10 +113,12 @@ class PhoneUsageTrackerService {
 
       // Record the weekly usage data
       await recordPhoneUsageData(userId, usageData);
-      console.log('Weekly phone usage data recorded:', usageData);
-
+      console.log(
+        "📊 EXACT SCREEN TIME DATA SAVED TO DB:",
+        JSON.stringify(usageData, null, 2)
+      );
     } catch (error) {
-      console.error('Failed to collect weekly phone usage data:', error);
+      console.error("Failed to collect weekly phone usage data:", error);
     }
   }
 

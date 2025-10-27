@@ -1,16 +1,16 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
-import { appleAuth } from '@invertase/react-native-apple-authentication';
+import { appleAuth } from "@invertase/react-native-apple-authentication";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -30,7 +30,6 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
     } catch (err: any) {
       console.log(err.message || "Signup failed");
     } finally {
-      
     }
   };
 
@@ -39,10 +38,12 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       setIsLoading(true);
       setError(null);
       if (!appleAuth.isSupported) {
-        if (Platform.OS === 'ios') {
-          setError('Apple Sign In requires iOS 13+ and a physical device. Please test on a real iPhone/iPad (not simulator).');
+        if (Platform.OS === "ios") {
+          setError(
+            "Apple Sign In requires iOS 13+ and a physical device. Please test on a real iPhone/iPad (not simulator)."
+          );
         } else {
-          setError('Apple Sign In is only available on iOS devices.');
+          setError("Apple Sign In is only available on iOS devices.");
         }
         return;
       }
@@ -55,13 +56,14 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
         await signInWithApple(identityToken, nonce);
         // Navigation will be handled by AuthContext
       } else {
-        setError('Apple Sign Up was cancelled');
+        setError("Apple Sign Up was cancelled");
       }
     } catch (err: any) {
-      if (err.code === 'ERR_REQUEST_CANCELED') {
+      console.log("Here is apple Error", err);
+      if (err.code === "ERR_REQUEST_CANCELED") {
         setError(null);
       } else {
-        setError('Apple Sign Up failed. Please try again.');
+        setError("Apple Sign Up failed. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -81,83 +83,98 @@ const SignupOptionsScreen = ({ traps, toggleOption }: any) => {
       <View
         style={[styles.textContainer, { top: insets.top + scaleVertical(16) }]}
       >
-      <TouchableOpacity style={styles.buttonBack} activeOpacity={0.8} onPress={() => router.back()}>
-        <Image
-          source={require("../../assets/new-images/icon-back.png")}
-          // resizeMode={"center"}
-          style={{
-            height: scale(20),
-            width: scale(20),
-          }}
-        />
-      </TouchableOpacity>
-      <Text style={styles.slogan}>{"Create an account"}</Text>
-
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
-
-      <TouchableOpacity
-        style={[styles.item, styles.itemActive, {marginTop: scaleVertical(40)}]}
-        activeOpacity={0.8}
-        onPress={() => router.push("/(auth)/signup")}
-      >
-        <View style={styles.leftRow}>
-          <View style={styles.buttonText}>
-            <Text style={[styles.label]}>{"Continue with Email"}</Text>
-          </View>
+        <TouchableOpacity
+          style={styles.buttonBack}
+          activeOpacity={0.8}
+          onPress={() => router.back()}
+        >
           <Image
-            source={require("../../assets/new-images/icon-email.png")}
-            style={styles.iconImage}
-            resizeMode={"contain"}
+            source={require("../../assets/new-images/icon-back.png")}
+            // resizeMode={"center"}
+            style={{
+              height: scale(20),
+              width: scale(20),
+            }}
           />
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+        {/* <Text style={styles.slogan}>{"Create an account"}</Text> */}
 
-      <View style={styles.separator} />
-
-      <TouchableOpacity
-        style={[styles.item, styles.itemActive, { marginBottom: scale(16) }]}
-        activeOpacity={0.8}
-        onPress={handleGoogleSignup}
-      >
-        <View style={styles.leftRow}>
-          <View style={styles.buttonText}>
-            <Text style={[styles.label]}>{"Continue with Google"}</Text>
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
-          <Image
-            source={require("../../assets/new-images/icon-google.png")}
-            style={styles.iconImage}
-            resizeMode={"contain"}
-          />
-        </View>
-      </TouchableOpacity>
+        )}
 
-      <TouchableOpacity
-        style={[styles.item, styles.itemActive, isLoading && styles.itemDisabled]}
-        activeOpacity={0.8}
-        onPress={handleAppleSignUp}
-        disabled={isLoading}
-      >
-        <View style={styles.leftRow}>
-          <View style={styles.buttonText}>
-            <Text style={[styles.label, isLoading && styles.labelDisabled]}>
-              {isLoading ? "Signing in..." : "Continue with Apple"}
-            </Text>
+        <TouchableOpacity
+          style={[
+            styles.item,
+            styles.itemActive,
+            { marginTop: scaleVertical(40) },
+          ]}
+          activeOpacity={0.8}
+          onPress={() => router.push("/(auth)/signup")}
+        >
+          <View style={styles.leftRow}>
+            <View style={styles.buttonText}>
+              <Text style={[styles.label]}>{"Continue with Email"}</Text>
+            </View>
+            <Image
+              source={require("../../assets/new-images/icon-email.png")}
+              style={styles.iconImage}
+              resizeMode={"contain"}
+            />
           </View>
-          <Image
-            source={require("../../assets/new-images/icon-apple.png")}
-            style={[styles.iconImage, isLoading && styles.iconDisabled]}
-            resizeMode={"contain"}
-          />
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+
+        <View style={styles.separator} />
+
+        <TouchableOpacity
+          style={[styles.item, styles.itemActive, { marginBottom: scale(16) }]}
+          activeOpacity={0.8}
+          onPress={handleGoogleSignup}
+        >
+          <View style={styles.leftRow}>
+            <View style={styles.buttonText}>
+              <Text style={[styles.label]}>{"Continue with Google"}</Text>
+            </View>
+            <Image
+              source={require("../../assets/new-images/icon-google.png")}
+              style={styles.iconImage}
+              resizeMode={"contain"}
+            />
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.item,
+            styles.itemActive,
+            isLoading && styles.itemDisabled,
+          ]}
+          activeOpacity={0.8}
+          onPress={handleAppleSignUp}
+          disabled={isLoading}
+        >
+          <View style={styles.leftRow}>
+            <View style={styles.buttonText}>
+              <Text style={[styles.label, isLoading && styles.labelDisabled]}>
+                {isLoading ? "Signing in..." : "Continue with Apple"}
+              </Text>
+            </View>
+            <Image
+              source={require("../../assets/new-images/icon-apple.png")}
+              style={[styles.iconImage, isLoading && styles.iconDisabled]}
+              resizeMode={"contain"}
+            />
+          </View>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
-        style={[styles.haveAccountView, { bottom: insets.bottom + scaleVertical(16) }]}
+        style={[
+          styles.haveAccountView,
+          { bottom: insets.bottom + scaleVertical(16) },
+        ]}
         activeOpacity={0.8}
         onPress={() => router.push("/(auth)/login")}
       >
@@ -260,18 +277,18 @@ const styles = StyleSheet.create({
     fontFamily: "ZillaSlab-Medium",
   },
   errorContainer: {
-    backgroundColor: 'rgba(255, 0, 0, 0.1)',
+    backgroundColor: "rgba(255, 0, 0, 0.1)",
     borderRadius: scale(8),
     padding: scale(12),
     marginTop: scaleVertical(16),
     borderWidth: 1,
-    borderColor: 'rgba(255, 0, 0, 0.3)',
+    borderColor: "rgba(255, 0, 0, 0.3)",
   },
   errorText: {
-    color: '#FF4444',
+    color: "#FF4444",
     fontSize: scale(14),
-    fontFamily: 'ZillaSlab-Medium',
-    textAlign: 'center',
+    fontFamily: "ZillaSlab-Medium",
+    textAlign: "center",
   },
   itemDisabled: {
     opacity: 0.6,

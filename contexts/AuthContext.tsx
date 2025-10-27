@@ -1,7 +1,5 @@
 import { loginWithGoogle, supabase } from "@/lib/supabaseClient";
 import { getUserProfile } from "@/lib/supabaseUserProfile";
-import { getStoredPushToken } from "@/utils/notifications";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter, useSegments } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -54,9 +52,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoadingAuth(false);
     };
     getSession();
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
     return () => {
       listener?.subscription.unsubscribe();
     };
@@ -68,13 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isLoadingAuth) return;
       const inAuthGroup = segments[0] === "(auth)";
       const inOnboardingGroup = segments[0] === "(onboarding)";
-      console.log("isLoggedIn ====>", isLoggedIn)
-      console.log("inAuthGroup ====>", inAuthGroup)
-      console.log("inOnboardingGroup ====>", inOnboardingGroup)
-      console.log("segments ====>", segments)
+      console.log("isLoggedIn ====>", isLoggedIn);
+      console.log("inAuthGroup ====>", inAuthGroup);
+      console.log("inOnboardingGroup ====>", inOnboardingGroup);
+      console.log("segments ====>", segments);
 
       if (!isLoggedIn && !inAuthGroup && !inOnboardingGroup) {
-        console.log("1111 ====>", segments)
+        console.log("1111 ====>", segments);
         router.replace("/(auth)/login");
         return;
       }
@@ -88,39 +88,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // if (segments[1] !== "ScreenProfileSetup") {
             //   router.replace("/(onboarding)/ScreenProfileSetup");
             // }
-            console.log("2222 ====>", segments)
+            console.log("2222 ====>", segments);
 
             if (segments[1] === "signup") {
-
               console.log("2222 ====> signup");
               router.replace("/(onboarding)/EmailVerificationScreen");
-
             } else if (segments[1] === "SignupOptionsScreen") {
-
               console.log("2222 ====> SignupOptionsScreen");
               router.replace("/(onboarding)/ScreenTimePermission");
-
             } else if (segments[1] === "login") {
-
               console.log("2222 ====> login");
               router.replace("/(tabs)/camp");
             }
             return;
           } else {
-            console.log("3333 ====>", segments)
+            console.log("3333 ====>", segments);
 
             if (segments[1] === "signup") {
-
               console.log("3333 ====> signup");
               router.replace("/(onboarding)/EmailVerificationScreen");
-
             } else if (segments[1] === "SignupOptionsScreen") {
-
               console.log("3333 ====> SignupOptionsScreen");
               router.replace("/(onboarding)/ScreenTimePermission");
-
             } else if (segments[1] === "login") {
-
               console.log("3333 ====> login");
               router.replace("/(tabs)/camp");
             }
@@ -154,31 +144,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Simulate signup
+  // Signup with Supabase
   const signup = async (email: string, password: string, name: string) => {
     setIsLoadingAuth(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const pushToken = await getStoredPushToken();
-      
-      // Generate a proper UUID for the user
-      const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          const r = Math.random() * 16 | 0;
-          const v = c == 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
-      };
-      
-      const userData: User = {
-        id: generateUUID(),
-        email,
-        name,
-        pushToken: pushToken || undefined,
-      };
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      setUser(userData);
-      router.replace("/(onboarding)/ScreenProfileSetup");
+      // Create user in Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+          },
+        },
+      });
+
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
+
+      if (data.user) {
+        // User will be set automatically by the auth state listener
+        console.log("Signup successful", data);
+        // Navigation will be handled by the useEffect that listens to auth state changes
+      }
     } catch (error) {
       console.error("Error signing up:", error);
       throw error;
@@ -189,26 +179,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Sign in with Apple
   const signInWithApple = async (identityToken: string, nonce?: string) => {
+    console.log("identityToken", identityToken);
+    console.log("nonce", nonce);
     setIsLoadingAuth(true);
     try {
       const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: 'apple',
+        provider: "apple",
         token: identityToken,
         nonce: nonce,
       });
 
       if (error) {
-        console.error('Apple Sign-In error:', error);
+        console.error("Apple Sign-In error:", error);
         throw error;
       }
 
       if (data.user) {
         // The user will be set automatically by the auth state listener
-        console.log('Apple Sign-In successful');
+        console.log("Apple Sign-In successful", data);
         // Navigation will be handled by the useEffect that listens to auth state changes
       }
     } catch (error) {
-      console.error('Apple Sign-In error:', error);
+      console.error("Apple Sign-In error:", error);
       throw error;
     } finally {
       setIsLoadingAuth(false);
@@ -220,34 +212,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       // Check if this is a mock user (short ID) or real Supabase user
       const isMockUser = user?.id && user.id.length <= 10;
-      
+
       if (isMockUser) {
         // For mock users, just simulate success
-        console.log('Mock user password update:', { userId: user?.id, newPassword });
+        console.log("Mock user password update:", {
+          userId: user?.id,
+          newPassword,
+        });
         await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
         return;
       } else {
         // For real Supabase users, check if they have email/password authentication
         // OAuth users (Google/Apple) cannot change password through this method
-        const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
-        
+        const {
+          data: { user: supabaseUser },
+          error: userError,
+        } = await supabase.auth.getUser();
+
         if (userError) {
           throw new Error("Unable to verify user authentication method");
         }
-        
+
         // Check if user has email/password provider (not OAuth)
-        const hasPasswordProvider = supabaseUser?.app_metadata?.providers?.includes('email') || 
-                                   supabaseUser?.identities?.some(identity => identity.provider === 'email');
-        
+        const hasPasswordProvider =
+          supabaseUser?.app_metadata?.providers?.includes("email") ||
+          supabaseUser?.identities?.some(
+            (identity) => identity.provider === "email"
+          );
+
         if (!hasPasswordProvider) {
-          throw new Error("Password cannot be changed for accounts signed in with Google or Apple");
+          throw new Error(
+            "Password cannot be changed for accounts signed in with Google or Apple"
+          );
         }
-        
+
         // Update password for email/password users
         const { error } = await supabase.auth.updateUser({
-          password: newPassword
+          password: newPassword,
         });
-        
+
         if (error) {
           console.error("Password update error:", error);
           throw error;

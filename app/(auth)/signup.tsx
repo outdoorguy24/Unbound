@@ -1,19 +1,20 @@
 import { height, scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Dimensions,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,17 +23,19 @@ const { width } = Dimensions.get("window");
 const SignupScreen = () => {
   const insets = useSafeAreaInsets();
   const { signup } = useAuth();
-    
+
+  // Refs for TextInputs
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
+
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [showPass, setShowPass] = useState(false);
-  
+
   const [confirm, setConfirm] = useState("");
   const [showConfirmPass, setShowConfirmPass] = useState(false);
-  
+
   const [agree, setAgree] = useState(false);
-  const [bottomBarHeight, setBottomBarHeight] = useState(0);
-  const [buttonHeight, setButtonHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,32 +50,34 @@ const SignupScreen = () => {
   const canSubmit = isEmailValid && isPassValid && isMatch && agree;
 
   const handleSignup = async () => {
+    if (isLoading) return;
     setIsLoading(true);
     setError(null);
 
     try {
       // Use AuthContext signup which bypasses email verification
       await signup(email, pass, email); // Using email as name for now
-      
+
       // Signup successful - AuthContext will handle navigation to profile setup
       // No need to navigate here as AuthContext handles it
     } catch (err: any) {
-      if (err.message?.includes('already registered')) {
-        setError('An account with this email already exists. Please login instead.');
+      if (err.message?.includes("already registered")) {
+        setError(
+          "An account with this email already exists. Please login instead."
+        );
       } else {
-        setError(err.message || 'Signup failed. Please try again.');
+        setError(err.message || "Signup failed. Please try again.");
       }
       // Reset fields on error
-      setEmail('');
-      setPass('');
-      setConfirm('');
+      setEmail("");
+      setPass("");
+      setConfirm("");
     } finally {
       setIsLoading(false);
     }
   };
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.safe}>
+    <View style={styles.safe}>
       <Image
         source={require("../../assets/new-images/onboarding-screen-4.png")}
         style={styles.image}
@@ -82,168 +87,205 @@ const SignupScreen = () => {
         style={styles.overlayImage}
       />
 
-      <View
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={[
           styles.mainContainer,
           {
             top: insets.top + scaleVertical(16),
-            bottom: 0,
+            bottom: insets.bottom,
           },
         ]}
+        keyboardVerticalOffset={0}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.keyboard}
+        {/* Fixed Back Button - Outside ScrollView */}
+        <TouchableOpacity
+          style={styles.buttonBack}
+          activeOpacity={0.8}
+          onPress={() => router.back()}
         >
-          <TouchableOpacity
-            style={styles.buttonBack}
-            activeOpacity={0.8}
-            onPress={() => router.back()}
-          >
-            <Image
-              source={require("../../assets/new-images/icon-back.png")}
-              // resizeMode={"center"}
-              style={{
-                height: scale(20),
-                width: scale(20),
-              }}
-            />
-          </TouchableOpacity>
-          <Text style={styles.slogan}>{
-          "Let’s get you set up."
-          }</Text>
-          <Text style={styles.description}>
-            {
-              "Let’s get started. Enter your email and create a password to begin your journey."
-            }
-          </Text>
-
-          <Text style={[styles.label, { marginTop: scaleVertical(24) }]}>Email</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="example.user@mail.com"
-            placeholderTextColor="rgba(0, 0, 0, 0.3)"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
+          <Image
+            source={require("../../assets/new-images/icon-back.png")}
+            style={{
+              height: scale(20),
+              width: scale(20),
+            }}
           />
+        </TouchableOpacity>
 
-          {/* Password */}
-          <Text style={[styles.label, { marginTop: scaleVertical(16) }]}>Password</Text>
-          <View style={{justifyContent: 'center'}}>
-            <TextInput
-              value={pass}
-              onChangeText={setPass}
-              placeholder="Minimum of 8 characters"
-              placeholderTextColor="rgba(0, 0, 0, 0.3)"
-              secureTextEntry={!showPass}
-              style={styles.input}
-            />
-            <TouchableOpacity style={styles.eyeBtn} onPress={() => {
-              setShowPass((prev) => !prev)
-            }}>
-              <Image
-                source={require("../../assets/new-images/eye-icon.png")}
-                style={styles.eyeIconImage}
-                resizeMode={"contain"}
-              />
-            </TouchableOpacity>
-          </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          keyboardDismissMode="none"
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.contentWrapper}>
+              <View style={styles.topContent}>
+                <Text style={styles.slogan}>{"Let's get you set up."}</Text>
+                <Text style={styles.description}>
+                  {
+                    "Let's get started. Enter your email and create a password to begin your journey."
+                  }
+                </Text>
 
-          {/* Retype */}
-          <Text style={[styles.label, { marginTop: scaleVertical(16) }]}>Retype password</Text>
-
-          <View style={{justifyContent: 'center'}}>
-            <TextInput
-              value={confirm}
-              onChangeText={setConfirm}
-              placeholder="Same password as above"
-              placeholderTextColor="rgba(0, 0, 0, 0.3)"
-              secureTextEntry={!showConfirmPass}
-              style={styles.input}
-            />
-            <TouchableOpacity style={styles.eyeBtn} onPress={() => {
-              setShowConfirmPass((prev) => !prev)
-            }}>
-              <Image
-                source={require("../../assets/new-images/eye-icon.png")}
-                style={styles.eyeIconImage}
-                resizeMode={"contain"}
-              />
-            </TouchableOpacity>
-          </View>
-
-          {error && <View style={styles.errorView}>
-                <Image
-                  source={require("../../assets/new-images/caution-white.png")}
-                  style={styles.cautionIconImage}
-                  resizeMode={"contain"}
+                <Text style={[styles.label, { marginTop: scaleVertical(24) }]}>
+                  Email
+                </Text>
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="example.user@mail.com"
+                  placeholderTextColor="rgba(0, 0, 0, 0.3)"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  blurOnSubmit={false}
+                  style={styles.input}
                 />
-                <Text style={styles.error} numberOfLines={2}>{error}</Text>
+
+                {/* Password */}
+                <Text style={[styles.label, { marginTop: scaleVertical(16) }]}>
+                  Password
+                </Text>
+                <View style={{ justifyContent: "center" }}>
+                  <TextInput
+                    ref={passwordRef}
+                    value={pass}
+                    onChangeText={setPass}
+                    placeholder="Minimum of 8 characters"
+                    placeholderTextColor="rgba(0, 0, 0, 0.3)"
+                    secureTextEntry={!showPass}
+                    returnKeyType="next"
+                    onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+                    blurOnSubmit={false}
+                    style={styles.input}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeBtn}
+                    onPress={() => {
+                      setShowPass((prev) => !prev);
+                    }}
+                  >
+                    <Image
+                      source={require("../../assets/new-images/eye-icon.png")}
+                      style={styles.eyeIconImage}
+                      resizeMode={"contain"}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Retype */}
+                <Text style={[styles.label, { marginTop: scaleVertical(16) }]}>
+                  Retype password
+                </Text>
+
+                <View style={{ justifyContent: "center" }}>
+                  <TextInput
+                    ref={confirmPasswordRef}
+                    value={confirm}
+                    onChangeText={setConfirm}
+                    placeholder="Same password as above"
+                    placeholderTextColor="rgba(0, 0, 0, 0.3)"
+                    secureTextEntry={!showConfirmPass}
+                    returnKeyType="done"
+                    onSubmitEditing={() => {
+                      Keyboard.dismiss();
+                      if (canSubmit) {
+                        handleSignup();
+                      }
+                    }}
+                    style={styles.input}
+                  />
+                  <TouchableOpacity
+                    style={styles.eyeBtn}
+                    onPress={() => {
+                      setShowConfirmPass((prev) => !prev);
+                    }}
+                  >
+                    <Image
+                      source={require("../../assets/new-images/eye-icon.png")}
+                      style={styles.eyeIconImage}
+                      resizeMode={"contain"}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {error && (
+                  <View style={styles.errorView}>
+                    <Image
+                      source={require("../../assets/new-images/caution-white.png")}
+                      style={styles.cautionIconImage}
+                      resizeMode={"contain"}
+                    />
+                    <Text style={styles.error} numberOfLines={2}>
+                      {error}
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Terms and buttons at bottom */}
+              <View style={styles.bottomSection}>
+                <View style={[styles.termsRow]}>
+                  <TouchableOpacity
+                    style={[styles.checkbox, agree && styles.checkboxChecked]}
+                    activeOpacity={0.8}
+                    onPress={() => setAgree(!agree)}
+                  >
+                    {agree && (
+                      <Image
+                        source={require("../../assets/new-images/icon-check-black.png")}
+                        style={{
+                          width: scale(24),
+                          height: scale(24),
+                        }}
+                      />
+                    )}
+                  </TouchableOpacity>
+                  <Text style={styles.termsText}>
+                    I agree to Unbound&apos;s{" "}
+                    <Text style={styles.link}>Terms & Conditions</Text> and{" "}
+                    <Text style={styles.link}>Privacy Policy</Text>.
+                  </Text>
+                </View>
+
+                {/* Submit */}
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  disabled={!canSubmit}
+                  style={[
+                    styles.btn,
+                    canSubmit ? styles.btnEnabled : styles.btnDisabled,
+                  ]}
+                  onPress={handleSignup}
+                >
+                  <Text
+                    style={[styles.btnText, { opacity: canSubmit ? 1 : 0.5 }]}
+                  >
+                    Create Account
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.haveAccountView]}
+                  activeOpacity={0.8}
+                  onPress={() => router.push("/(auth)/login")}
+                >
+                  <Text style={styles.haveAccountText}>
+                    {"Already have an account?"}
+                    <Text style={styles.loginText}>{" Log in"}</Text>
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          }
-
-        </KeyboardAvoidingView>
-
-        {/* Terms */}
-        <View style={{bottom: insets.bottom + scaleVertical(16)}}>
-          <View style={[styles.termsRow]}>
-            <TouchableOpacity
-              style={[styles.checkbox, agree && styles.checkboxChecked]}
-              activeOpacity={0.8}
-              onPress={() => setAgree(!agree)}
-            >
-              {agree && (
-                <Image
-                  source={require("../../assets/new-images/icon-check-black.png")}
-                  // resizeMode="center"
-                  style={{
-                    width: scale(24),
-                    height: scale(24)
-                  }}
-                />
-              )}
-            </TouchableOpacity>
-            <Text style={styles.termsText}>
-              I agree to Unbound’s{" "}
-              <Text style={styles.link}>Terms & Conditions</Text> and{" "}
-              <Text style={styles.link}>Privacy Policy</Text>.
-            </Text>
-          </View>
-
-          {/* Submit */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            disabled={!canSubmit}
-            style={[
-              styles.btn,
-              canSubmit ? styles.btnEnabled : styles.btnDisabled,
-            ]}
-            onLayout={(e) => setButtonHeight(e.nativeEvent.layout.height)}
-            onPress={handleSignup}
-          >
-            <Text style={[styles.btnText, {opacity: canSubmit ? 1 : 0.5}]}>Create Account</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.haveAccountView]}
-            activeOpacity={0.8}
-            onLayout={(e) => setBottomBarHeight(e.nativeEvent.layout.height)}
-            onPress={() => router.push("/(auth)/login")}
-          >
-            <Text style={styles.haveAccountText}>
-              {"Already have an account?"}
-              <Text style={styles.loginText}>{" Log in"}</Text>
-            </Text>
-          </TouchableOpacity>
-          
-      </View>
+          </TouchableWithoutFeedback>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
-
-      
-    </View>
-    </TouchableWithoutFeedback>
   );
 };
 
@@ -268,13 +310,31 @@ const styles = StyleSheet.create({
     borderRadius: scale(20),
     justifyContent: "center",
     alignItems: "center",
+    marginLeft: scale(24),
+    marginBottom: scaleVertical(24),
+    zIndex: 10,
   },
   mainContainer: {
-    width: '100%',
     position: "absolute",
+    left: 0,
+    right: 0,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  contentWrapper: {
+    flex: 1,
+    paddingHorizontal: scale(24),
+    justifyContent: "space-between",
+  },
+  topContent: {
+    flex: 0,
   },
   slogan: {
-    marginTop: scaleVertical(24),
+    marginTop: 0,
     color: "#FFF",
     fontSize: scale(40),
     fontFamily: "Cinzel-Regular",
@@ -284,7 +344,7 @@ const styles = StyleSheet.create({
   haveAccountView: {
     alignSelf: "center",
     padding: scale(6),
-    marginTop: height < 700 ? scaleVertical(8) : scaleVertical(16)
+    marginTop: height < 700 ? scaleVertical(8) : scaleVertical(16),
   },
   haveAccountText: {
     color: "rgba(255, 255, 255, 0.5)",
@@ -304,10 +364,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  keyboard: {
-    width: '100%',
-    flex: 1,
-    paddingHorizontal: scale(24),
+  bottomSection: {
+    marginTop: scaleVertical(24),
+    paddingBottom: scaleVertical(16),
   },
   label: {
     color: "#FFFFFF",
@@ -327,7 +386,6 @@ const styles = StyleSheet.create({
   },
   termsRow: {
     flexDirection: "row",
-    marginHorizontal: scale(24),
     marginBottom: height < 700 ? scaleVertical(16) : scale(24),
     alignItems: "center",
   },
@@ -370,7 +428,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: scaleVertical(20),
-    marginHorizontal: scale(24),
   },
   btnEnabled: {
     backgroundColor: "#BE5E19",
@@ -389,27 +446,27 @@ const styles = StyleSheet.create({
   },
   errorView: {
     borderRadius: 6,
-    backgroundColor: '#FD4949',
+    backgroundColor: "#FD4949",
     paddingVertical: scaleVertical(10),
     paddingHorizontal: scaleVertical(12),
-    flexDirection: 'row',
-    alignItems: 'center',   // let multiline text start at top
+    flexDirection: "row",
+    alignItems: "center", // let multiline text start at top
     marginTop: scaleVertical(10),
   },
   error: {
     marginLeft: scaleVertical(12),
-    color: '#fff',
+    color: "#fff",
     fontSize: scale(16),
-    fontFamily: 'ZillaSlab-Bold',
+    fontFamily: "ZillaSlab-Bold",
     flex: 1,
     flexShrink: 1,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   eyeBtn: {
-    position: 'absolute',
-    right: scale(16), 
-    width: scale(24), 
-    height: scale(24), 
+    position: "absolute",
+    right: scale(16),
+    width: scale(24),
+    height: scale(24),
   },
   eyeIconImage: {
     width: scale(24),
@@ -418,7 +475,6 @@ const styles = StyleSheet.create({
 });
 
 export default SignupScreen;
-
 
 // import { ScreenContainer } from "@/components/ui/ScreenContainer";
 // import { COLORS, SPACING } from "@/constants/theme";

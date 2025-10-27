@@ -1,22 +1,22 @@
 import { scale, scaleVertical } from "@/constants/Scale";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
-import { appleAuth } from '@invertase/react-native-apple-authentication';
-import { BlurView } from 'expo-blur';
+import { appleAuth } from "@invertase/react-native-apple-authentication";
+import { BlurView } from "expo-blur";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
-    Dimensions,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Dimensions,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -24,7 +24,10 @@ const { width } = Dimensions.get("window");
 
 const LoginScreen = () => {
   const insets = useSafeAreaInsets();
-    
+
+  // Ref for password TextInput
+  const passwordRef = useRef<TextInput>(null);
+
   const [email, setEmail] = useState(""); //amol@yopmail.com
   const [showPass, setShowPass] = useState(false);
   const [pass, setPass] = useState(""); //12345678
@@ -34,7 +37,7 @@ const LoginScreen = () => {
   const [error, setError] = useState<string | null>(null);
 
   const [loginAttemptExceeded, setLoginAttemptExceeded] = useState(false);
-  
+
   const { login, signInWithApple } = useAuth();
 
   const handleGoogleSignup = async () => {
@@ -43,7 +46,6 @@ const LoginScreen = () => {
     } catch (err: any) {
       console.log(err.message || "Signup failed");
     } finally {
-      
     }
   };
 
@@ -52,10 +54,12 @@ const LoginScreen = () => {
       setIsAppleLoading(true);
       setError(null);
       if (!appleAuth.isSupported) {
-        if (Platform.OS === 'ios') {
-          setError('Apple Sign In requires iOS 13+ and a physical device. Please test on a real iPhone/iPad (not simulator).');
+        if (Platform.OS === "ios") {
+          setError(
+            "Apple Sign In requires iOS 13+ and a physical device. Please test on a real iPhone/iPad (not simulator)."
+          );
         } else {
-          setError('Apple Sign In is only available on iOS devices.');
+          setError("Apple Sign In is only available on iOS devices.");
         }
         return;
       }
@@ -68,13 +72,13 @@ const LoginScreen = () => {
         await signInWithApple(identityToken, nonce);
         // Navigation will be handled by AuthContext
       } else {
-        setError('Apple Sign In was cancelled');
+        setError("Apple Sign In was cancelled");
       }
     } catch (err: any) {
-      if (err.code === 'ERR_REQUEST_CANCELED') {
+      if (err.code === "ERR_REQUEST_CANCELED") {
         setError(null);
       } else {
-        setError('Apple Sign In failed. Please try again.');
+        setError("Apple Sign In failed. Please try again.");
       }
     } finally {
       setIsAppleLoading(false);
@@ -84,49 +88,49 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     // Validate email
-    if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address');
+    if (!email || !email.includes("@")) {
+      setError("Please enter a valid email address");
       setIsLoading(false);
       return;
     }
-    
+
     // Validate password
     if (!pass) {
-      setError('Please enter your password');
+      setError("Please enter your password");
       setIsLoading(false);
       return;
     }
-    
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: pass,
       });
-      
+
       console.log("error =====>", error);
       console.log("data =====>", data);
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setError('Invalid email or password. Please try again.');
+        if (error.message.includes("Invalid login credentials")) {
+          setError("Invalid email or password. Please try again.");
         } else {
-          setError(error.message || 'Login failed. Please try again.');
+          setError(error.message || "Login failed. Please try again.");
         }
         // Reset fields on error
-        setEmail('');
-        setPass('');
+        setEmail("");
+        setPass("");
       } else {
         // Login successful - AuthContext will handle the redirect
       }
     } catch (err: any) {
       console.log("error 222 =====>", err);
 
-      setError('Network error. Please check your connection and try again.');
+      setError("Network error. Please check your connection and try again.");
       // Reset fields on error
-      setEmail('');
-      setPass('');
+      setEmail("");
+      setPass("");
     } finally {
       setIsLoading(false);
     }
@@ -134,211 +138,256 @@ const LoginScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <View style={styles.safe}>
-      <Image
-        source={require("../../assets/new-images/onboarding-screen-4.png")}
-        style={styles.image}
-      />
-      <Image
-        source={require("../../assets/new-images/onboarding-overlay-full.png")}
-        style={styles.overlayImage}
-      />
+      <View style={styles.safe}>
+        <Image
+          source={require("../../assets/new-images/onboarding-screen-4.png")}
+          style={styles.image}
+        />
+        <Image
+          source={require("../../assets/new-images/onboarding-overlay-full.png")}
+          style={styles.overlayImage}
+        />
 
-      <View
-        style={[
-          styles.mainContainer,
-          {
-            marginTop: insets.top + scaleVertical(16),
-          },
-        ]}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.keyboard}
-        >
-          <TouchableOpacity
-            style={styles.buttonBack}
-            activeOpacity={0.8}
-            onPress={() => router.back()}
-          >
-            <Image
-              source={require("../../assets/new-images/icon-back.png")}
-              style={{
-                height: scale(20),
-                width: scale(20),
-              }}
-              // resizeMode={"center"}
-            />
-          </TouchableOpacity>
-          <Text style={styles.slogan}>{"Welcome back!"}</Text>
-          <Text style={styles.description}>
+        <View
+          style={[
+            styles.mainContainer,
             {
-              "Enter your details below"
-            }
-          </Text>
+              marginTop: insets.top + scaleVertical(16),
+            },
+          ]}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.keyboard}
+          >
+            <TouchableOpacity
+              style={styles.buttonBack}
+              activeOpacity={0.8}
+              onPress={() => router.back()}
+            >
+              <Image
+                source={require("../../assets/new-images/icon-back.png")}
+                style={{
+                  height: scale(20),
+                  width: scale(20),
+                }}
+                // resizeMode={"center"}
+              />
+            </TouchableOpacity>
+            <Text style={styles.slogan}>{"Welcome back!"}</Text>
+            <Text style={styles.description}>{"Enter your details below"}</Text>
 
-          {/* Email */}
-          <Text style={[styles.label, { marginTop: scaleVertical(24) }]}>Email</Text>
-          <TextInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="example.user@mail.com"
-            placeholderTextColor="rgba(0, 0, 0, 0.3)"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
-          />
-
-          {/* Password */}
-          <Text style={[styles.label, { marginTop: scaleVertical(16) }]}>Password</Text>
-          <View style={{justifyContent: 'center'}}>
+            {/* Email */}
+            <Text style={[styles.label, { marginTop: scaleVertical(24) }]}>
+              Email
+            </Text>
             <TextInput
-              value={pass}
-              onChangeText={setPass}
-              placeholder="Minimum of 8 characters"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="example.user@mail.com"
               placeholderTextColor="rgba(0, 0, 0, 0.3)"
-              secureTextEntry={!showPass}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              blurOnSubmit={false}
               style={styles.input}
             />
-            <TouchableOpacity style={styles.eyeBtn} onPress={() => {
-              setShowPass((prev) => !prev)
-            }}>
-              <Image
-                source={require("../../assets/new-images/eye-icon.png")}
-                style={styles.eyeIconImage}
-                resizeMode={"contain"}
+
+            {/* Password */}
+            <Text style={[styles.label, { marginTop: scaleVertical(16) }]}>
+              Password
+            </Text>
+            <View style={{ justifyContent: "center" }}>
+              <TextInput
+                ref={passwordRef}
+                value={pass}
+                onChangeText={setPass}
+                placeholder="Minimum of 8 characters"
+                placeholderTextColor="rgba(0, 0, 0, 0.3)"
+                secureTextEntry={!showPass}
+                returnKeyType="done"
+                onSubmitEditing={() => {
+                  Keyboard.dismiss();
+                  if (email && pass) {
+                    handleLogin();
+                  }
+                }}
+                style={styles.input}
               />
+              <TouchableOpacity
+                style={styles.eyeBtn}
+                onPress={() => {
+                  setShowPass((prev) => !prev);
+                }}
+              >
+                <Image
+                  source={require("../../assets/new-images/eye-icon.png")}
+                  style={styles.eyeIconImage}
+                  resizeMode={"contain"}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {error && (
+              <View style={styles.errorView}>
+                <Image
+                  source={require("../../assets/new-images/caution-white.png")}
+                  style={styles.cautionIconImage}
+                  resizeMode={"contain"}
+                />
+                <Text style={styles.error} numberOfLines={2}>
+                  {error}
+                </Text>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[
+                styles.primaryBtn,
+                { marginTop: error ? scaleVertical(24) : scaleVertical(32) },
+              ]}
+              onPress={handleLogin}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.primaryText}>{"Login"}</Text>
             </TouchableOpacity>
-          </View>
 
-          {error && <View style={styles.errorView}>
-              <Image
-                source={require("../../assets/new-images/caution-white.png")}
-                style={styles.cautionIconImage}
-                resizeMode={"contain"}
-              />
-              <Text style={styles.error} numberOfLines={2}>{error}</Text>
-          </View>
-        }
+            <TouchableOpacity
+              style={[
+                styles.backBtn,
+                { marginTop: error ? scaleVertical(16) : scaleVertical(24) },
+              ]}
+              onPress={() => setLoginAttemptExceeded(true)}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.backText}>{"Forgot your password?"}</Text>
+            </TouchableOpacity>
+          </KeyboardAvoidingView>
+        </View>
 
-        <TouchableOpacity
-          style={[
-            styles.primaryBtn,
-            {marginTop: error ? scaleVertical(24) : scaleVertical(32)}
-          ]}
-          onPress={handleLogin}
-          activeOpacity={0.9}
+        <View
+          style={{ alignContent: "center", justifyContent: "center", flex: 1 }}
         >
-          <Text style={styles.primaryText}>{"Login"}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.backBtn, {marginTop: error ? scaleVertical(16) : scaleVertical(24)}]}
-          onPress={() => setLoginAttemptExceeded(true)}
-          activeOpacity={0.9}
-        >
-          <Text style={styles.backText}>{"Forgot your password?"}</Text>
-        </TouchableOpacity>
-      
-
-        </KeyboardAvoidingView>
-      </View>
-
-      <View style={{alignContent: 'center', justifyContent: 'center', flex: 1}}>
           <Text style={styles.orText}>{"or"}</Text>
-      </View>
+        </View>
 
-      
-      <View style={[styles.buttonView, {marginBottom: insets.bottom + scaleVertical(16)}]}>
-        <TouchableOpacity
-          style={[styles.item, styles.itemActive, { marginBottom: scaleVertical(16) }]}
-          activeOpacity={0.8}
-          onPress={handleGoogleSignup}
+        <View
+          style={[
+            styles.buttonView,
+            { marginBottom: insets.bottom + scaleVertical(16) },
+          ]}
         >
-          <View style={styles.leftRow}>
-            <View style={styles.buttonText}>
-              <Text style={[styles.btnLabel]}>{"Continue with Google"}</Text>
+          <TouchableOpacity
+            style={[
+              styles.item,
+              styles.itemActive,
+              { marginBottom: scaleVertical(16) },
+            ]}
+            activeOpacity={0.8}
+            onPress={handleGoogleSignup}
+          >
+            <View style={styles.leftRow}>
+              <View style={styles.buttonText}>
+                <Text style={[styles.btnLabel]}>{"Continue with Google"}</Text>
+              </View>
+              <Image
+                source={require("../../assets/new-images/icon-google.png")}
+                style={styles.iconImage}
+                resizeMode={"contain"}
+              />
             </View>
-            <Image
-              source={require("../../assets/new-images/icon-google.png")}
-              style={styles.iconImage}
-              resizeMode={"contain"}
-            />
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.item, styles.itemActive, isAppleLoading && styles.itemDisabled]}
-          activeOpacity={0.8}
-          onPress={handleAppleSignIn}
-          disabled={isAppleLoading}
-        >
-          <View style={styles.leftRow}>
-            <View style={styles.buttonText}>
-              <Text style={[styles.btnLabel, isAppleLoading && styles.labelDisabled]}>
-                {isAppleLoading ? "Signing in..." : "Continue with Apple"}
-              </Text>
+          <TouchableOpacity
+            style={[
+              styles.item,
+              styles.itemActive,
+              isAppleLoading && styles.itemDisabled,
+            ]}
+            activeOpacity={0.8}
+            onPress={handleAppleSignIn}
+            disabled={isAppleLoading}
+          >
+            <View style={styles.leftRow}>
+              <View style={styles.buttonText}>
+                <Text
+                  style={[
+                    styles.btnLabel,
+                    isAppleLoading && styles.labelDisabled,
+                  ]}
+                >
+                  {isAppleLoading ? "Signing in..." : "Continue with Apple"}
+                </Text>
+              </View>
+              <Image
+                source={require("../../assets/new-images/icon-apple.png")}
+                style={[
+                  styles.iconImage,
+                  isAppleLoading && styles.iconDisabled,
+                ]}
+                resizeMode={"contain"}
+              />
             </View>
-            <Image
-              source={require("../../assets/new-images/icon-apple.png")}
-              style={[styles.iconImage, isAppleLoading && styles.iconDisabled]}
-              resizeMode={"contain"}
-            />
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+
+        {loginAttemptExceeded && (
+          <BlurView style={styles.alertContainer} tint={"dark"} intensity={100}>
+            <View style={styles.alertView}>
+              <TouchableOpacity
+                style={styles.btnClose}
+                onPress={() => setLoginAttemptExceeded(false)}
+              >
+                <Image
+                  source={require("../../assets/new-images/icon-close-black.png")}
+                  // resizeMode={"center"}
+                  style={{
+                    height: scale(24),
+                    width: scale(24),
+                  }}
+                />
+              </TouchableOpacity>
+              <View style={styles.dangerView}>
+                <Image
+                  source={require("../../assets/new-images/trouble-login.png")}
+                  // resizeMode={"center"}
+                  style={styles.cautionImage}
+                />
+                <Text style={styles.incorrectCode}>
+                  {"Having trouble logging in?"}
+                </Text>
+                <Text style={styles.incorrectCodeDesc}>
+                  {
+                    "You’ve entered the wrong email or password multiple times.\n\nWould you like to reset your password and regain access?"
+                  }
+                </Text>
+
+                <TouchableOpacity
+                  style={[styles.retryBtn]}
+                  onPress={() => {
+                    setLoginAttemptExceeded(false);
+                    router.push("/(auth)/ForgotPassword");
+                  }}
+                  activeOpacity={0.9}
+                >
+                  <Text style={styles.retryText}>{"Reset password"}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.resendBtn]}
+                  onPress={() => {
+                    setLoginAttemptExceeded(false);
+                  }}
+                  activeOpacity={0.9}
+                >
+                  <Text style={styles.resendText}>{"Try again"}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </BlurView>
+        )}
       </View>
-
-      {loginAttemptExceeded && 
-        <BlurView style={styles.alertContainer} tint={'dark'} intensity={100}>
-          <View style={styles.alertView}>
-            <TouchableOpacity style={styles.btnClose} onPress={() => setLoginAttemptExceeded(false)}>
-              <Image
-                source={require("../../assets/new-images/icon-close-black.png")}
-                // resizeMode={"center"}
-                style={{
-                  height: scale(24),
-                  width: scale(24),
-                }}
-              />
-            </TouchableOpacity>
-            <View style={styles.dangerView}>
-              <Image
-              source={require("../../assets/new-images/trouble-login.png")}
-              // resizeMode={"center"}
-              style={styles.cautionImage}
-              />
-              <Text style={styles.incorrectCode}>{"Having trouble logging in?"}</Text>            
-              <Text style={styles.incorrectCodeDesc}>{"You’ve entered the wrong email or password multiple times.\n\nWould you like to reset your password and regain access?"}</Text>            
-
-              <TouchableOpacity
-                style={[
-                  styles.retryBtn,
-                ]}
-                onPress={() => {
-                  setLoginAttemptExceeded(false);
-                  router.push("/(auth)/ForgotPassword");
-                }}
-                activeOpacity={0.9}
-              >
-                <Text style={styles.retryText}>{"Reset password"}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.resendBtn,
-                ]}
-                onPress={() => {
-                  setLoginAttemptExceeded(false);
-                }}
-                activeOpacity={0.9}
-              >
-                <Text style={styles.resendText}>{"Try again"}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </BlurView>
-      }
-    </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -367,7 +416,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   mainContainer: {
-    width: '100%',
+    width: "100%",
     // flex: 1,
   },
   slogan: {
@@ -392,7 +441,7 @@ const styles = StyleSheet.create({
   },
 
   keyboard: {
-    width: '100%',
+    width: "100%",
     paddingHorizontal: scale(24),
   },
   label: {
@@ -431,10 +480,10 @@ const styles = StyleSheet.create({
     height: scale(24),
   },
   eyeBtn: {
-    position: 'absolute',
-    right: scale(16), 
-    width: scale(24), 
-    height: scale(24), 
+    position: "absolute",
+    right: scale(16),
+    width: scale(24),
+    height: scale(24),
   },
   eyeIconImage: {
     width: scale(24),
@@ -442,29 +491,29 @@ const styles = StyleSheet.create({
   },
   errorView: {
     borderRadius: 6,
-    backgroundColor: '#FD4949',
+    backgroundColor: "#FD4949",
     paddingVertical: scaleVertical(10),
     paddingHorizontal: scaleVertical(12),
-    flexDirection: 'row',
-    alignItems: 'center',   // let multiline text start at top
+    flexDirection: "row",
+    alignItems: "center", // let multiline text start at top
     marginTop: scaleVertical(10),
   },
   error: {
     marginLeft: scaleVertical(12),
-    color: '#fff',
+    color: "#fff",
     fontSize: scale(16),
-    fontFamily: 'ZillaSlab-Bold',
+    fontFamily: "ZillaSlab-Bold",
     flex: 1,
     flexShrink: 1,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   primaryBtn: {
-    backgroundColor: '#BE5E19',
+    backgroundColor: "#BE5E19",
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(20),
-    width: '100%',
+    width: "100%",
   },
   primaryText: {
     color: "#FFFFFF",
@@ -475,8 +524,8 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(8),
     paddingHorizontal: scaleVertical(20),
   },
@@ -494,9 +543,9 @@ const styles = StyleSheet.create({
     fontFamily: "ZillaSlab-SemiBold",
     letterSpacing: 0,
   },
-  
+
   buttonView: {
-    width:'100%',
+    width: "100%",
   },
   item: {
     flexDirection: "row",
@@ -533,34 +582,33 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-
   alertContainer: {
-    position: 'absolute', 
-    top: 0, 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    justifyContent: 'center'
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: "center",
   },
   alertView: {
-    backgroundColor: 'white', 
-    marginHorizontal: scale(24), 
-    borderRadius: 6
+    backgroundColor: "white",
+    marginHorizontal: scale(24),
+    borderRadius: 6,
   },
   btnClose: {
-    width: scale(34), 
-    aspectRatio: 1, 
-    alignSelf: 'flex-end', 
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: scale(34),
+    aspectRatio: 1,
+    alignSelf: "flex-end",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: scale(16),
-    marginTop: scale(16)
+    marginTop: scale(16),
   },
   dangerView: {
-    justifyContent: 'center', 
-    alignItems: 'center', 
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: scale(24),
-    marginHorizontal: scale(24)
+    marginHorizontal: scale(24),
   },
   cautionImage: {
     height: scaleVertical(48),
@@ -578,15 +626,15 @@ const styles = StyleSheet.create({
     color: "rgba(0,0,0,0.6)",
     fontSize: scale(16),
     fontFamily: "ZillaSlab-Medium",
-    textAlign: 'center',
+    textAlign: "center",
   },
   retryBtn: {
-    backgroundColor: '#BE5E19',
+    backgroundColor: "#BE5E19",
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(20),
-    width: '100%',
+    width: "100%",
     marginTop: scaleVertical(32),
   },
   retryText: {
@@ -597,14 +645,14 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   resendBtn: {
-    backgroundColor: 'transparent',
-    borderColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: "transparent",
+    borderColor: "rgba(0,0,0,0.2)",
     borderWidth: 1,
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: scaleVertical(20),
-    width: '100%',
+    width: "100%",
     marginTop: scaleVertical(16),
   },
   resendText: {

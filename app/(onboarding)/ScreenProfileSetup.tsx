@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { saveUserProfile } from "@/lib/supabaseUserProfile";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -24,13 +24,14 @@ const { width } = Dimensions.get("window");
 
 const ScreenProfileSetup = () => {
   const insets = useSafeAreaInsets();
-    
+
+  // Ref for TextInput
+  const cityRef = useRef<TextInput>(null);
+
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
-  
+
   const [toggle, setToggle] = useState(true);
-  const [bottomBarHeight, setBottomBarHeight] = useState(0);
-  const [buttonHeight, setButtonHeight] = useState(0);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,7 @@ const ScreenProfileSetup = () => {
     const trimmed = name.trim();
     return trimmed.length >= 2 && /^[A-Za-z\s'-]+$/.test(trimmed);
   };
-  
+
   const isValidCity = (city: string) => {
     const trimmed = city.trim();
     return trimmed.length >= 2 && /^[A-Za-z\s'-]+$/.test(trimmed);
@@ -50,36 +51,47 @@ const ScreenProfileSetup = () => {
   const canSubmit = isValidName(name) && isValidCity(city);
 
   const handleSubmit = async () => {
-    if (!user?.id) return;
-    
+    if (!user?.id || isLoading) return;
+
     setIsLoading(true);
     setError(null);
     try {
       // Check if this is a mock user (from AuthContext) or real Supabase user
       const isMockUser = user.id && user.id.length > 10; // Mock UUIDs are longer
-      
+
       if (isMockUser) {
         // For mock users, skip Supabase save to avoid security policy errors
-        console.log('Profile setup completed for mock user:', user.id);
-        console.log('Name:', name.trim(), 'City:', city.trim());
-        console.log('Email subscription enabled:', toggle);
-        console.log('Onboarding data:', { traps, scrollTimes, concerns });
-        console.log('Skipping Supabase save for mock user');
+        console.log("Profile setup completed for mock user:", user.id);
+        console.log("Name:", name.trim(), "City:", city.trim());
+        console.log("Email subscription enabled:", toggle);
+        console.log("Onboarding data:", { traps, scrollTimes, concerns });
+        console.log("Skipping Supabase save for mock user");
       } else {
         // For real Supabase users, save to database
-        await saveUserProfile(user.id, name.trim(), city.trim(), {
+        await saveUserProfile(
+          user.id,
+          name.trim(),
+          city.trim(),
+          {
+            traps,
+            scrollTimes,
+            concerns,
+            improvementOptions,
+          },
+          toggle
+        );
+
+        console.log("Profile setup completed for real user:", user.id);
+        console.log("Name:", name.trim(), "City:", city.trim());
+        console.log("Email subscription enabled:", toggle);
+        console.log("Onboarding data:", {
           traps,
           scrollTimes,
           concerns,
           improvementOptions,
-        }, toggle);
-        
-        console.log('Profile setup completed for real user:', user.id);
-        console.log('Name:', name.trim(), 'City:', city.trim());
-        console.log('Email subscription enabled:', toggle);
-        console.log('Onboarding data:', { traps, scrollTimes, concerns, improvementOptions });
+        });
       }
-      
+
       // Navigate to Screen Time permission screen
       router.replace("/(onboarding)/ScreenTimePermission");
     } catch (e: any) {
@@ -92,117 +104,133 @@ const ScreenProfileSetup = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.safe}>
-      <Image
-        source={require("../../assets/new-images/onboarding-screen-4.png")}
-        style={styles.image}
-      />
-      <Image
-        source={require("../../assets/new-images/onboarding-overlay-full.png")}
-        style={styles.overlayImage}
-      />
+        <Image
+          source={require("../../assets/new-images/onboarding-screen-4.png")}
+          style={styles.image}
+        />
+        <Image
+          source={require("../../assets/new-images/onboarding-overlay-full.png")}
+          style={styles.overlayImage}
+        />
 
-      <View
-        style={[
-          styles.mainContainer,
-          {
-            top: insets.top + scaleVertical(16),
-            bottom: 0,
-          },
-        ]}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.keyboard}
-        >
-          <TouchableOpacity
-            style={styles.buttonBack}
-            activeOpacity={0.8}
-            onPress={() => router.back()}
-          >
-            <Image
-              source={require("../../assets/new-images/icon-back.png")}
-              // resizeMode={"center"}
-              style={{
-                height: scale(20),
-                width: scale(20),
-              }}
-            />
-          </TouchableOpacity>
-          <Text style={styles.slogan}>{
-          "LET’S DO THIS"
-          }</Text>
-          <Text style={styles.description}>
+        <View
+          style={[
+            styles.mainContainer,
             {
-              "Tell us your first name and where you’re based. This helps personalize your experience."
-            }
-          </Text>
+              top: insets.top + scaleVertical(16),
+              bottom: 0,
+            },
+          ]}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.keyboard}
+          >
+            <TouchableOpacity
+              style={styles.buttonBack}
+              activeOpacity={0.8}
+              onPress={() => router.back()}
+            >
+              <Image
+                source={require("../../assets/new-images/icon-back.png")}
+                // resizeMode={"center"}
+                style={{
+                  height: scale(20),
+                  width: scale(20),
+                }}
+              />
+            </TouchableOpacity>
+            <Text style={styles.slogan}>{"LET’S DO THIS"}</Text>
+            <Text style={styles.description}>
+              {
+                "Tell us your first name and where you’re based. This helps personalize your experience."
+              }
+            </Text>
 
-          
-          <Text style={[styles.label, { marginTop: scaleVertical(46) }]}>First name</Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Please enter your first name"
-            placeholderTextColor="rgba(0, 0, 0, 0.3)"
-            autoCapitalize="none"
-            style={styles.input}
-          />
-          
-          <Text style={[styles.label]}>Where are you based?</Text>
-          <TextInput
-            value={city}
-            onChangeText={setCity}
-            placeholder="Type your city or town"
-            placeholderTextColor="rgba(0, 0, 0, 0.3)"
-            autoCapitalize="none"
-            style={styles.input}
-          />
+            <Text style={[styles.label, { marginTop: scaleVertical(46) }]}>
+              First name
+            </Text>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Please enter your first name"
+              placeholderTextColor="rgba(0, 0, 0, 0.3)"
+              autoCapitalize="words"
+              returnKeyType="next"
+              onSubmitEditing={() => cityRef.current?.focus()}
+              blurOnSubmit={false}
+              style={styles.input}
+            />
 
-          {error && <View style={styles.errorView}>
+            <Text style={[styles.label]}>Where are you based?</Text>
+            <TextInput
+              ref={cityRef}
+              value={city}
+              onChangeText={setCity}
+              placeholder="Type your city or town"
+              placeholderTextColor="rgba(0, 0, 0, 0.3)"
+              autoCapitalize="words"
+              returnKeyType="done"
+              onSubmitEditing={() => {
+                Keyboard.dismiss();
+                if (canSubmit) {
+                  handleSubmit();
+                }
+              }}
+              style={styles.input}
+            />
+
+            {error && (
+              <View style={styles.errorView}>
                 <Image
                   source={require("../../assets/new-images/caution-white.png")}
                   style={styles.cautionIconImage}
                   resizeMode={"contain"}
                 />
-                <Text style={styles.error} numberOfLines={2}>{error}</Text>
-            </View>
-          }
-          <Text style={[styles.label2]}>Your location is used only to personalize your journey. You can change it anytime.</Text>
+                <Text style={styles.error} numberOfLines={2}>
+                  {error}
+                </Text>
+              </View>
+            )}
+            <Text style={[styles.label2]}>
+              Your location is used only to personalize your journey. You can
+              change it anytime.
+            </Text>
 
-          <View style={styles.unboundToggleView}>
-            <Text style={[
-              styles.label3, 
-              {marginRight: scaleVertical(25)}
-            ]}>Yes, I want to receive the Unbound Dispatch: a monthly email with motivation, adventure ideas, and wins from the community</Text>
-            <Switch value={toggle} onValueChange={(value) => setToggle(value)}         
-              ios_backgroundColor={'rgba(255, 255, 255, 0.2)'}
-              trackColor={{ false: "#67CE67", true: "#67CE67" }}
-              thumbColor={toggle ? "#f4f3f4" : "#f4f3f4"}
+            <View style={styles.unboundToggleView}>
+              <Text style={[styles.label3, { marginRight: scaleVertical(25) }]}>
+                Yes, I want to receive the Unbound Dispatch: a monthly email
+                with motivation, adventure ideas, and wins from the community
+              </Text>
+              <Switch
+                value={toggle}
+                onValueChange={(value) => setToggle(value)}
+                ios_backgroundColor={"rgba(255, 255, 255, 0.2)"}
+                trackColor={{ false: "#67CE67", true: "#67CE67" }}
+                thumbColor={toggle ? "#f4f3f4" : "#f4f3f4"}
               />
+            </View>
+          </KeyboardAvoidingView>
+
+          {/* Terms */}
+          <View style={{ bottom: insets.bottom + scaleVertical(16) }}>
+            {/* Submit */}
+            <TouchableOpacity
+              activeOpacity={0.9}
+              disabled={!canSubmit}
+              style={[
+                styles.btn,
+                canSubmit ? styles.btnEnabled : styles.btnDisabled,
+              ]}
+              onPress={handleSubmit}
+            >
+              <Text style={[styles.btnText, { opacity: canSubmit ? 1 : 0.5 }]}>
+                Continue
+              </Text>
+            </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-
-        {/* Terms */}
-        <View style={{bottom: insets.bottom + scaleVertical(16)}}>
-          {/* Submit */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            disabled={!canSubmit}
-            style={[
-              styles.btn,
-              canSubmit ? styles.btnEnabled : styles.btnDisabled,
-            ]}
-            onLayout={(e) => setButtonHeight(e.nativeEvent.layout.height)}
-            onPress={handleSubmit}
-          >
-            <Text style={[styles.btnText, {opacity: canSubmit ? 1 : 0.5}]}>Continue</Text>
-          </TouchableOpacity>
-          
+        </View>
       </View>
-    </View>
-
-      
-    </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -230,7 +258,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   mainContainer: {
-    width: '100%',
+    width: "100%",
     position: "absolute",
   },
   slogan: {
@@ -244,7 +272,7 @@ const styles = StyleSheet.create({
   haveAccountView: {
     alignSelf: "center",
     padding: scale(6),
-    marginTop: height < 700 ? scaleVertical(8) : scaleVertical(16)
+    marginTop: height < 700 ? scaleVertical(8) : scaleVertical(16),
   },
   haveAccountText: {
     color: "rgba(255, 255, 255, 0.5)",
@@ -287,9 +315,9 @@ const styles = StyleSheet.create({
     marginTop: scaleVertical(20),
   },
   unboundToggleView: {
-    width: '100%',
-    flexDirection: 'row', 
-    justifyContent: 'center',
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: scaleVertical(40),
     paddingHorizontal: scale(24),
   },
@@ -366,27 +394,27 @@ const styles = StyleSheet.create({
   },
   errorView: {
     borderRadius: 6,
-    backgroundColor: '#FD4949',
+    backgroundColor: "#FD4949",
     paddingVertical: scaleVertical(10),
     paddingHorizontal: scaleVertical(12),
-    flexDirection: 'row',
-    alignItems: 'center',   // let multiline text start at top
+    flexDirection: "row",
+    alignItems: "center", // let multiline text start at top
     marginTop: scaleVertical(10),
   },
   error: {
     marginLeft: scaleVertical(12),
-    color: '#fff',
+    color: "#fff",
     fontSize: scale(16),
-    fontFamily: 'ZillaSlab-Bold',
+    fontFamily: "ZillaSlab-Bold",
     flex: 1,
     flexShrink: 1,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   eyeBtn: {
-    position: 'absolute',
-    right: scale(16), 
-    width: scale(24), 
-    height: scale(24), 
+    position: "absolute",
+    right: scale(16),
+    width: scale(24),
+    height: scale(24),
   },
   eyeIconImage: {
     width: scale(24),
@@ -395,7 +423,6 @@ const styles = StyleSheet.create({
 });
 
 export default ScreenProfileSetup;
-
 
 // import { ScreenContainer } from "@/components/ui/ScreenContainer";
 // import { SPACING } from "@/constants/theme";
@@ -428,7 +455,7 @@ export default ScreenProfileSetup;
 //     const trimmed = name.trim();
 //     return trimmed.length >= 2 && /^[A-Za-z\s'-]+$/.test(trimmed);
 //   };
-  
+
 //   const isValidCity = (city: string) => {
 //     const trimmed = city.trim();
 //     return trimmed.length >= 2 && /^[A-Za-z\s'-]+$/.test(trimmed);
